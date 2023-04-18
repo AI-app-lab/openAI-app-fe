@@ -1,0 +1,205 @@
+$inputHeight: 30px;
+$captchaBtnWidth: 80px;
+
+.modalWrapper {
+    background-color: rgba(100, 100, 100, 0.5);
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    transition: all 0.5s;
+
+    &:hover {
+        backdrop-filter: blur(1px);
+    }
+
+    .modal {
+        border-radius: var(--border-radius);
+        position: absolute;
+        background-color: var(--primary-bg);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text);
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        form {
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            font-size: 14px;
+            width: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+
+            input {
+                padding-left: 5px;
+                font-size: 12px;
+                color: var(--text);
+                background-color: var(--secondary-bg);
+                height: $inputHeight;
+                width: 100%;
+                box-sizing: border-box;
+                border-radius: 5px;
+                border: 2px solid var(--primary);
+            }
+        }
+
+        label+label {
+            margin-top: 20px;
+        }
+    }
+
+    .lgModal {
+        @extend .modal;
+        width: var(--lgModal-w);
+        height: var(--lgModal-h);
+
+        header {
+            margin: 0 auto;
+            text-align: center;
+            width: calc(var(--lgModal-w) - 60px);
+
+
+
+
+            .toggle {
+                padding: 10px;
+                display: flex;
+                justify-content: space-between;
+                cursor: pointer;
+
+                .loginMethod {
+                    width: 50%;
+                    border-bottom: 3px solid inherit;
+
+
+                    &:hover {
+                        opacity: 0.8;
+                    }
+
+                    &:active {
+                        opacity: 0.6;
+                    }
+                }
+
+                .smsLg {
+                    @extend .loginMethod;
+                    border-bottom: 3px solid var(--secondary);
+                }
+
+                .pwdLg {
+                    @extend .loginMethod;
+                    box-sizing: border-box;
+                    border-bottom: 3px solid var(--secondary);
+                }
+
+            }
+        }
+
+        form {
+            margin-top: 10px;
+
+        }
+
+        .lgCaptchaGroup {
+            display: flex;
+            width: 100%;
+
+            input {
+                width: 50%;
+            }
+
+            .sendBtn {
+                margin-left: 30px;
+                height: $inputHeight;
+                width: $captchaBtnWidth;
+
+            }
+        }
+
+        .noAccAndResetPwd {
+            margin-top: 20px;
+            font-size: 12px;
+            width: 200px;
+            display: flex;
+            justify-content: space-between;
+
+
+            font-style: italic;
+            cursor: pointer;
+
+            span {
+                &:hover {
+                    text-decoration: underline;
+                }
+
+                &:active {
+                    opacity: 0.8;
+                }
+            }
+
+
+
+        }
+
+        .btn {
+            box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
+            margin-top: 20px;
+        }
+
+
+    }
+
+    .signUpModal {
+        @extend .modal;
+        height: var(--suModal-h);
+        width: var(--suModal-w);
+
+
+        .btn {
+            margin-top: 30px;
+            box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary)
+        }
+
+        .captchaGroup {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+
+            .sendBtn {
+                margin-left: 30px;
+
+                height: $inputHeight;
+                width: $captchaBtnWidth !important;
+            }
+        }
+
+        .login {
+            margin-top: 20px;
+            font-size: 12px;
+            font-style: italic;
+            cursor: pointer;
+
+            &:hover {
+                text-decoration: underline;
+            }
+
+            &:active {
+                opacity: 0.8;
+            }
+        }
+
+    }
+}

@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
+
+@mixin dark {
+    --background: #171717;
+    --text: #e2e2e2;
+    --text-light: #bababa;
+    --secondary: #6e6e6e;
+    --secondary-bg: #242121;
+    --primary: #5662a3;
+    --primary-bg: #262731;
+    --markdown: #262731;
+    --markdown-header: #13151b;
+
+}
+
+@mixin light {
+    --background: #fffcfb;
+    --secondary: #44566d;
+    --primary: #d6dae0;
+    --btn: #4bbbad;
+}
+
+:root {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 300;
+    font-size: 14px;
+    --box-width: 90vw;
+    --box-height: 90vh;
+    --sidebar-width: 300px;
+    --chatbox-width: calc(100% - var(--sidebar-width));
+    --full-hight: 100%;
+    --border-radius: 12px;
+    --chatbox-input-range-width: 100%;
+    --chatbox-input-range-height: 100px;
+    --chatbox-header-height: 80px;
+    --chatbox-window-height: calc(100% - var(--chatbox-input-range-height) - var(--chatbox-header-height));
+    --lgModal-h: 300px;
+    --lgModal-w: 300px;
+    --suModal-h: 350px;
+    --suModal-w: 300px;
+}
+
+.light {
+    @include light;
+}
+
+.dark {
+    @include dark;
+}
