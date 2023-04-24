@@ -5,8 +5,9 @@
     color: var(--text);
     cursor: pointer;
     border-radius: var(--border-radius);
-}
 
+
+}
 
 .btn:hover {
     opacity: 0.8;
@@ -14,4 +15,22 @@
 
 .btn:active {
     opacity: 0.6;
+}
+
+.btnLoading {
+    @extend .btn;
+    cursor: default;
+    opacity: 0.3;
+
+    &:hover {
+        opacity: 0.3;
+    }
+
+    ;
+
+    &:active {
+        opacity: 0.3;
+    }
+
+    ;
 }

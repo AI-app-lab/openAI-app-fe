@@ -3,13 +3,13 @@ import styles from "./index.module.scss";
 
 import { useSelector } from "react-redux";
 
-import { CpntsCtrlState } from "../../store/cpntsCtrlSlice";
 import LoginModal from "./LoginModal";
 import SignUp from "./SignUp";
+import { UserState } from "../../store/userSlice";
 type Props = {};
 
 const Modal = (props: Props) => {
-  const { currentModal } = useSelector((state: CpntsCtrlState) => state.cpntsCtrl);
+  const { currentModal } = useSelector((state: UserState) => state.user);
 
   const modals = {
     login: <LoginModal />,

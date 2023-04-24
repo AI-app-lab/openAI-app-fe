@@ -11,7 +11,7 @@ const ChatBox = (props: Props) => {
   return (
     <div className={styles.chatBox}>
       <ChatBoxHeader />
-      <ChatWindow messageList={conversations[currConversationId].conList} />
+      <ChatWindow messageList={conversations[currConversationId]?.conList} />
       <InputRange />
     </div>
   );

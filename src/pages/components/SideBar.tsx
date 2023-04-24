@@ -15,6 +15,7 @@ const SideBar = (props: Props) => {
     dispatch(getRecentConversations());
   }, []);
   const { conversations } = useSelector((state: any) => state.chatApi);
+  const { userInfo } = useSelector((state: any) => state.user);
   return (
     <div className={styles.sideBar}>
       <div className={styles.sideBarHeader}>
@@ -27,22 +28,26 @@ const SideBar = (props: Props) => {
           <AddIcon />
         </Button>
       </div>
-      <div className={styles.sessionCardContainer}>
-        {conversations &&
-          conversations
-            .map((_: never, index: number) => {
-              return <SessionCard key={index} cardId={index} title={conversations[index].topic} />;
-            })
-            .reverse()}
+      <div className={styles.sessionCardBox}>
+        <div className={styles.sessionCardContainer}>
+          {conversations &&
+            conversations
+              .map((_: never, index: number) => {
+                return <SessionCard key={index} cardId={index} title={conversations[index].topic} />;
+              })
+              .reverse()}
+        </div>
       </div>
       <div className={styles.sideBarFooter}>
         <Button w={36} h={36} className={styles.settings}>
           ⚙
         </Button>
-        <div className={styles.userType}>
-          <PersonOutlineIcon />
-          游客 ID51645
-        </div>
+        {userInfo && (
+          <div className={styles.userType}>
+            <PersonOutlineIcon />
+            {userInfo.username}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -13,28 +13,15 @@ $padding: 10px;
     border-radius: var(--border-radius);
     border: 1px solid var(--secondary);
 
+
+
     .sideBar {
 
 
-        ::-webkit-scrollbar {
-            opacity: 0.5;
-            width: 5px;
-            background-color: var(--primary)
-        }
+        height: 100%;
 
-        ::-webkit-scrollbar-thumb {
-            border-radius: 10px;
-            background-color: whitesmoke;
-
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: black;
-
-        }
-
-        color:var(--text);
-        padding: 2*$padding;
+        color: var(--text);
+        padding: 2*$padding 0;
         width: var(--sidebar-width);
         background-color: var(--primary-bg);
 
@@ -43,7 +30,7 @@ $padding: 10px;
         $sideBarFooterHeight: 56px;
 
         .sideBarHeader {
-
+            padding: 0 2*$padding;
 
             :first-child {
                 :first-child {
@@ -72,86 +59,115 @@ $padding: 10px;
             height: $sideBarHeaderHeight;
         }
 
-        .sessionCardContainer {
-
-
-            overflow-y: auto;
+        .sessionCardBox {
             height: calc(100% - $sideBarFooterHeight - $sideBarHeaderHeight);
 
-            .sessionCard {
+            ::-webkit-scrollbar {
 
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                color: var(--text);
-                background-color: var(--secondary-bg);
-                cursor: pointer;
-                padding: $padding 14px;
-                height: 45px;
-                border-radius: var(--border-radius);
-                border: 2px solid var(--primary-bg);
+                height: 7px;
+                width: 7px;
+                background-color: var(--primary-bg)
+            }
 
-                .cardTop {
+            ::-webkit-scrollbar-thumb {
+                border-radius: 10px;
+                background-color: var(--primary);
+
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background-color: var(--secondary);
+
+            }
+
+            .sessionCardContainer {
+
+                padding: 0 2*$padding;
+                overflow-y: auto;
+                height: 100%;
+
+
+                .sessionCard {
 
                     display: flex;
+                    flex-direction: column;
                     justify-content: space-between;
+                    color: var(--text);
+                    background-color: var(--secondary-bg);
+                    cursor: pointer;
+                    padding: $padding 14px;
+                    height: 45px;
+                    border-radius: var(--border-radius);
+                    border: 2px solid var(--primary-bg);
+                    transition: all 0.1s ease-in-out;
 
-                    .topLeft {
+                    .cardTop {
+
                         display: flex;
+                        justify-content: space-between;
 
-                        .cardTitle {
-                            margin-left: 5px;
-                            font-size: 14px;
+                        .topLeft {
+                            display: flex;
+
+                            .cardTitle {
+                                margin-left: 5px;
+                                font-size: 14px;
+                            }
                         }
+
+
+
+                        .closeBtn {
+                            opacity: 1;
+                            color: var(--primary);
+
+                        }
+
+                        .closeBtn:hover {
+                            opacity: 0.8;
+                        }
+
+                        .closeBtn:active {
+                            opacity: 0.6;
+                        }
+
+
                     }
 
-
-
-                    .closeBtn {
-                        opacity: 1;
-                        color: var(--primary);
-
+                    .cardBottom {
+                        font-size: 12px;
+                        width: 100%;
+                        display: flex;
+                        justify-content: space-between;
                     }
 
-                    .closeBtn:hover {
-                        opacity: 0.8;
-                    }
+                    &:hover {
+                        //给我个透明的background color
+                        background-color: rgba(139, 135, 135, 0.2);
 
-                    .closeBtn:active {
-                        opacity: 0.6;
                     }
-
 
                 }
 
-                .cardBottom {
-                    font-size: 12px;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
+                .sessionCardSelected {
+                    @extend .sessionCard;
+
+
+                    border: 2px solid var(--primary);
+                }
+
+                .sessionCard+.sessionCard {
+                    margin-top: 10px;
                 }
 
 
             }
-
-            .sessionCardSelected {
-                @extend .sessionCard;
-
-
-                border: 2px solid var(--primary);
-            }
-
-            .sessionCard+.sessionCard {
-                margin-top: 10px;
-            }
-
 
         }
 
-
         .sideBarFooter {
 
-
+            padding: 0 2*$padding;
             height: $sideBarFooterHeight;
             display: flex;
             justify-content: space-between;
@@ -217,11 +233,12 @@ $padding: 10px;
 
         .chatBoxHeader {
             align-items: center;
+            justify-content: end;
 
             .headerRight {
                 display: flex;
                 flex-direction: column;
-                align-items: center;
+                align-items: end;
 
                 .signUp {
 
@@ -240,11 +257,36 @@ $padding: 10px;
 
             }
 
+            .editBtn {
+                background-color: inherit !important;
+            }
 
             .title {
 
+                box-sizing: border-box;
+                margin-left: 5px;
                 font-size: 20px;
                 font-weight: 600;
+                border: 2px solid transparent;
+                background-color: var(--secondary-bg);
+                color: var(--text);
+                padding: 1px;
+                padding-left: 5px;
+                outline: none
+            }
+
+
+
+            .editInput {
+                @extend .title;
+                background-color: var(--secondary-bg);
+                color: var(--text);
+                font-weight: 600;
+                border-radius: 5px;
+                border: 2px solid transparent;
+                border-color: var(--secondary);
+
+
             }
 
             .subTitle {
@@ -288,10 +330,13 @@ $padding: 10px;
                     max-width: 80%;
                     min-width: 0;
                     padding: $bubble-padding;
-                    border: 1px solid var(--secondary);
+                    border: 2px solid var(--secondary);
                     border-radius: $bubble-border-radius;
                     background-color: var(--secondary-bg);
+
                     box-sizing: border-box;
+                    //让背景模糊
+
 
                     .reactMarkdown {
 
@@ -342,6 +387,16 @@ $padding: 10px;
                             margin-top: 20px;
                         }
 
+                        .inlineCode {
+                            cursor: pointer;
+                            background-color: var(--secondary);
+                            padding: 0 5px;
+                            color: var(--text);
+                            border-radius: 5px;
+                            font-size: 14px;
+                            font-family: 'Open Sans', sans-serif;
+                        }
+
                     }
 
                 }
@@ -354,6 +409,11 @@ $padding: 10px;
 
             .bubbleContainerUser {
                 @extend .bubbleContainer;
+
+                .chatBubble {
+                    background-color: var(--primary-bg);
+                    border: 2px solid var(--primary);
+                }
 
                 justify-content: end;
 
@@ -374,8 +434,9 @@ $padding: 10px;
 
                     button {
                         width: max-content;
-                        cursor: pointer;
-                        font-size: 12px;
+                        background-color: inherit;
+                        color: var(--text);
+
                     }
                 }
 
