@@ -1,21 +1,22 @@
 import React, { useMemo, useRef } from "react";
 import styles from "../index.module.scss";
 import { useSelector } from "react-redux";
-import Loading from "../../components/Loading/Loading";
+import Loading from "../../../components/Loading/Loading";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import RemarkGfm from "remark-gfm";
 import RemarkMath from "remark-math";
 import RehypeKatex from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula } from "react-syntax-highlighter/dist/esm/styles/prism";
-import Button from "../../components/Button/Button";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import Button from "../../../components/Button/Button";
+
 type Props = {
   type: "system" | "user" | "err";
   message: string;
+  time: string;
 };
 
-const ChatBubble = ({ type, message }: Props) => {
+const ChatBubble = ({ time, type, message }: Props) => {
   const codeRef = useRef<any>({});
   const style = useMemo(() => ({ system: styles.bubbleContainerBot, user: styles.bubbleContainerUser, err: styles.bubbleContainerBot }), []);
 
@@ -87,9 +88,18 @@ const ChatBubble = ({ type, message }: Props) => {
   };
 
   return (
-    <div className={style[type]}>
-      <div className={styles.chatBubble}>{message ? chatMsgs[type] : <Loading size={8} />}</div>
-    </div>
+    <>
+      {type === "user" ? (
+        <div className={style[type]}>
+          <div className={styles.chatBubble}>{message ? chatMsgs[type] : <Loading size={8} />}</div>
+        </div>
+      ) : (
+        <div className={style[type]}>
+          <div className={styles.chatBubble}>{message ? chatMsgs[type] : <Loading size={8} />}</div>
+          <div className={styles.time}>{time}</div>
+        </div>
+      )}
+    </>
   );
 };
 

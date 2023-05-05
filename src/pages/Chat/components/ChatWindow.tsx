@@ -2,7 +2,7 @@ import React, { WheelEvent, useEffect, useRef, useState } from "react";
 import styles from "../index.module.scss";
 import { useSelector } from "react-redux";
 import ChatBubble from "./ChatBubble";
-import { ShownMessage } from "../../store/chatApiSlice";
+import { ShownMessage } from "../../../store/chatApiSlice";
 
 type Props = {
   messageList: Array<ShownMessage>;
@@ -24,7 +24,7 @@ const ChatWindow = ({ messageList }: Props) => {
   };
   return (
     <div onWheel={(e) => handleWheel(e)} ref={messagesEndRef} className={styles.chatWindow}>
-      {messageList && messageList.map(({ role, content }: ShownMessage, index: number) => <ChatBubble key={index} type={role} message={content} />)}
+      {messageList && messageList.map(({ time, role, content }: ShownMessage, index: number) => <ChatBubble time={time} key={index} type={role} message={content} />)}
     </div>
   );
 };

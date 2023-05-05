@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 import styles from "../index.module.scss";
 import SessionCard from "./SessionCard";
 import { useSelector, useDispatch } from "react-redux";
-import { getRecentConversations, startNewConversation } from "../../store/chatApiSlice";
-import Button from "../../components/Button/Button";
+import { getRecentConversations, startNewConversation } from "../../../store/chatApiSlice";
+import Button from "../../../components/Button/Button";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -20,13 +20,10 @@ const SideBar = (props: Props) => {
     <div className={styles.sideBar}>
       <div className={styles.sideBarHeader}>
         <div>
-          <div>Chat Genius</div>
+          <div>Kit Zone</div>
 
           <div>强大的AI助理</div>
         </div>
-        <Button w={36} h={36} className={styles.addConversationBtn} onClick={() => dispatch(startNewConversation())}>
-          <AddIcon />
-        </Button>
       </div>
       <div className={styles.sessionCardBox}>
         <div className={styles.sessionCardContainer}>
@@ -39,15 +36,9 @@ const SideBar = (props: Props) => {
         </div>
       </div>
       <div className={styles.sideBarFooter}>
-        <Button w={36} h={36} className={styles.settings}>
-          ⚙
-        </Button>
-        {userInfo && (
-          <div className={styles.userType}>
-            <PersonOutlineIcon />
-            {userInfo.username}
-          </div>
-        )}
+        <div className={styles.settings}>⚙</div>
+
+        <AddIcon className={styles.addConversationBtn} onClick={() => dispatch(startNewConversation())} />
       </div>
     </div>
   );

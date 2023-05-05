@@ -1,9 +1,9 @@
 import React, { LegacyRef, useEffect, useRef } from "react";
-import styles from "../index.module.scss";
-import SideBar from "./SideBar";
-import ChatBox from "./ChatBox";
+import styles from "./index.module.scss";
+import SideBar from "./components/SideBar";
+import ChatBox from "./components/ChatBox";
 import { useSelector, useDispatch } from "react-redux";
-const Box = () => {
+const Chat = () => {
   return (
     <div className={styles.box}>
       <SideBar />
@@ -12,4 +12,4 @@ const Box = () => {
   );
 };
 
-export default Box;
+export default Chat;

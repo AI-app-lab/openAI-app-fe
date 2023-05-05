@@ -1,28 +1,25 @@
 $padding: 10px;
 
 .box {
+    border-radius: var(--border-radius);
     display: flex;
     box-sizing: border-box;
     overflow: hidden;
     min-width: 600px;
     min-height: 480px;
-    max-width: 900px;
-    width: var(--box-width);
-    height: var(--box-height);
+    max-width: 1000px;
+    width: 100%;
+    height: 100%;
     background-color: var(--secondary-bg);
-    border-radius: var(--border-radius);
-    border: 1px solid var(--secondary);
-
-
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), 0 10px 30px rgba(0, 0, 0, 1);
+    box-sizing: border-box;
 
     .sideBar {
-
-
         height: 100%;
 
         color: var(--text);
-        padding: 2*$padding 0;
-        width: var(--sidebar-width);
+        padding: 2 * $padding 0;
+        width: var(--chatbox-sidebar-width);
         background-color: var(--primary-bg);
 
         box-sizing: border-box;
@@ -30,12 +27,14 @@ $padding: 10px;
         $sideBarFooterHeight: 56px;
 
         .sideBarHeader {
-            padding: 0 2*$padding;
+            padding: 0 2 * $padding;
+            color: var(--primary);
+            font-weight: 700;
 
             :first-child {
                 :first-child {
                     font-size: 20px;
-                    font-weight: 600;
+                    font-weight: 700;
                 }
 
                 :last-child {
@@ -44,13 +43,6 @@ $padding: 10px;
             }
 
 
-            .addConversationBtn {
-                color: var(--text);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                background-color: var(--secondary-bg);
-            }
 
             display: flex;
             flex-direction: row;
@@ -63,32 +55,24 @@ $padding: 10px;
             height: calc(100% - $sideBarFooterHeight - $sideBarHeaderHeight);
 
             ::-webkit-scrollbar {
-
                 height: 7px;
-                width: 7px;
-                background-color: var(--primary-bg)
+                width: 5px;
+                background-color: var(--primary-bg);
             }
 
             ::-webkit-scrollbar-thumb {
                 border-radius: 10px;
-                background-color: var(--primary);
-
-            }
-
-            ::-webkit-scrollbar-thumb:hover {
                 background-color: var(--secondary);
-
             }
+
+
 
             .sessionCardContainer {
-
-                padding: 0 2*$padding;
+                padding: 0 $padding;
                 overflow-y: auto;
                 height: 100%;
 
-
                 .sessionCard {
-
                     display: flex;
                     flex-direction: column;
                     justify-content: space-between;
@@ -96,42 +80,53 @@ $padding: 10px;
                     background-color: var(--secondary-bg);
                     cursor: pointer;
                     padding: $padding 14px;
-                    height: 45px;
+                    height: 55px;
                     border-radius: var(--border-radius);
-                    border: 2px solid var(--primary-bg);
+
                     transition: all 0.1s ease-in-out;
 
                     .cardTop {
-
                         display: flex;
                         justify-content: space-between;
+                        font-size: 14px;
+                        align-items: center;
+
+                        svg {
+                            width: 18px;
+                            height: 18px;
+                        }
 
                         .topLeft {
                             display: flex;
+                            overflow: hidden;
+                            justify-content: space-between;
+
+                            align-items: center;
 
                             .cardTitle {
+                                //让cardTitle溢出省略号
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
                                 margin-left: 5px;
-                                font-size: 14px;
+
+
                             }
                         }
 
-
-
                         .closeBtn {
+                            padding: 0;
                             opacity: 1;
-                            color: var(--primary);
 
                         }
 
                         .closeBtn:hover {
-                            opacity: 0.8;
-                        }
-
-                        .closeBtn:active {
                             opacity: 0.6;
                         }
 
-
+                        .closeBtn:active {
+                            opacity: 0.4;
+                        }
                     }
 
                     .cardBottom {
@@ -143,87 +138,80 @@ $padding: 10px;
 
                     &:hover {
                         //给我个透明的background color
-                        background-color: rgba(139, 135, 135, 0.2);
-
+                        opacity: 0.8;
                     }
-
                 }
 
                 .sessionCardSelected {
                     @extend .sessionCard;
+                    color: var(--text-contrast);
+                    background-color: var(--primary-activated);
 
 
-                    border: 2px solid var(--primary);
                 }
 
                 .sessionCard+.sessionCard {
-                    margin-top: 10px;
+                    margin-top: 15px;
                 }
-
-
             }
-
         }
 
         .sideBarFooter {
-
-            padding: 0 2*$padding;
+            padding: 0 2 * $padding;
             height: $sideBarFooterHeight;
             display: flex;
             justify-content: space-between;
             align-items: end;
 
-            .userType {
-                height: 36px;
-                border-radius: 0px;
+
+            .addConversationBtn {
+                cursor: pointer;
+                width: 25px;
+                height: 25px;
+                color: var(--text);
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                width: max-content;
-                color: var(--text);
-                background-color: inherit;
-                cursor: default;
 
+                &:hover {
+                    opacity: 0.6;
+                }
             }
 
             .settings {
+                line-height: 25px;
+                font-size: 25px;
+                cursor: pointer;
+                color: var(--text);
 
-
-                background-color: var(--secondary-bg);
+                &:hover {
+                    opacity: 0.6;
+                }
             }
-
-
         }
     }
 
-
     .chatBox {
-
         ::-webkit-scrollbar {
             margin-right: -10px;
-            height: 7px;
-            width: 7px;
-            background-color: var(--secondary-bg)
+
+            width: 5px;
+            background-color: var(--secondary-bg);
         }
 
         ::-webkit-scrollbar-thumb {
             border-radius: 10px;
             background-color: var(--secondary);
-
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: var(--primary);
-
-        }
 
 
         ::-webkit-scrollbar-corner {
             background: transparent;
             width: 0;
             height: 0;
-            border-left: 16px solid #8B7E79;
-            border-top: 16px solid #8B7E79;
+            border-left: 16px solid #8b7e79;
+            border-top: 16px solid #8b7e79;
             border-bottom: 16px solid transparent;
             border-right: 16px solid transparent;
         }
@@ -235,34 +223,38 @@ $padding: 10px;
             align-items: center;
             justify-content: end;
 
+
+            .headerTop {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+            }
+
             .headerRight {
                 display: flex;
                 flex-direction: column;
                 align-items: end;
 
-                .signUp {
-
-                    justify-content: center;
-
-
-                    border-radius: var(--border-radius);
-                    padding: 3px;
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    font-size: 10px;
-
-
-                }
-
             }
 
             .editBtn {
+                height: 100%;
                 background-color: inherit !important;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+
+                &:hover {
+                    opacity: 0.6;
+                }
+
+                &:active {
+                    opacity: 0.4;
+                }
             }
 
             .title {
-
+                max-width: 200px;
                 box-sizing: border-box;
                 margin-left: 5px;
                 font-size: 20px;
@@ -272,21 +264,20 @@ $padding: 10px;
                 color: var(--text);
                 padding: 1px;
                 padding-left: 5px;
-                outline: none
+                outline: none;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                padding-left: 10px;
             }
-
-
 
             .editInput {
                 @extend .title;
                 background-color: var(--secondary-bg);
                 color: var(--text);
-                font-weight: 600;
+                padding-left: 10px;
                 border-radius: 5px;
                 border: 2px solid transparent;
-                border-color: var(--secondary);
-
-
+                border-color: var(--text);
             }
 
             .subTitle {
@@ -301,20 +292,15 @@ $padding: 10px;
             height: var(--chatbox-header-height);
             position: sticky;
             color: var(--text);
-            padding:0 2*$padding;
-
-
+            padding: 0 2 * $padding;
         }
 
-
-
         .chatWindow {
-
-            padding: 0 $padding $padding;
+            padding: $padding*2;
             box-sizing: border-box;
             overflow-x: hidden;
             overflow-y: auto;
-            height: var(--chatbox-window-height);
+            height: calc(var(--chatbox-window-height) - 15px);
             color: var(--text);
 
             $bubble-border-radius: 10px;
@@ -323,39 +309,26 @@ $padding: 10px;
             .bubbleContainer {
                 display: flex;
 
-
                 .chatBubble {
 
-                    overflow-x: auto;
                     max-width: 80%;
                     min-width: 0;
                     padding: $bubble-padding;
-                    border: 2px solid var(--secondary);
+
                     border-radius: $bubble-border-radius;
                     background-color: var(--secondary-bg);
-
+                    overflow-wrap: break-word;
                     box-sizing: border-box;
-                    //让背景模糊
-
 
                     .reactMarkdown {
-
-
-
-
                         font-size: 14px;
 
-
-
-
                         .imgUrl {
-
                             color: var(--text);
                             font-style: italic;
                             font-size: 12px;
                             text-decoration: underline;
                             opacity: 1;
-
                         }
 
                         .imgUrl:hover {
@@ -367,23 +340,18 @@ $padding: 10px;
                         }
 
                         a {
-                            @extend .imgUrl
+                            @extend .imgUrl;
                         }
 
                         .rmdP {
-
                             margin: 0;
-
                         }
 
                         .rmdP+.rmdP {
-
-
                             margin-top: 20px;
                         }
 
                         ol li {
-
                             margin-top: 20px;
                         }
 
@@ -394,13 +362,10 @@ $padding: 10px;
                             color: var(--text);
                             border-radius: 5px;
                             font-size: 14px;
-                            font-family: 'Open Sans', sans-serif;
+                            font-family: "Open Sans", sans-serif;
                         }
-
                     }
-
                 }
-
             }
 
             .bubbleContainer+.bubbleContainer {
@@ -412,16 +377,29 @@ $padding: 10px;
 
                 .chatBubble {
                     background-color: var(--primary-bg);
-                    border: 2px solid var(--primary);
+
                 }
 
                 justify-content: end;
-
             }
 
             .bubbleContainerBot {
                 @extend .bubbleContainer;
-                justify-content: start;
+
+                ::-webkit-scrollbar {
+                    margin-right: -10px;
+                    height: 7px;
+
+                    background-color: var(--secondary-bg);
+                }
+
+                ::-webkit-scrollbar-thumb {
+                    border-radius: 10px;
+                    background-color: var(--secondary);
+                }
+
+                flex-direction: column;
+                align-items: flex-start;
 
                 .markDownHeader {
                     border-top-left-radius: var(--border-radius);
@@ -435,15 +413,17 @@ $padding: 10px;
                     button {
                         width: max-content;
                         background-color: inherit;
-                        color: var(--text);
-
+                        color: var(--text-contrast);
                     }
                 }
 
                 .syntaxHighlighter {
 
+
+
                     margin-top: 0 !important;
-                    font-family: 'Open Sans', sans-serif;
+                    font-family: "Open Sans",
+                        sans-serif;
                     font-size: 12px;
 
                     border-bottom-left-radius: var(--border-radius);
@@ -452,13 +432,10 @@ $padding: 10px;
                 }
 
                 .rmdTable {
-
-
                     border-radius: var(--border-radius);
                     border-collapse: collapse;
                     width: 100%;
                     max-width: 800px;
-
 
                     color: #fff;
 
@@ -466,7 +443,6 @@ $padding: 10px;
 
                     th,
                     td {
-
                         border: 1px solid #444;
                         padding: 5px;
                         text-align: left;
@@ -479,77 +455,71 @@ $padding: 10px;
                     tr:nth-child(even) {
                         background-color: #3d3d3d;
                     }
-
                 }
 
+                .chatBubble {
+                    background-color: var(--primary-bg);
+                }
 
+                .time {
+                    white-space: nowrap;
 
-
-
-
-
-
+                    font-size: 8px;
+                    color: var(--text);
+                    opacity: 0.5;
+                    margin-left: 5px;
+                    margin-top: 5px;
+                }
             }
-
-
         }
-
 
         .inputRangeContainer {
             position: relative;
-            padding-left: $padding;
-            padding-right: $padding;
-
-
+            padding-top: 5px;
+            padding-left: 2*$padding;
+            padding-right: 2*$padding;
+            padding-bottom: 2*$padding;
 
             .inputRange {
+                font-family: inherit;
                 height: var(--chatbox-input-range-height);
 
                 width: var(--chatbox-input-range-width);
                 box-sizing: border-box;
                 padding: $padding;
-
-
                 color: var(--text);
                 resize: none;
                 border: 1px solid var(--secondary);
                 border-radius: var(--border-radius);
-                background-color: inherit;
-
-
-
+                background-color: var(--primary-bg);
             }
 
             .inputRange:focus {
-                border: none;
+
+                border: 1px solid var(--primary);
                 outline: 1px solid var(--primary);
 
             }
 
             .buttonWrapper {
-                bottom: $padding;
-                right: 2*$padding;
+                bottom: 3*$padding;
+                right: 3*$padding;
                 position: absolute;
 
+
                 .sendBtn {
+                    color: var(--text);
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    background-color: inherit;
                 }
 
                 .btnLoading {
                     cursor: not-allowed;
                     opacity: 0.5;
                 }
-
             }
         }
-
     }
-
-
-
-
-
-
 }

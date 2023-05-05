@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styles from "../index.module.scss";
-import Button from "../../components/Button/Button";
+import Button from "../../../components/Button/Button";
 import { useDispatch, useSelector } from "react-redux";
-import { ChatApiState, RequestDto, RequestMessage, getBotMessages, sendUserMessage } from "../../store/chatApiSlice";
-import { locations } from "../../localization";
-import { ConfigState } from "../../store/configSlice";
+import { ChatApiState, RequestDto, RequestMessage, getBotMessages, sendUserMessage } from "../../../store/chatApiSlice";
+import { locations } from "../../../localization";
+import { ConfigState } from "../../../store/configSlice";
 import SendSharpIcon from "@mui/icons-material/SendSharp";
 const InputRange = () => {
   const [userMessage, setUserMessage] = useState<string>("");
@@ -59,9 +59,8 @@ const InputRange = () => {
         className={styles.inputRange}
       />
       <div className={styles.buttonWrapper}>
-        <Button className={`${styles.sendBtn} ${loading === "loading" ? styles.btnLoading : ""}`} onClick={handleClick} w={70} h={40}>
+        <Button onClick={handleClick} className={`${styles.sendBtn} ${loading === "loading" ? styles.btnLoading : ""}`} w={36} h={36}>
           <SendSharpIcon />
-          {locations[location].send}
         </Button>
       </div>
     </div>

@@ -19,7 +19,7 @@ const SignUpModal = (props: Props) => {
   const [sendBtnText, setSendBtnText] = useState<number | string>("发送");
 
   useEffect(() => {
-    nextTryTime && countdown();
+    nextTryTime["signup"] && countdown();
     setError(status.message);
 
     const timeoutId = setTimeout(() => {
@@ -27,12 +27,12 @@ const SignUpModal = (props: Props) => {
       dispatch(destroyStatus());
     }, 3000);
     return () => clearTimeout(timeoutId);
-  }, [nextTryTime, sendBtnText, status.message]);
+  }, [nextTryTime["signup"], sendBtnText, status.message]);
 
   const countdown = () => {
     const timer = setInterval(() => {
       const time = new Date().getTime();
-      const count = Math.round((nextTryTime - time) / 1000);
+      const count = Math.round((nextTryTime["signup"] - time) / 1000);
       setSendBtnText(count);
       if (count <= 0) {
         clearInterval(timer);
@@ -89,18 +89,18 @@ const SignUpModal = (props: Props) => {
         <h2> {locations[location].loginTitle}</h2>
         <form onSubmit={(e) => e.preventDefault()}>
           <label>
-            <input value={userPostDto.email} autoComplete="email" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, email: e.target.value }))} placeholder="请输入邮箱" type="email" />
+            <input id="email" value={userPostDto.email} autoComplete="text" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, email: e.target.value }))} placeholder="请输入邮箱" type="text" />
           </label>
           <label>
             <div className={styles.captchaGroup}>
-              <input autoComplete="text" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, verificationCode: e.target.value }))} placeholder="验证码" type="text" />
+              <input type="text" id="captcha" name="captcha" autoComplete="off" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, verificationCode: e.target.value }))} placeholder="验证码" />
               <Button allow={typeof sendBtnText === "string"} onClick={handleSendVcode} className={styles.sendBtn}>
                 {sendBtnText}
               </Button>
             </div>
           </label>
           <label>
-            <input autoComplete="current-password" value={userPostDto.password} onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, password: e.target.value }))} placeholder="请输入密码" type="password" />
+            <input id="password" autoComplete="current-password" value={userPostDto.password} onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, password: e.target.value }))} placeholder="请输入密码" type="password" />
           </label>
           <div className={`${styles.skeleton} ${error && styles.errAlert}`}>{error}</div>
           <Button onClick={handleSignUp} className={styles.btn} w={70} h={50}>

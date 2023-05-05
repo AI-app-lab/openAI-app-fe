@@ -5,8 +5,7 @@ import styles from "./index.module.scss";
 import { ConfigState } from "../../store/configSlice";
 import { locations } from "../../localization";
 import Button from "../Button/Button";
-import { UserLoginPostDto, UserState, destroyStatus, login, openModal } from "../../store/userSlice";
-import AlertBubble from "../AlertBubble/AlertBubble";
+import { UserLoginPostDto, UserState, destroyStatus, getLoginVCode, login, loginWithVCode, openModal } from "../../store/userSlice";
 import Loading from "../Loading/Loading";
 import { isEmail } from "../../utils/formValidation";
 
@@ -15,19 +14,31 @@ type Props = {};
 const LoginModal = (props: Props) => {
   const dispatch: any = useDispatch();
   const { location } = useSelector((state: ConfigState) => state.config);
-  const { status } = useSelector((state: UserState) => state.user);
+  const { status, nextTryTime } = useSelector((state: UserState) => state.user);
+  const [sendBtnText, setSendBtnText] = useState<number | string>("发送");
 
   useEffect(() => {
+    nextTryTime["login"] && !Boolean(countdown()) && setError(status.message);
     status.status === "failed" && setError(status.message);
     const timeoutId = setTimeout(() => {
       setError("");
       dispatch(destroyStatus());
     }, 3000);
     return () => clearTimeout(timeoutId);
-  }, [status.status]);
+  }, [nextTryTime["login"], status.status, status.message]);
 
   const [error, setError] = useState<string>("");
-
+  const countdown = () => {
+    const timer = setInterval(() => {
+      const time = new Date().getTime();
+      const count = Math.round((nextTryTime["login"] - time) / 1000);
+      setSendBtnText(count);
+      if (count <= 0) {
+        clearInterval(timer);
+        setSendBtnText("发送");
+      }
+    }, 1000);
+  };
   const [method, setMethod] = useState<"pwd" | "sms">("pwd");
   const methods = {
     pwd: { clsSms: `${styles.loginMethod}`, clsPwd: `${styles.loginMethod}  ${styles.pwdLg}`, placeHolderL1: "请输入邮箱", placeHolderL2: "请输入密码" },
@@ -35,9 +46,9 @@ const LoginModal = (props: Props) => {
   };
   const alert = {};
 
-  const [userLoginPostDto, setUserLoginPostDto] = useState<UserLoginPostDto>({ email: "", password: "" });
+  const [userLoginPostDto, setUserLoginPostDto] = useState<UserLoginPostDto>({ email: "", password: "", verificationCode: "" });
 
-  const handleSubmit = () => {
+  const handleSubmitPwd = () => {
     if (userLoginPostDto.email === "") {
       setError("邮箱不能为空!");
       setTimeout(() => {
@@ -54,9 +65,37 @@ const LoginModal = (props: Props) => {
         setError("");
       }, 3000);
     } else {
-      dispatch(login(userLoginPostDto));
+      const { email, password } = userLoginPostDto;
+      dispatch(login({ email, password }));
     }
   };
+  const handleSubmitVCode = () => {
+    if (userLoginPostDto.email === "") {
+      setError("邮箱不能为空!");
+      setTimeout(() => {
+        setError("");
+      }, 3000);
+    } else if (!isEmail(userLoginPostDto.email)) {
+      setError("邮箱格式不正确!");
+      setTimeout(() => {
+        setError("");
+      }, 3000);
+    } else if (userLoginPostDto.verificationCode === "") {
+      setError("验证码不能为空!");
+      setTimeout(() => {
+        setError("");
+      }, 3000);
+    } else {
+      const { email, verificationCode } = userLoginPostDto;
+
+      dispatch(loginWithVCode({ email, verificationCode: verificationCode as string }));
+    }
+  };
+  const handleSubmit = {
+    pwd: handleSubmitPwd,
+    sms: handleSubmitVCode,
+  };
+
   return status.status === "loading" ? (
     <div className={styles.modalWrapper}>
       <Loading />
@@ -90,8 +129,16 @@ const LoginModal = (props: Props) => {
           {method === "sms" ? (
             <label>
               <div className={styles.lgCaptchaGroup}>
-                <input autoComplete="text" placeholder="验证码" type="text" />
-                <Button className={styles.sendBtn}>发送</Button>
+                <input value={userLoginPostDto.verificationCode} onChange={(e) => setUserLoginPostDto((prev: UserLoginPostDto) => ({ ...prev, verificationCode: e.target.value }))} autoComplete="text" placeholder="验证码" type="text" />
+                <Button
+                  allow={sendBtnText === "发送"}
+                  onClick={() => {
+                    console.log(userLoginPostDto.email);
+                    dispatch(getLoginVCode(userLoginPostDto.email));
+                  }}
+                  className={styles.sendBtn}>
+                  {sendBtnText}
+                </Button>
               </div>
             </label>
           ) : (
@@ -102,7 +149,7 @@ const LoginModal = (props: Props) => {
         </form>
         <div className={`${styles.skeleton} ${error && styles.errAlert}`}>{error}</div>
 
-        <Button type="submit" onClick={handleSubmit} className={styles.btn} w={70} h={50}>
+        <Button type="submit" onClick={handleSubmit[method]} className={styles.btn} w={70} h={50}>
           {locations[location].lgConfirm}
         </Button>
         <div className={styles.noAccAndResetPwd}>

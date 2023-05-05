@@ -1,8 +1,23 @@
-.layout {
+.container {
+    display: flex;
+
+
+    height: var(--main-height);
+
+    //url("../../pages/bg.png")让这张图片作为背景图片
+    //no-repeat不重复
+    //center居中
+    //cover覆盖
+    // background: url("../../pages/bg.png") no-repeat center / cover;
+
+}
+
+.main {
     display: flex;
     justify-content: center;
-    align-items: center;
-    width: 100vw;
-    height: 100vh;
-    background-color: var(--background);
+    padding: var(--main-padding-top-bottom) 0;
+
+    background-color: var(--secondary-bg);
+    width: var(--main-width);
+
 }

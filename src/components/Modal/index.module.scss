@@ -2,6 +2,7 @@ $inputHeight: 35px;
 $captchaBtnWidth: 105px;
 
 .modalWrapper {
+    z-index: 9999;
     background-color: rgba(100, 100, 100, 0.5);
     position: absolute;
     height: 100vh;
@@ -52,7 +53,12 @@ $captchaBtnWidth: 105px;
                 width: 100%;
                 box-sizing: border-box;
                 border-radius: 5px;
-                border: 2px solid var(--primary);
+                border: 2px solid var(--secondary);
+
+                &:focus {
+                    outline: none;
+                    border: 2px solid var(--primary);
+                }
             }
         }
 
@@ -141,7 +147,7 @@ $captchaBtnWidth: 105px;
             }
 
             .sendBtn {
-
+                color: var(--text-contrast);
                 margin-left: 30px;
                 height: $inputHeight;
                 width: calc($captchaBtnWidth - 20px);
@@ -175,7 +181,7 @@ $captchaBtnWidth: 105px;
         }
 
         .btn {
-            box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
+            color: var(--text-contrast);
             margin-top: 15px;
         }
 
@@ -190,7 +196,8 @@ $captchaBtnWidth: 105px;
 
         .btn {
             margin-top: 10px;
-            box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary)
+
+
         }
 
         .captchaGroup {

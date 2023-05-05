@@ -1,5 +1,5 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import { Action, PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios, { AxiosError, AxiosResponse, isAxiosError } from "axios";
 
 export interface UserEmailVerifyDto {
   email: string;
@@ -13,7 +13,8 @@ export interface UserPostDto {
 }
 export interface UserLoginPostDto {
   email: string;
-  password: string;
+  password?: string;
+  verificationCode?: string;
 }
 
 export interface UserInfo {
@@ -22,6 +23,7 @@ export interface UserInfo {
   authority: string;
   username: string;
   id: number;
+  timeSet: string;
 }
 
 export interface UserState {
@@ -47,31 +49,72 @@ export const signUp = createAsyncThunk("users/signUp", async ({ username, email,
 });
 
 export const login = createAsyncThunk("users/login", async ({ email, password }: UserLoginPostDto, { rejectWithValue }) => {
-  const response = axios.post("http://43.139.143.5:9999/user/login/email", { email, password }).catch((err) => {
-    return rejectWithValue(err.response.status);
-  });
-  return response;
+  try {
+    const response = await axios.post("http://43.139.143.5:9999/user/login/email", { email, password });
+    const { data, status } = response as AxiosResponse<UserInfo>;
+    console.log(data);
+    return { data, status };
+  } catch (err) {
+    if (isAxiosError(err)) {
+      const errCode = err.response?.status;
+      console.log(errCode);
+      return rejectWithValue(errCode);
+    }
+  }
 });
 
+export const getLoginVCode = createAsyncThunk("users/getLoginVCode", async (email: string, { rejectWithValue }) => {
+  try {
+    const response = await axios.post("http://43.139.143.5:9999/user/login/email/sendcode", { email });
+    const { data } = response as AxiosResponse<any>;
+    return { data };
+  } catch (err) {
+    if (isAxiosError(err)) {
+      const errCode = err.response?.status;
+      console.log(errCode);
+      return rejectWithValue(errCode);
+    }
+  }
+});
+export const loginWithVCode = createAsyncThunk("users/loginWithVCode", async (vCodeLoginDto: { email: string; verificationCode: string }, { rejectWithValue }) => {
+  try {
+    const response = await axios.post("http://43.139.143.5:9999/user/login/email/verifycode", vCodeLoginDto);
+    const { data, status } = response as AxiosResponse<{
+      data: UserInfo;
+      status: number;
+    }>;
+    return { data, status };
+  } catch (err) {
+    if (isAxiosError(err)) {
+      const errCode = err.response?.status;
+      return rejectWithValue(errCode);
+    }
+  }
+});
 export interface Status {
   status: "idle" | "loading" | "failed";
   sCode: any;
   message: any;
 }
+export type NextTryTime = Record<"login" | "signup", number>;
 export interface UserInitialState {
   userInfo: UserInfo | null;
   vCode: number | null;
-  nextTryTime: number;
+  nextTryTime: NextTryTime;
   status: Status;
   currentModal: "close" | "login" | "signUp";
 }
 export interface UserState {
-  user: { userInfo: UserInfo | null; vCode: number | null; nextTryTime: number; status: Status; currentModal: "close" | "login" | "signUp" };
+  user: { userInfo: UserInfo | null; vCode: number | null; nextTryTime: NextTryTime; status: Status; currentModal: "close" | "login" | "signUp" };
 }
+
 const initialState: UserInitialState = {
   userInfo: null,
   vCode: null,
-  nextTryTime: 0,
+  nextTryTime: {
+    login: 0,
+    signup: 0,
+  },
   status: { status: "idle", sCode: null, message: null },
   currentModal: "close",
 };
@@ -85,14 +128,85 @@ export const userSlice = createSlice({
     destroyStatus: (state) => {
       state.status = { status: "idle", sCode: null, message: null };
     },
+    saveUserInfo: (state, action) => {
+      state.userInfo = action.payload;
+    },
+    logout: (state) => {
+      state.userInfo = null;
+      localStorage.removeItem("userInfo");
+    },
   },
+
   extraReducers: (builder) => {
+    builder.addCase(loginWithVCode.fulfilled, (state, action) => {
+      const userInfo = action.payload?.data;
+      console.log(userInfo);
+      console.log(123);
+
+      userInfo && (state.userInfo = userInfo.data) && localStorage.setItem("userInfo", JSON.stringify(userInfo));
+      state.currentModal = "close";
+
+      state.status = { status: "idle", message: "登录成功", sCode: action.payload?.status };
+    });
+    builder.addCase(loginWithVCode.pending, (state, action) => {
+      state.status = { status: "loading", message: null, sCode: null };
+    });
+    builder.addCase(loginWithVCode.rejected, (state, action) => {
+      switch (action.payload) {
+        case 404:
+          state.status = { status: "failed", message: "邮箱不存在", sCode: action.error.code };
+          break;
+        case 500:
+          state.status = { status: "failed", message: "未知错误", sCode: action.error.code };
+          break;
+        case 401:
+          state.status = { status: "failed", message: "验证码无效", sCode: action.error.code };
+          break;
+        case 400:
+          state.status = { status: "failed", message: "邮箱格式有误", sCode: action.error.code };
+          break;
+        default:
+          state.status = { status: "failed", message: "网络错误", sCode: action.error.code };
+      }
+    });
+    builder.addCase(getLoginVCode.fulfilled, (state, action) => {
+      state.nextTryTime["login"] = new Date().getTime() + 60 * 1000;
+
+      state.status = { status: "idle", message: "发送成功", sCode: 200 };
+    });
+    builder.addCase(getLoginVCode.pending, (state, action) => {
+      state.status = { status: "loading", message: null, sCode: null };
+    });
+    builder.addCase(getLoginVCode.rejected, (state, action) => {
+      console.log(222222222222221);
+
+      switch (action.payload) {
+        case 404:
+          state.status = { status: "failed", message: "邮箱不存在", sCode: action.error.code };
+          console.log("邮箱不存在");
+          break;
+        case 500:
+          state.status = { status: "failed", message: "未知错误！", sCode: action.error.code };
+          console.log("未知错误");
+          break;
+        case 429:
+          state.status = { status: "failed", message: "发送太频繁！", sCode: action.error.code };
+          break;
+        case 400:
+          state.status = { status: "failed", message: "邮箱或密码格式有误！", sCode: action.error.code };
+          console.log("邮箱或密码格式有误");
+          break;
+        default:
+          state.status = { status: "failed", message: "网络错误！", sCode: action.error.code };
+      }
+    });
+
     builder.addCase(verifyEmail.fulfilled, (state, action) => {
-      state.nextTryTime = new Date().getTime() + 60 * 1000;
+      state.nextTryTime["signup"] = new Date().getTime() + 60 * 1000;
       state.status = { status: "idle", message: "发送成功", sCode: null };
     });
     builder.addCase(verifyEmail.pending, (state, action) => {
-      state.nextTryTime = 0;
+      state.nextTryTime["signup"] = 0;
       state.status = { status: "loading", message: null, sCode: null };
     });
     builder.addCase(verifyEmail.rejected, (state, action) => {
@@ -130,8 +244,10 @@ export const userSlice = createSlice({
     });
     builder.addCase(login.fulfilled, (state, action) => {
       state.currentModal = "close";
-      state.userInfo = action.payload.data;
-      state.status = { status: "idle", message: action.payload.data, sCode: action.payload.status };
+      state.userInfo = action.payload?.data as UserInfo;
+      console.log(action.payload);
+      localStorage.setItem("userInfo", JSON.stringify(action.payload?.data));
+      state.status = { status: "idle", message: action.payload, sCode: action.payload?.status };
     });
     builder.addCase(login.pending, (state, action) => {
       state.status = { status: "loading", message: null, sCode: null };
@@ -139,6 +255,9 @@ export const userSlice = createSlice({
     builder.addCase(login.rejected, (state, action) => {
       switch (action.payload) {
         case 400:
+          state.status = { status: "failed", message: "用户名或密码错误！", sCode: action.error.code };
+          break;
+        case 401:
           state.status = { status: "failed", message: "用户名或密码错误！", sCode: action.error.code };
           break;
         case 500:
@@ -150,5 +269,5 @@ export const userSlice = createSlice({
     });
   },
 });
-export const { openModal, destroyStatus } = userSlice.actions;
+export const { openModal, destroyStatus, saveUserInfo, logout } = userSlice.actions;
 export default userSlice.reducer;

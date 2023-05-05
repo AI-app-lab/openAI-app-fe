@@ -1,8 +1,12 @@
-import Layout from "./components/Layout/Layout";
-import Home from "./pages/Home";
+import React, { useEffect } from "react";
+
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
+import { useDispatch } from "react-redux";
+import { saveUserInfo } from "./store/userSlice";
 
 function App() {
-  return <Home />;
+  return <RouterProvider router={router} />;
 }
 
 export default App;

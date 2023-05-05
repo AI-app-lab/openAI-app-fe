@@ -14,7 +14,7 @@ export interface RequestMessage {
   content: string;
 }
 export interface ShownMessage {
-  time?: string;
+  time: string;
   role: "err" | "user" | "system";
   content: string;
 }
@@ -38,7 +38,8 @@ export interface ChatApiState {
 }
 const ctrl = new AbortController();
 export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async ({ cardId, ...chatRequestDto }: RequestDto, { dispatch }) => {
-  const id = cardId;
+  console.log("chatRequestDto", chatRequestDto);
+
   const res = await fetchEventSource("http://localhost:8080/openAI/chat/completions", {
     method: "POST",
     body: JSON.stringify(chatRequestDto),
@@ -60,7 +61,7 @@ const initialState: ChatApiSliceState = {
   loading: "idle",
   model: "gpt-3.5-turbo",
   currConversationId: 0,
-  conversations: [{ time: getFormattedDate(), topic: "New Conversation", conList: [{ role: "system", content: "我是AI助手，请问有什么我可以帮您的吗？" }] }],
+  conversations: [{ time: getFormattedDate(), topic: "New Conversation", conList: [{ time: getFormattedDate(), role: "system", content: "我是AI助手，请问有什么我可以帮您的吗？" }] }],
   validConversations: [[]],
   activeConversationId: 0,
   maxContextNum: 6, //default
@@ -88,7 +89,7 @@ export const chatApiSlice = createSlice({
     },
     sendUserMessage(state, action) {
       state.activeConversationId = state.currConversationId;
-      state.conversations[state.activeConversationId].conList.push({ role: "user", content: action.payload });
+      state.conversations[state.activeConversationId].conList.push({ time: getFormattedDate(), role: "user", content: action.payload });
       state.validConversations[state.activeConversationId].push({ role: "user", content: action.payload });
     },
     receivedUpdate(state, action) {
@@ -110,7 +111,7 @@ export const chatApiSlice = createSlice({
       state.conversations = state.conversations.filter((_, index) => index !== action.payload);
       state.validConversations = state.validConversations.filter((_, index) => index !== action.payload);
 
-      !state.conversations.length && (state.conversations = [{ time: getFormattedDate(), topic: "New Conversation", conList: [{ role: "system", content: "我是AI助手，请问有什么我可以帮您的吗？" }] }]);
+      !state.conversations.length && (state.conversations = [{ time: getFormattedDate(), topic: "New Conversation", conList: [{ time: getFormattedDate(), role: "system", content: "我是AI助手，请问有什么我可以帮您的吗？" }] }]);
       !state.validConversations.length && (state.validConversations = [[]]);
       state.currConversationId = state.conversations.length - 1;
       localStorage.setItem("conversations", JSON.stringify(state.conversations));
@@ -124,15 +125,13 @@ export const chatApiSlice = createSlice({
       state.currConversationId = action.payload;
     },
     modifyTopic(state, action) {
-      console.log(123);
-
       state.conversations[state.currConversationId].topic = action.payload;
       localStorage.setItem("conversations", JSON.stringify(state.conversations));
     },
   },
   extraReducers(builder) {
     builder.addCase(getBotMessages.pending, (state) => {
-      state.conversations[state.activeConversationId].conList.push({ role: "system", content: "" });
+      state.conversations[state.activeConversationId].conList.push({ time: getFormattedDate(), role: "system", content: "" });
       state.validConversations[state.activeConversationId].push({ role: "system", content: "" });
       state.loading = "loading";
     });
@@ -148,7 +147,7 @@ export const chatApiSlice = createSlice({
       state.validConversations[state.activeConversationId].pop();
       state.validConversations[state.activeConversationId].pop();
       const msg = state.conversations[state.activeConversationId].conList[last].content;
-      state.conversations[state.activeConversationId].conList[last] = { role: "err", content: msg + "(Error)" };
+      state.conversations[state.activeConversationId].conList[last] = { time: getFormattedDate(), role: "err", content: msg + "(Error)" };
       localStorage.setItem("conversations", JSON.stringify(state.conversations));
       localStorage.setItem("validConversations", JSON.stringify(state.validConversations));
       state.loading = "idle";

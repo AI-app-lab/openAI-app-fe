@@ -1,33 +1,51 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
 
 @mixin dark {
-    --background: #171717;
-    --text: #e2e2e2;
-    --text-light: #bababa;
-    --secondary: #6e6e6e;
-    --secondary-bg: #242121;
-    --primary: #5662a3;
-    --primary-bg: #262731;
+
+    --text: #e5e5e5;
+    --text-contrast: #ffffff;
+    --secondary: #282828;
+    --secondary-bg: #303134;
+    --primary: #468efd;
+    --primary-activated: #468efd;
+    --primary-bg: #202124;
     --markdown: #262731;
-    --markdown-header: #13151b;
+    --markdown-header: #0c0d11;
+    --bg: #3b3f5c;
+
 
 }
 
 @mixin light {
-    --background: #fffcfb;
-    --secondary: #44566d;
-    --primary: #d6dae0;
-    --btn: #4bbbad;
+    --text: #171341;
+    --text-contrast: #ffffff;
+    --secondary: #dfdede;
+    --secondary-bg: #eaedf0;
+    --primary: #468efd;
+    --primary-activated: #468efd;
+    --primary-bg: #ffffff;
+    --markdown: #2e2f38;
+    --markdown-header: #0c0d11;
+    --bg: #3b3f5c;
+
+
 }
 
 :root {
+
     font-family: 'Open Sans', sans-serif;
-    font-weight: 300;
+    font-weight: 500;
     font-size: 14px;
-    --box-width: 90vw;
-    --box-height: 90vh;
-    --sidebar-width: 300px;
-    --chatbox-width: calc(100% - var(--sidebar-width));
+    --navbar-height: 70px;
+    --navbar-padding: 0 20px;
+    --sidebar-width: 100px;
+    --main-padding-top-bottom: 15px;
+    --main-height: calc(100vh - var(--navbar-height));
+    --main-width: calc(100vw - var(--sidebar-width));
+    --box-width: calc(100vw - var(--sidebar-width));
+    --box-height: calc(100vh - var(--navbar-height) - 2 * var(--main-padding-top-bottom));
+    --chatbox-sidebar-width: 250px;
+    --chatbox-width: calc(100% - var(--chatbox-sidebar-width));
     --full-hight: 100%;
     --border-radius: 12px;
     --chatbox-input-range-width: 100%;
