@@ -3,7 +3,7 @@ import styles from "./index.module.scss";
 
 type Props = {
   children?: React.ReactNode;
-  key?: number | string;
+  key: number | string;
   className?: string;
 };
 

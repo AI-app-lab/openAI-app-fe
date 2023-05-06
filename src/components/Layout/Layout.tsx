@@ -1,17 +1,19 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import styles from "./index.module.scss";
 import "../../styles/global.scss";
 import SideBar from "../SideBar/SideBar";
 import NavBar from "../NavBar/NavBar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ConfigState } from "../../store/configSlice";
 import Modal from "../Modal/Modal";
 import { Snackbar } from "@mui/material";
 import { NavLink, Outlet } from "react-router-dom";
 import { GuardRounded } from "../../router";
+import { changeTheme } from "../../store/configSlice";
 type Props = {};
 
 const Layout = ({}: Props) => {
+
   const { theme } = useSelector((state: ConfigState) => state.config);
   return (
     <div className={theme}>

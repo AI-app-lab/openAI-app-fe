@@ -40,7 +40,9 @@ const SideBar = (props: Props) => {
   };
   useEffect(() => {
     const theme = localStorage.getItem("theme");
-    dispatch(changeTheme(theme));
+    theme&&dispatch(changeTheme(theme));
+
+    
   }, []);
   return (
     <div className={styles.sideBarWrapper}>
@@ -54,8 +56,8 @@ const SideBar = (props: Props) => {
         })}
       </ListContainer>
       <ListContainer>
-        <ListItem></ListItem>
-        <ListItem>
+   
+        <ListItem key="">
           <Switch
             onChange={(e) => {
               e.target.checked ? dispatch(changeTheme("dark")) : dispatch(changeTheme("light"));
