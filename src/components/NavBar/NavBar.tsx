@@ -21,12 +21,12 @@ const NavBar = (props: Props) => {
   return (
     <div className={styles.navBarWrapper}>
       <ListContainer className={styles.listContainer} fd="row">
-        <ListItem className={styles.logo}>Kit Zone</ListItem>
+        <ListItem key="" className={styles.logo}>Kit Zone</ListItem>
       </ListContainer>
 
       <ListContainer className={styles.listContainer} fd="row">
         {!userInfo ? (
-          <ListItem>
+          <ListItem key="">
             <div className={styles.headerRight}>
               <Button w={70} h={30} className={styles.signUp} onClick={() => dispatch(openModal("signUp"))}>
                 <AppRegistrationIcon />
@@ -36,8 +36,8 @@ const NavBar = (props: Props) => {
           </ListItem>
         ) : (
           <>
-            <ListItem className={styles.avatar}>L</ListItem>
-            <ListItem>
+            <ListItem key="" className={styles.avatar}>L</ListItem>
+            <ListItem key="">
               <KeyboardArrowDownSharpIcon />
             </ListItem>
           </>

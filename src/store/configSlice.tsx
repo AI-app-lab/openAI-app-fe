@@ -21,6 +21,7 @@ export const configSlice = createSlice({
       localStorage.setItem("theme", action.payload);
       state.theme = action.payload;
     },
+    
   },
 });
 export const { changeTheme } = configSlice.actions;
