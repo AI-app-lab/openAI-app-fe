@@ -13,7 +13,6 @@ import Shop from "./pages/Shop/Shop";
 
 export const GuardRounded = ({ component }: { component: JSX.Element }) => {
   const userInfoDto = JSON.parse(localStorage.getItem("userInfo") as string);
-  console.log(userInfoDto);
 
   return userInfoDto ? component : <Navigate to="/" replace />;
 };

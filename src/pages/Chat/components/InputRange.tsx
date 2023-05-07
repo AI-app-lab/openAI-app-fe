@@ -11,11 +11,8 @@ const InputRange = () => {
   const dispatch: Function = useDispatch();
   const { loading, currConversationId, validConversations, activeConversationId, model, maxContextNum } = useSelector((state: ChatApiState) => state.chatApi);
   const { location } = useSelector((state: ConfigState) => state.config);
-
-  function handleClick() {
-    console.log(userMessage);
-    console.log(currConversationId);
-    console.log(activeConversationId);
+  const sleep = (t: number) => new Promise((p) => setTimeout(p, t));
+  async function handleClick() {
     if (loading === "loading") {
       return;
     }
@@ -32,16 +29,16 @@ const InputRange = () => {
         content: userMessage,
       } as RequestMessage,
     ].slice(-1 * maxContextNum); //context
-    console.log(messages);
 
     const requestDto: RequestDto = {
       cardId: currConversationId,
       model: model,
       messages: messages,
     };
-    dispatch(getBotMessages(requestDto));
 
     setUserMessage("");
+    await sleep(1);
+    dispatch(getBotMessages(requestDto));
   }
   return (
     <div className={styles.inputRangeContainer}>

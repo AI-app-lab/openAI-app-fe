@@ -1,7 +1,7 @@
-import { createSlice, createAsyncThunk, original } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, original, Dispatch } from "@reduxjs/toolkit";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { getFormattedDate } from "../utils/date";
-
+import { GPTTokens } from "gpt-tokens";
 interface ChatRequestDto {
   model: string;
   messages: Array<RequestMessage>;
@@ -37,16 +37,15 @@ export interface ChatApiState {
   chatApi: ChatApiSliceState;
 }
 const ctrl = new AbortController();
-export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async ({ cardId, ...chatRequestDto }: RequestDto, { dispatch }) => {
-  console.log("chatRequestDto", chatRequestDto);
-
-  const res = await fetchEventSource("http://localhost:8080/openAI/chat/completions", {
+const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispatch) => {
+  return fetchEventSource("http://localhost:8080/openAI/chat/completions", {
     method: "POST",
     body: JSON.stringify(chatRequestDto),
     headers: {
       "Content-Type": "application/json",
     },
     signal: ctrl.signal,
+
     onmessage(msg) {
       const word = JSON.parse(msg.data).choices[0].delta.content;
       word && dispatch(receivedUpdate(word));
@@ -55,7 +54,40 @@ export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (
       throw err;
     },
   });
+};
+export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async ({ cardId, ...chatRequestDto }: RequestDto, { dispatch, rejectWithValue }) => {
+  console.log("[Request] ", JSON.stringify(chatRequestDto.messages, null, 3));
+
+  let tokens = getTokensCount(chatRequestDto);
+  const before = tokens;
+
+  //当使用的token数超过4000时，将messages中的前两条消息删除直到token数小于4000，如果messages中只有一条消息，那么删除这条消息并且报错
+  tokens > 100 && console.log("Token到达阈值开始压缩....:", tokens);
+  while (tokens > 100) {
+    if (chatRequestDto.messages.length <= 1) {
+      console.log("压缩失败");
+
+      return rejectWithValue({ message: "你的信息太长了" });
+    }
+    chatRequestDto.messages.shift();
+    tokens = getTokensCount(chatRequestDto);
+  }
+  const after = tokens;
+  if (before != after) {
+    console.log("Token到达阈值:", before);
+    console.log("[压缩前]:", before);
+    console.log("[压缩后]:", after);
+  } else {
+    console.log("Tokens(当前):", tokens);
+  }
+
+  await handleFetchEventSource(chatRequestDto, dispatch);
 });
+
+const getTokensCount = (chatRequestDto: ChatRequestDto) => {
+  const usageInfo = new GPTTokens(chatRequestDto as any);
+  return usageInfo.usedTokens;
+};
 
 const initialState: ChatApiSliceState = {
   loading: "idle",
@@ -88,9 +120,14 @@ export const chatApiSlice = createSlice({
       }
     },
     sendUserMessage(state, action) {
+      //send user message
       state.activeConversationId = state.currConversationId;
       state.conversations[state.activeConversationId].conList.push({ time: getFormattedDate(), role: "user", content: action.payload });
       state.validConversations[state.activeConversationId].push({ role: "user", content: action.payload });
+      //receive system message placeholder
+      state.conversations[state.activeConversationId].conList.push({ time: getFormattedDate(), role: "system", content: "" });
+      state.validConversations[state.activeConversationId].push({ role: "system", content: "" });
+      state.loading = "loading";
     },
     receivedUpdate(state, action) {
       const word = action.payload;
@@ -132,28 +169,25 @@ export const chatApiSlice = createSlice({
     },
   },
   extraReducers(builder) {
-    builder.addCase(getBotMessages.pending, (state) => {
-      state.conversations[state.activeConversationId].conList.push({ time: getFormattedDate(), role: "system", content: "" });
-      state.validConversations[state.activeConversationId].push({ role: "system", content: "" });
-      state.loading = "loading";
-    });
+    builder.addCase(getBotMessages.pending, (state) => {});
     builder.addCase(getBotMessages.fulfilled, (state) => {
       state.validConversations[state.activeConversationId].length > state.maxContextNum && (state.validConversations[state.activeConversationId] = state.validConversations[state.activeConversationId].splice(-1 * state.maxContextNum));
       localStorage.setItem("validConversations", JSON.stringify(state.validConversations));
       state.loading = "idle";
     });
-    builder.addCase(getBotMessages.rejected, (state) => {
+    builder.addCase(getBotMessages.rejected, (state, action: any) => {
+      console.log(action.payload?.message);
+
       ctrl.abort();
       const last = state.conversations[state.activeConversationId].conList.length - 1;
 
       state.validConversations[state.activeConversationId].pop();
       state.validConversations[state.activeConversationId].pop();
       const msg = state.conversations[state.activeConversationId].conList[last].content;
-      state.conversations[state.activeConversationId].conList[last] = { time: getFormattedDate(), role: "err", content: msg + "(Error)" };
+      state.conversations[state.activeConversationId].conList[last] = { time: getFormattedDate(), role: "err", content: msg + `(${action.payload?.message ? action.payload?.message : "error"})` };
       localStorage.setItem("conversations", JSON.stringify(state.conversations));
       localStorage.setItem("validConversations", JSON.stringify(state.validConversations));
       state.loading = "idle";
-      console.log(JSON.stringify(state.validConversations[state.currConversationId]));
     });
   },
 });
