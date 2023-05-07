@@ -1,13 +1,14 @@
-import React, { LegacyRef, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import styles from "./index.module.scss";
 import SideBar from "./components/SideBar";
 import ChatBox from "./components/ChatBox";
-import { useSelector, useDispatch } from "react-redux";
+
 const Chat = () => {
+  const [isChatSideBox, setIsChatSdBarOpen] = useState<boolean>(false);
   return (
     <div className={styles.box}>
-      <SideBar />
-      <ChatBox />
+      <SideBar isChatSideBox={isChatSideBox} setIsChatSdBarOpen={setIsChatSdBarOpen} />
+      <ChatBox isChatSideBox={isChatSideBox} setIsChatSdBarOpen={setIsChatSdBarOpen} />
     </div>
   );
 };

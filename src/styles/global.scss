@@ -3,6 +3,7 @@
 @mixin dark {
 
     --text: #e5e5e5;
+    --text-secondary: rgb(212, 211, 211);
     --text-contrast: #ffffff;
     --secondary: #282828;
     --secondary-bg: #303134;
@@ -19,6 +20,7 @@
 @mixin light {
     --text: #171341;
     --text-contrast: #ffffff;
+    --text-secondary: #6f6f80;
     --secondary: #dfdede;
     --secondary-bg: #eaedf0;
     --primary: #468efd;
@@ -31,17 +33,54 @@
 
 }
 
+//position
+:root {
+    --chatbox-sidebar-position: initial;
+    --transform-x-full: translateX(0);
+
+    @media screen and (max-width: 768px) {
+        --chatbox-sidebar-position: absolute;
+        --transform-x-full: translateX(-100%);
+    }
+}
+
+//style
+:root {
+
+    --backdrop-filter-blur: blur(0);
+
+    @media screen and (max-width: 768px) {
+
+        --backdrop-filter-blur: blur(5px);
+    }
+}
+
+//zIndex
+:root {
+    --sidebar-wrapper-z-index: 0;
+
+    @media screen and (max-width: 768px) {
+        --sidebar-wrapper-z-index: 1000;
+
+    }
+}
+
+//Layout
 :root {
 
     font-family: 'Open Sans', sans-serif;
     font-weight: 500;
     font-size: 14px;
+
     --navbar-height: 70px;
     --navbar-padding: 0 20px;
     --sidebar-width: 100px;
-    --main-padding-top-bottom: 15px;
+    --sidebar-wrapper-width: var(--sidebar-width);
+    --sidebar-wrapper-width-on-closed: var(--sidebar-width) --main-padding-top-bottom: 15px;
     --main-height: calc(100vh - var(--navbar-height));
-    --main-width: calc(100vw - var(--sidebar-width));
+    --main-width: 100vw;
+    --main-content-width-max: 1000px;
+    --main-content-width-min: 600px;
     --box-width: calc(100vw - var(--sidebar-width));
     --box-height: calc(100vh - var(--navbar-height) - 2 * var(--main-padding-top-bottom));
     --chatbox-sidebar-width: 250px;
@@ -52,10 +91,33 @@
     --chatbox-input-range-height: 100px;
     --chatbox-header-height: 80px;
     --chatbox-window-height: calc(100% - var(--chatbox-input-range-height) - var(--chatbox-header-height));
+    --main-margin-left-width: var(--sidebar-width);
     --lgModal-h: 300px;
     --lgModal-w: 300px;
     --suModal-h: 350px;
     --suModal-w: 300px;
+
+
+    @media screen and (max-width: 768px) {
+        --sidebar-wrapper-width-on-closed: 0px;
+        --sidebar-wrapper-width: 100%;
+        --main-margin-left-width: 0;
+        --sidebar-width: 50vw;
+        --main-width: 100vw;
+        --main-content-width-max: 100%;
+        --main-content-width-min: 100%;
+        --chatbox-width: 100%;
+        --chatbox-sidebar-width: 100%;
+        // --chatbox-sidebar-width: 0px;
+    }
+}
+
+//animation
+:root {
+    --transition-1: transform 0.1s,
+        margin 0.1s,
+        background-color 0.2s;
+
 }
 
 .light {

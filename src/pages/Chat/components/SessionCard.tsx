@@ -19,7 +19,11 @@ const SessionCard = ({ cardId, title }: Props) => {
     dispatch(deleteConversation(cardId));
   };
   return (
-    <div onClick={() => dispatch(switchConversation(cardId))} className={cardId === currConversationId ? styles.sessionCardSelected : styles.sessionCard}>
+    <div
+      onClick={(e) => {
+        dispatch(switchConversation(cardId));
+      }}
+      className={cardId === currConversationId ? styles.sessionCardSelected : styles.sessionCard}>
       <div className={styles.cardTop}>
         <div className={styles.topLeft}>
           <QuestionAnswerSharpIcon />

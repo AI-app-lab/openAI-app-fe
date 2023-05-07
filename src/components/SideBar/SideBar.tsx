@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./index.module.scss";
 import Drawer from "@mui/material/Drawer";
-import { Switch, Toolbar } from "@mui/material";
+import { Switch as _Switch, Toolbar } from "@mui/material";
 import ListItem from "../ListItem/ListItem";
 import ListContainer from "../ListContainer/ListContainer";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -10,98 +10,118 @@ import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
 import { useDispatch, useSelector } from "react-redux";
 import { ConfigState, changeTheme } from "../../store/configSlice";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 
 import LightModeSharpIcon from "@mui/icons-material/LightModeSharp";
-type Props = {};
+import { nanoid } from "nanoid";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "antd";
+
+type Props = {
+  isSideBarOpen: boolean;
+  setIsSideBarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
 const groupTop = [
   {
     name: "应用",
     icon: <GridViewRoundedIcon />,
+    route: "/apps",
   },
   {
     name: "购买服务",
     icon: <ShoppingCartRoundedIcon />,
+    route: "/shop",
   },
 ];
 const groupBottom = [
   {
     name: "退出登录",
     icon: <LogoutIcon />,
+    route: "/",
   },
 ];
-const SideBar = (props: Props) => {
+const SideBar = ({ setIsSideBarOpen, isSideBarOpen }: Props) => {
+  const { pathname } = useLocation();
   const dispatch = useDispatch();
   const { theme } = useSelector((state: ConfigState) => state.config);
   const mode = {
     dark: true,
     light: false,
   };
+  const Switch = (
+    <_Switch
+      onChange={(e) => {
+        e.target.checked ? dispatch(changeTheme("dark")) : dispatch(changeTheme("light"));
+      }}
+      checkedIcon={
+        <DarkModeIcon
+          sx={{
+            color: "black !important",
+          }}
+        />
+      }
+      icon={<LightModeSharpIcon />}
+      size="medium"
+      sx={{
+        display: "flex !important",
+        alignItems: "center !important",
+
+        height: "36px",
+        width: "63px",
+        "& .MuiSwitch-switchBase": {
+          display: "flex !important",
+          alignItems: "center !important",
+          width: "36px",
+
+          height: "100%",
+
+          backgroundColor: `${theme === "dark" ? "white" : "black"} !important`,
+        },
+        "& .MuiSwitch-track": {
+          borderRadius: "20px",
+          height: "20px",
+        },
+        "& .Mui-checked": {
+          transform: "translateX(27px) !important",
+          "& + .MuiSwitch-track": {
+            backgroundColor: `${theme === "dark" ? "white" : "black"} !important`,
+          },
+        },
+      }}
+      checked={mode[theme]}
+    />
+  );
+
   useEffect(() => {
     const theme = localStorage.getItem("theme");
-    theme&&dispatch(changeTheme(theme));
-
-    
+    theme && dispatch(changeTheme(theme));
   }, []);
   return (
-    <div className={styles.sideBarWrapper}>
-      <ListContainer className={styles.listContainer}>
-        {groupTop.map(({ name, icon }) => {
-          return (
-            <ListItem className={styles.menuItemTop} key={name}>
-              {icon}
-            </ListItem>
-          );
-        })}
-      </ListContainer>
-      <ListContainer>
-   
-        <ListItem key="">
-          <Switch
-            onChange={(e) => {
-              e.target.checked ? dispatch(changeTheme("dark")) : dispatch(changeTheme("light"));
-            }}
-            checkedIcon={
-              <DarkModeIcon
-                sx={{
-                  color: "black !important",
-                }}
-              />
-            }
-            icon={<LightModeSharpIcon />}
-            size="medium"
-            sx={{
-              display: "flex !important",
-              alignItems: "center !important",
-
-              height: "36px",
-              width: "63px",
-              "& .MuiSwitch-switchBase": {
-                display: "flex !important",
-                alignItems: "center !important",
-                width: "36px",
-
-                height: "100%",
-
-                backgroundColor: `${theme === "dark" ? "white" : "black"} !important`,
-              },
-              "& .MuiSwitch-track": {
-                borderRadius: "20px",
-                height: "20px",
-              },
-              "& .Mui-checked": {
-                transform: "translateX(27px) !important",
-                "& + .MuiSwitch-track": {
-                  backgroundColor: `${theme === "dark" ? "white" : "black"} !important`,
-                },
-              },
-            }}
-            checked={mode[theme]}
-            defaultChecked={mode[theme]}
-          />
-        </ListItem>
-      </ListContainer>
+    <div
+      onClick={() => {
+        setIsSideBarOpen(false);
+      }}
+      className={`${styles.sideBarWrapper} ${isSideBarOpen ? "" : styles.closed}`}>
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        className={`${styles.sideBar} ${isSideBarOpen ? "" : styles.closed}`}>
+        <ListContainer className={styles.listContainer}>
+          {groupTop.map(({ route, name, icon }) => {
+            return (
+              <ListItem className={`${styles.menuItemTop} ${pathname === route ? styles.selected : ""}`} key={nanoid()}>
+                <Link to={route} style={{ color: "inherit", width: "100%", height: "100%" }}>
+                  {icon}
+                </Link>
+              </ListItem>
+            );
+          })}
+        </ListContainer>
+        <ListContainer>
+          <ListItem>{Switch}</ListItem>
+        </ListContainer>
+      </div>
     </div>
   );
 };

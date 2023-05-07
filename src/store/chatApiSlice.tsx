@@ -103,7 +103,9 @@ export const chatApiSlice = createSlice({
     },
     startNewConversation(state) {
       const last = state.conversations.length - 1;
-      last >= 0 && state.conversations[last].conList.length && state.conversations.push(...initialState.conversations) && state.validConversations.push([]) && (state.currConversationId = last + 1) && (state.conversations[last].time = getFormattedDate());
+      last >= 0 && state.conversations[last].conList.length && state.conversations.push({ time: getFormattedDate(), topic: "New Conversation", conList: [{ time: getFormattedDate(), role: "system", content: "我是AI助手，请问有什么我可以帮您的吗？" }] }) && state.validConversations.push([]) && (state.currConversationId = last + 1);
+
+      console.log(last);
     },
     deleteConversation(state, action) {
       state.activeConversationId === action.payload && ctrl.abort();

@@ -7,9 +7,12 @@ import Button from "../../../components/Button/Button";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import AddIcon from "@mui/icons-material/Add";
 
-type Props = {};
+type Props = {
+  isChatSideBox: boolean;
+  setIsChatSdBarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
-const SideBar = (props: Props) => {
+const SideBar = ({ isChatSideBox, setIsChatSdBarOpen }: Props) => {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getRecentConversations());
@@ -17,7 +20,7 @@ const SideBar = (props: Props) => {
   const { conversations } = useSelector((state: any) => state.chatApi);
   const { userInfo } = useSelector((state: any) => state.user);
   return (
-    <div className={styles.sideBar}>
+    <div className={`${styles.sideBar} ${isChatSideBox ? styles.open : ""}`}>
       <div className={styles.sideBarHeader}>
         <div>
           <div>Kit Zone</div>
@@ -25,7 +28,7 @@ const SideBar = (props: Props) => {
           <div>强大的AI助理</div>
         </div>
       </div>
-      <div className={styles.sessionCardBox}>
+      <div onClick={() => setIsChatSdBarOpen(false)} className={styles.sessionCardBox}>
         <div className={styles.sessionCardContainer}>
           {conversations &&
             conversations

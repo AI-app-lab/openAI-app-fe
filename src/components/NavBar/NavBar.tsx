@@ -10,10 +10,17 @@ import { ConfigState } from "../../store/configSlice";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 import { locations } from "../../localization";
 import Button from "../Button/Button";
+import { nanoid } from "nanoid";
+import MenuOpenIcon from "@mui/icons-material/MenuOpen";
+import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
+import IconButton from "../IconButon/IconButton";
 
-type Props = {};
+type Props = {
+  isSideBarOpen: boolean;
+  setIsSideBarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
-const NavBar = (props: Props) => {
+const NavBar = ({ isSideBarOpen, setIsSideBarOpen }: Props) => {
   const { userInfo } = useSelector((state: UserState) => state.user);
   const { location } = useSelector((state: ConfigState) => state.config);
 
@@ -21,12 +28,25 @@ const NavBar = (props: Props) => {
   return (
     <div className={styles.navBarWrapper}>
       <ListContainer className={styles.listContainer} fd="row">
-        <ListItem key="" className={styles.logo}>Kit Zone</ListItem>
+        {
+          <ListItem onClick={() => setIsSideBarOpen(!isSideBarOpen)} className={styles.sdBarCallBtn}>
+            {isSideBarOpen ? (
+              <IconButton>
+                <AiOutlineMenuFold size={20} />
+              </IconButton>
+            ) : (
+              <IconButton>
+                <AiOutlineMenuUnfold size={20} />
+              </IconButton>
+            )}
+          </ListItem>
+        }
+        <ListItem className={styles.logo}>Kit Zone</ListItem>
       </ListContainer>
 
       <ListContainer className={styles.listContainer} fd="row">
         {!userInfo ? (
-          <ListItem key="">
+          <ListItem>
             <div className={styles.headerRight}>
               <Button w={70} h={30} className={styles.signUp} onClick={() => dispatch(openModal("signUp"))}>
                 <AppRegistrationIcon />
@@ -36,7 +56,9 @@ const NavBar = (props: Props) => {
           </ListItem>
         ) : (
           <>
-            <ListItem key="" className={styles.avatar}>L</ListItem>
+            <ListItem key={nanoid()} className={styles.avatar}>
+              L
+            </ListItem>
             <ListItem key="">
               <KeyboardArrowDownSharpIcon />
             </ListItem>

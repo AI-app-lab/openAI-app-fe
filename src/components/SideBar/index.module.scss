@@ -1,50 +1,93 @@
 .sideBarWrapper {
-    padding: 20px 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    width: var(--sidebar-width);
-    background-color: var(--primary-bg);
-    height: var(--main-height);
+    position: absolute;
+    height: 100%;
 
-    box-sizing: border-box;
 
-    .menuItemTop {
+    width: var(--sidebar-wrapper-width);
 
-        display: flex;
-        align-items: center;
-        padding: 10px 20px;
-        color: var(--text);
-        font-size: 16px;
-        cursor: pointer;
-        width: 100%;
+    backdrop-filter: var(--backdrop-filter-blur);
+    z-index: var(--sidebar-wrapper-z-index);
 
-        &:hover {
-
-            color: var(--primary-activated);
-        }
+    &.closed {
+        width: var(--sidebar-wrapper-width-on-closed);
     }
 
-    .menuItemTop+.menuItemTop {
-        margin-top: 60px;
-    }
+    .sideBar {
 
-    .menuItemBottom {
-
+        position: absolute;
+        padding: 20px 0;
         display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         align-items: center;
-        padding: 10px 20px;
-        color: var(--text);
-        font-size: 16px;
-        cursor: pointer;
-        margin-top: 20px;
-        width: 100%;
-        margin-bottom: 50px;
+        z-index: 1000;
+        width: var(--sidebar-width);
+        background-color: var(--primary-bg);
+        height: var(--main-height);
+        transition: var(--transition-1);
+        transform: translateX(0);
+        box-sizing: border-box;
 
-        &:hover {
-            color: var(--primary-activated);
+
+        &.closed {
+
+            transform: translateX(-100%);
 
         }
+
+        .menuItemTop {
+
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+            color: var(--text);
+            font-size: 16px;
+            cursor: pointer;
+            box-sizing: border-box;
+
+
+            &:hover {
+
+
+                opacity: 0.5;
+
+            }
+
+            &:active {
+                opacity: 1;
+                color: var(--primary-activated);
+
+            }
+
+            &.selected {
+                color: var(--primary-activated);
+            }
+        }
+
+        .menuItemTop+.menuItemTop {
+            margin-top: 60px;
+        }
+
+
+        .menuItemBottom {
+
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            color: var(--text);
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            margin-bottom: 50px;
+
+            &:hover {
+                color: var(--primary-activated);
+
+            }
+        }
+
+
     }
 }

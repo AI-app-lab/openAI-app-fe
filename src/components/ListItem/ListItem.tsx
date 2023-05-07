@@ -1,15 +1,16 @@
 import React from "react";
 import styles from "./index.module.scss";
+import { nanoid } from "nanoid";
 
 type Props = {
   children?: React.ReactNode;
-  key: number | string;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
   className?: string;
 };
 
-const ListItem = ({ className = "", key, children }: Props) => {
+const ListItem = ({ onClick, className = "", children }: Props) => {
   return (
-    <div key={key} className={`${styles.listItem} ${className}`}>
+    <div onClick={onClick} className={`${styles.listItem} ${className}`}>
       {children}
     </div>
   );

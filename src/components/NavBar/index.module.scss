@@ -8,6 +8,7 @@
     border-bottom: 1px solid var(--secondary);
     color: var(--text);
     box-sizing: border-box;
+
 }
 
 .listContainer {
@@ -17,7 +18,10 @@
     height: 100%;
 }
 
+.sdBarCallBtn {}
+
 .logo {
+    margin-left: 20px;
     font-size: 20px;
     font-weight: 700;
     color: var(--primary);
