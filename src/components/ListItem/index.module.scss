@@ -1,10 +1,13 @@
 .listItem {
-    cursor: pointer;
+    position: relative;
+
     align-items: center;
     display: flex;
     justify-content: flex-start;
     box-sizing: border-box;
     font-weight: 600;
 
-
+    &.btn {
+        cursor: pointer;
+    }
 }

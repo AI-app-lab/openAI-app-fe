@@ -9,6 +9,7 @@ import RehypeKatex from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula } from "react-syntax-highlighter/dist/esm/styles/prism";
 import Button from "../../../components/Button/Button";
+import { enqueueSnackbar } from "notistack";
 
 type Props = {
   type: "system" | "user" | "err";

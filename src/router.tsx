@@ -10,6 +10,9 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { saveUserInfo } from "./store/userSlice";
 import Shop from "./pages/Shop/Shop";
+import Login from "./pages/authPages/Login/Login";
+import OralChat from "./pages/OralChat/OralChat";
+import SignUp from "./pages/authPages/SignUp/SignUp";
 
 export const GuardRounded = ({ component }: { component: JSX.Element }) => {
   const userInfoDto = JSON.parse(localStorage.getItem("userInfo") as string);
@@ -24,11 +27,15 @@ export const getUserInfoFromLocal = () => {
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <>Landing Page</>,
+    element: <LandingPage />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
   },
   {
     path: "/sign-up",
-    element: <>sign-up</>,
+    element: <SignUp />,
   },
 
   {
@@ -40,11 +47,15 @@ export const router = createBrowserRouter([
       },
       {
         path: "apps/chat",
-        element: <GuardRounded component={<Chat />} />,
+        element: <GuardRounded component={<Chat type="basic" />} />,
       },
       {
-        path: "shop",
+        path: "apps/shop",
         element: <GuardRounded component={<Shop />} />,
+      },
+      {
+        path: "apps/oral-chat",
+        element: <GuardRounded component={<OralChat />} />,
       },
     ],
   },

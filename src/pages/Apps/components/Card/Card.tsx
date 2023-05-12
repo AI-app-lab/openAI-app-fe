@@ -20,7 +20,7 @@ const Card = ({ bg, title, content, media }: Props) => {
         {media}
       </div>
       <div className={styles.rightPart}>
-        <div className={styles.title}>{title}</div>
+        <div className={styles.cardTitle}>{title}</div>
         <div className={styles.content}>{content}</div>
       </div>
     </div>

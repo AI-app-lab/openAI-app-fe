@@ -79,7 +79,7 @@
     --sidebar-wrapper-width-on-closed: var(--sidebar-width) --main-padding-top-bottom: 15px;
     --main-height: calc(100vh - var(--navbar-height));
     --main-width: 100vw;
-    --main-content-width-max: 1000px;
+    --main-content-width-max: 90%;
     --main-content-width-min: 600px;
     --box-width: calc(100vw - var(--sidebar-width));
     --box-height: calc(100vh - var(--navbar-height) - 2 * var(--main-padding-top-bottom));
@@ -92,10 +92,12 @@
     --chatbox-header-height: 80px;
     --chatbox-window-height: calc(100% - var(--chatbox-input-range-height) - var(--chatbox-header-height));
     --main-margin-left-width: var(--sidebar-width);
-    --lgModal-h: 300px;
-    --lgModal-w: 300px;
-    --suModal-h: 350px;
-    --suModal-w: 300px;
+
+    --modal-lg-w: 396px;
+    --modal-su-w: var(--modal-lg-w);
+    --input-lg-h: 56px;
+    --input-su-h: var(--input-lg-h);
+
 
 
     @media screen and (max-width: 768px) {
@@ -108,6 +110,8 @@
         --main-content-width-min: 100%;
         --chatbox-width: 100%;
         --chatbox-sidebar-width: 100%;
+        --modal-lg-w: 350px;
+        --input-lg-h: 46px;
         // --chatbox-sidebar-width: 0px;
     }
 }

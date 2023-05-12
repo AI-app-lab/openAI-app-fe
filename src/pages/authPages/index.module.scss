@@ -1,0 +1,228 @@
+$captchaBtnWidth: 105px;
+$form-elem-margin-top: 16px;
+
+.modalWrapper {
+
+    background-color: var(--primary-bg);
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+
+
+    .modal {
+        border-radius: var(--border-radius);
+        position: absolute;
+        background-color: var(--primary-bg);
+
+
+        color: var(--text);
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        form {
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            width: var(--modal-lg-w);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+
+            input {
+                padding: 15px;
+                font-size: 16px;
+                color: var(--text);
+                background-color: var(--secondary-bg);
+                height: var(--input-lg-h);
+                width: 100%;
+                box-sizing: border-box;
+                border-radius: 5px;
+                border: 1px solid var(--secondary);
+
+                &:focus {
+                    outline: none;
+                    border: 1px solid var(--primary);
+                }
+            }
+        }
+
+        label+label {
+            margin-top: $form-elem-margin-top;
+        }
+
+
+        .errAlert {
+
+
+
+
+            border-radius: 5px;
+            font-size: 14px;
+
+            font-weight: 700;
+        }
+
+
+    }
+
+    .lgModal {
+        @extend .modal;
+        width: var(--modal-lg-w);
+
+
+        header {
+            margin: 0 auto;
+            text-align: center;
+            width: var(--modal-lg-w);
+
+
+
+
+            .toggle {
+                padding: 10px;
+                display: flex;
+                justify-content: space-between;
+                cursor: pointer;
+
+                .loginMethod {
+                    width: 50%;
+                    border-bottom: 3px solid inherit;
+
+
+                    &:hover {
+                        opacity: 0.8;
+                    }
+
+                    &:active {
+                        opacity: 0.6;
+                    }
+                }
+
+                .smsLg {
+                    @extend .loginMethod;
+                    border-bottom: 3px solid var(--secondary);
+                }
+
+                .pwdLg {
+                    @extend .loginMethod;
+                    box-sizing: border-box;
+                    border-bottom: 3px solid var(--secondary);
+                }
+
+            }
+        }
+
+        form {
+            margin-top: 10px;
+
+        }
+
+        .lgCaptchaGroup {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+
+            input {
+                width: 65%;
+            }
+
+            .sendBtn {
+                color: var(--text-contrast);
+
+                height: var(--input-lg-h);
+                width: 30%;
+
+            }
+        }
+
+        .noAccAndResetPwd {
+            margin-top: $form-elem-margin-top;
+            font-size: 16px;
+            width: calc(var(--modal-lg-w) - 20px);
+            display: flex;
+            justify-content: space-between;
+
+
+            font-style: italic;
+            cursor: pointer;
+
+            span {
+                &:hover {
+                    text-decoration: underline;
+                }
+
+                &:active {
+                    opacity: 0.8;
+                }
+            }
+
+
+
+        }
+
+        .btn {
+            color: var(--text-contrast);
+            margin-top: $form-elem-margin-top;
+            width: var(--modal-lg-w) !important;
+        }
+
+
+    }
+
+    .signUpModal {
+        @extend .modal;
+        width: var(--modal-su-w);
+
+
+        .btn {
+            margin-top: $form-elem-margin-top;
+
+            width: var(--modal-su-w) !important;
+        }
+
+        .captchaGroup {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+
+            input {
+                width: 65%;
+            }
+
+            .sendBtn {
+
+                height: var(--input-su-h);
+                width: 30% !important;
+            }
+        }
+
+        .login {
+
+            margin-top: $form-elem-margin-top;
+            font-style: italic;
+            cursor: pointer;
+
+            &:hover {
+                text-decoration: underline;
+            }
+
+            &:active {
+                opacity: 0.8;
+            }
+        }
+
+    }
+}

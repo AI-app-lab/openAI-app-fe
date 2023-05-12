@@ -2,14 +2,12 @@ import React, { ReactNode, useEffect, useState } from "react";
 import styles from "./index.module.scss";
 import "../../styles/global.scss";
 import SideBar from "../SideBar/SideBar";
-import NavBar from "../NavBar/NavBar";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { ConfigState } from "../../store/configSlice";
-import Modal from "../Modal/Modal";
-import { Snackbar } from "@mui/material";
-import { NavLink, Outlet } from "react-router-dom";
-import { GuardRounded } from "../../router";
-import { changeTheme } from "../../store/configSlice";
+
+import { Outlet } from "react-router-dom";
+
+import NavBarHome from "../NavBarHome/NavBarHome";
 type Props = {};
 
 const Layout = ({}: Props) => {
@@ -29,9 +27,8 @@ const Layout = ({}: Props) => {
     };
   }, []);
   return (
-    <div className={theme}>
-      <Modal />
-      <NavBar setIsSideBarOpen={setIsSideBarOpen} isSideBarOpen={isSideBarOpen} />
+    <div>
+      <NavBarHome setIsSideBarOpen={setIsSideBarOpen} isSideBarOpen={isSideBarOpen} />
       {/* <Snackbar
         sx={{
           zIndex: 9999,

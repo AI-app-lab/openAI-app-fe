@@ -21,8 +21,11 @@ export const configSlice = createSlice({
       localStorage.setItem("theme", action.payload);
       state.theme = action.payload;
     },
-    
+    getThemeFromLocal(state) {
+      const theme = localStorage.getItem("theme");
+      theme && (state.theme = theme as "light" | "dark");
+    },
   },
 });
-export const { changeTheme } = configSlice.actions;
+export const { changeTheme, getThemeFromLocal } = configSlice.actions;
 export default configSlice.reducer;

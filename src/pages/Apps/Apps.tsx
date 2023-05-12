@@ -8,6 +8,7 @@ import QuestionAnswerSharpIcon from "@mui/icons-material/QuestionAnswerSharp";
 import TranslateIcon from "@mui/icons-material/Translate";
 import HeadsetMicIcon from "@mui/icons-material/HeadsetMic";
 import DrawIcon from "@mui/icons-material/Draw";
+import { nanoid } from "nanoid";
 type Props = {};
 const useColor = () => {
   return ["#f1a746", "#dc5ce5", "#7b41de", "#ec445b", "#2bb68e"][Math.floor(Math.random() * 5)];
@@ -52,11 +53,10 @@ const Apps = (props: Props) => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.title}>我的应用</div>
-      <div className={styles.subTitle}></div>
       <div className={styles.container}>
         <Grid container rowSpacing={5}>
           {cards.map(({ to, title, content, media, bg }) => (
-            <Grid xs={12} md={6}>
+            <Grid key={nanoid()} xs={12} md={6}>
               <Link className={styles.cardLink} to={to}>
                 <div className={styles.item}>
                   <Card bg={bg} title={title} content={content} media={media} />

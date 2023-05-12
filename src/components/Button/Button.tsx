@@ -9,14 +9,16 @@ type Props = {
   className?: string;
   type?: "submit" | "button";
   allow?: boolean;
+  style?: React.CSSProperties;
 };
 
-const Button = ({ allow = true, type, children, w, h, onClick, className }: Props) => {
+const Button = ({ style, allow = true, type, children, w, h, onClick, className }: Props) => {
   return (
     <button
       type={type}
       onClick={allow ? onClick : () => {}} // if allow is false, then onClick will not be called
       style={{
+        ...style,
         width: w,
         height: h,
       }}

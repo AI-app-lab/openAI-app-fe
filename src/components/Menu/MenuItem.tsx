@@ -9,12 +9,12 @@ type Props = {
   btn?: boolean;
 };
 
-const ListItem = ({ btn = true, onClick, className = "", children }: Props) => {
+const MenuItem = ({ btn = true, onClick, className = "", children }: Props) => {
   return (
-    <div onClick={onClick} className={`${styles.listItem} ${className} ${btn ? styles.btn : ""}`}>
+    <div onClick={onClick} className={`${styles.menuItem} ${className} ${btn ? styles.btn : ""}`}>
       {children}
     </div>
   );
 };
 
-export default ListItem;
+export default MenuItem;

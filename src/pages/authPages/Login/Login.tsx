@@ -1,33 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import styles from "./index.module.scss";
+import styles from "../index.module.scss";
 
-import { ConfigState } from "../../store/configSlice";
-import { locations } from "../../localization";
-import Button from "../Button/Button";
-import { UserLoginPostDto, UserState, destroyStatus, getLoginVCode, login, loginWithVCode, openModal } from "../../store/userSlice";
-import Loading from "../Loading/Loading";
-import { isEmail } from "../../utils/formValidation";
+import { ConfigState } from "../../../store/configSlice";
+import { locations } from "../../../localization";
+import Button from "../../../components/Button/Button";
+import { UserLoginPostDto, UserState, destroyStatus, getLoginVCode, login, loginWithVCode, openModal, saveUserInfo } from "../../../store/userSlice";
+import Loading from "../../../components/Loading/Loading";
+import { isEmail } from "../../../utils/formValidation";
+import { useNavigate } from "react-router-dom";
+import { enqueueSnackbar } from "notistack";
+import { err } from "../../../utils/alert";
 
 type Props = {};
 
-const LoginModal = (props: Props) => {
+const Login = (props: Props) => {
   const dispatch: any = useDispatch();
   const { location } = useSelector((state: ConfigState) => state.config);
-  const { status, nextTryTime } = useSelector((state: UserState) => state.user);
+  const { status, nextTryTime, userInfo } = useSelector((state: UserState) => state.user);
   const [sendBtnText, setSendBtnText] = useState<number | string>("发送");
-
+  const navigate = useNavigate();
   useEffect(() => {
-    nextTryTime["login"] && !Boolean(countdown()) && setError(status.message);
-    status.status === "failed" && setError(status.message);
-    const timeoutId = setTimeout(() => {
-      setError("");
-      dispatch(destroyStatus());
-    }, 3000);
-    return () => clearTimeout(timeoutId);
-  }, [nextTryTime["login"], status.status, status.message]);
+    //if user is logged in, redirect to /apps
+    if (userInfo) {
+      navigate("/apps");
+      return;
+    }
+    //if not logged in, check if there is a userInfo in localStorage
+    const _userInfo = localStorage.getItem("userInfo");
+    //if there is, save it to redux store
+    _userInfo && dispatch(saveUserInfo(JSON.parse(_userInfo)));
+    // set the countdown timer
+    nextTryTime["login"] && countdown();
+  }, [nextTryTime["login"], userInfo]);
 
-  const [error, setError] = useState<string>("");
   const countdown = () => {
     const timer = setInterval(() => {
       const time = new Date().getTime();
@@ -38,6 +44,7 @@ const LoginModal = (props: Props) => {
         setSendBtnText("发送");
       }
     }, 1000);
+    return true;
   };
   const [method, setMethod] = useState<"pwd" | "sms">("pwd");
   const methods = {
@@ -50,20 +57,11 @@ const LoginModal = (props: Props) => {
 
   const handleSubmitPwd = () => {
     if (userLoginPostDto.email === "") {
-      setError("邮箱不能为空!");
-      setTimeout(() => {
-        setError("");
-      }, 3000);
+      err("邮箱不能为空!");
     } else if (!isEmail(userLoginPostDto.email)) {
-      setError("邮箱格式不正确!");
-      setTimeout(() => {
-        setError("");
-      }, 3000);
+      err("邮箱格式不正确!");
     } else if (userLoginPostDto.password === "") {
-      setError("密码不能为空!");
-      setTimeout(() => {
-        setError("");
-      }, 3000);
+      err("密码不能为空!");
     } else {
       const { email, password } = userLoginPostDto;
       dispatch(login({ email, password }));
@@ -71,24 +69,24 @@ const LoginModal = (props: Props) => {
   };
   const handleSubmitVCode = () => {
     if (userLoginPostDto.email === "") {
-      setError("邮箱不能为空!");
-      setTimeout(() => {
-        setError("");
-      }, 3000);
+      err("邮箱不能为空!");
     } else if (!isEmail(userLoginPostDto.email)) {
-      setError("邮箱格式不正确!");
-      setTimeout(() => {
-        setError("");
-      }, 3000);
+      err("邮箱格式不正确!");
     } else if (userLoginPostDto.verificationCode === "") {
-      setError("验证码不能为空!");
-      setTimeout(() => {
-        setError("");
-      }, 3000);
+      err("验证码不能为空!");
     } else {
       const { email, verificationCode } = userLoginPostDto;
 
       dispatch(loginWithVCode({ email, verificationCode: verificationCode as string }));
+    }
+  };
+  const handleSendVcode = () => {
+    if (userLoginPostDto.email === "") {
+      err("邮箱不能为空!");
+    } else if (!isEmail(userLoginPostDto.email)) {
+      err("邮箱格式不正确!");
+    } else {
+      dispatch(getLoginVCode(userLoginPostDto.email));
     }
   };
   const handleSubmit = {
@@ -111,7 +109,6 @@ const LoginModal = (props: Props) => {
             <span
               onClick={() => {
                 setMethod("sms");
-                setError("");
               }}
               className={methods[method].clsSms}>
               邮箱验证
@@ -130,13 +127,7 @@ const LoginModal = (props: Props) => {
             <label>
               <div className={styles.lgCaptchaGroup}>
                 <input value={userLoginPostDto.verificationCode} onChange={(e) => setUserLoginPostDto((prev: UserLoginPostDto) => ({ ...prev, verificationCode: e.target.value }))} autoComplete="text" placeholder="验证码" type="text" />
-                <Button
-                  allow={sendBtnText === "发送"}
-                  onClick={() => {
-                    console.log(userLoginPostDto.email);
-                    dispatch(getLoginVCode(userLoginPostDto.email));
-                  }}
-                  className={styles.sendBtn}>
+                <Button allow={sendBtnText === "发送"} onClick={handleSendVcode} className={styles.sendBtn}>
                   {sendBtnText}
                 </Button>
               </div>
@@ -147,13 +138,12 @@ const LoginModal = (props: Props) => {
             </label>
           )}
         </form>
-        <div className={`${styles.skeleton} ${error && styles.errAlert}`}>{error}</div>
 
         <Button type="submit" onClick={handleSubmit[method]} className={styles.btn} w={70} h={50}>
           {locations[location].lgConfirm}
         </Button>
         <div className={styles.noAccAndResetPwd}>
-          <span onClick={() => dispatch(openModal("signUp"))}>没有账号？</span>
+          <span onClick={() => navigate("/sign-up")}>没有账号？</span>
           <span>忘记密码</span>
         </div>
       </div>
@@ -161,4 +151,4 @@ const LoginModal = (props: Props) => {
   );
 };
 
-export default LoginModal;
+export default Login;

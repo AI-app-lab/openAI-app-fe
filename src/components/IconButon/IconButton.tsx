@@ -3,10 +3,15 @@ import styles from "./index.module.scss";
 
 type Props = {
   children: JSX.Element;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
 };
 
-const IconButton = ({ children }: Props) => {
-  return <div className={styles.iconButton}>{children}</div>;
+const IconButton = ({ onClick, children }: Props) => {
+  return (
+    <div onClick={onClick} className={styles.iconButton}>
+      {children}
+    </div>
+  );
 };
 
 export default IconButton;

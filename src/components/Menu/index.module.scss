@@ -1,0 +1,30 @@
+.menuWrapper {
+    position: absolute;
+
+    z-index: 1;
+    width: 100%;
+
+
+}
+
+.menuItem {
+    background-color: var(--primary-bg);
+    padding: 4px 14px;
+    position: relative;
+
+    align-items: center;
+    display: flex;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    cursor: default;
+
+
+    &.btn {
+        cursor: pointer;
+
+        &:hover {
+            background-color: var(--primary);
+            color: var(--text-contrast);
+        }
+    }
+}

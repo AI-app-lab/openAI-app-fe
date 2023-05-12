@@ -3,6 +3,7 @@ import styles from "../index.module.scss";
 import { useSelector } from "react-redux";
 import ChatBubble from "./ChatBubble";
 import { ShownMessage } from "../../../store/chatApiSlice";
+import { SnackbarProvider, enqueueSnackbar } from "notistack";
 
 type Props = {
   messageList: Array<ShownMessage>;

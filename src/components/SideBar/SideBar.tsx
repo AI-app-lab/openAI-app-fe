@@ -30,7 +30,7 @@ const groupTop = [
   {
     name: "购买服务",
     icon: <ShoppingCartRoundedIcon />,
-    route: "/shop",
+    route: "/apps/shop",
   },
 ];
 const groupBottom = [
