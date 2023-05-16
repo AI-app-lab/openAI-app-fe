@@ -1,6 +1,6 @@
 import { createBrowserRouter, Outlet, Navigate } from "react-router-dom";
 import App from "./App";
-import LandingPage from "./pages/LandingPage/LandingPage";
+import LandingPage from "./pages/LandingPage/LandingPage1";
 
 import Box from "./pages/Chat/Chat";
 import Layout from "./components/Layout/Layout";
