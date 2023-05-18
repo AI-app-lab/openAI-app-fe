@@ -1,4 +1,4 @@
-export default class workerbd extends Worker {
+export default class WorkerBuilder extends Worker {
   constructor(worker) {
     const code = worker.toString();
     const blob = new Blob([`(${code})()`]);
