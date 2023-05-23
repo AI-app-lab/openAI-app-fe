@@ -2,13 +2,14 @@ import React from "react";
 import styles from "./index.module.scss";
 
 type Props = {
-  children: JSX.Element;
+  children: JSX.Element | JSX.Element[];
   onClick?: React.MouseEventHandler<HTMLDivElement>;
+  className?: string;
 };
 
-const IconButton = ({ onClick, children }: Props) => {
+const IconButton = ({ onClick, children, className = "" }: Props) => {
   return (
-    <div onClick={onClick} className={styles.iconButton}>
+    <div onClick={onClick} className={styles.iconButton + " " + className}>
       {children}
     </div>
   );

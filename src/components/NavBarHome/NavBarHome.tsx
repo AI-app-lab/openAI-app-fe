@@ -17,13 +17,12 @@ import Logo from "../Logo/Logo";
 import Menu from "../Menu/Menu";
 import MenuItem from "../Menu/MenuItem";
 import { useNavigate } from "react-router-dom";
+import { CpntsState, setIsSideBarOpen } from "../../store/cpntsSlice";
 
-type Props = {
-  isSideBarOpen: boolean;
-  setIsSideBarOpen: React.Dispatch<React.SetStateAction<boolean>>;
-};
+type Props = {};
 
-const NavBarHome = ({ isSideBarOpen, setIsSideBarOpen }: Props) => {
+const NavBarHome = () => {
+  const { isSideBarOpen } = useSelector((state: CpntsState) => state.cpnts);
   const { userInfo } = useSelector((state: UserState) => state.user);
   useEffect(() => {
     !localStorage.getItem("userInfo") && navigate("/");
@@ -46,7 +45,7 @@ const NavBarHome = ({ isSideBarOpen, setIsSideBarOpen }: Props) => {
       <NavBar>
         <ListContainer className={styles.listContainer} fd="row">
           {
-            <ListItem onClick={() => setIsSideBarOpen(!isSideBarOpen)} className={styles.sdBarCallBtn}>
+            <ListItem onClick={() => dispatch(setIsSideBarOpen(!isSideBarOpen))} className={styles.sdBarCallBtn}>
               {isSideBarOpen ? (
                 <IconButton>
                   <AiOutlineMenuFold size={20} />

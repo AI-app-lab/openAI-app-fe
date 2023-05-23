@@ -1,19 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "../index.module.scss";
 import Button from "../../../components/Button/Button";
 import { useDispatch, useSelector } from "react-redux";
-import { ChatApiState, RequestDto, RequestMessage, getBotMessages, sendUserMessage } from "../../../store/chatApiSlice";
-import { ConfigState } from "../../../store/configSlice";
-import SendSharpIcon from "@mui/icons-material/SendSharp";
+import { ChatApiState, ChatRequestDto, ChatRequestType, RequestMessage, getBotMessages, sendUserMessage } from "../../../store/chatApiSlice";
 
-const InputRange = () => {
+import SendSharpIcon from "@mui/icons-material/SendSharp";
+import OralInputRange from "../../OralChat/components/OralInputRange";
+import IconButton from "../../../components/IconButon/IconButton";
+
+type Props = {
+  urlPlaying: string;
+  handlePause: () => void;
+};
+
+const InputRange = ({ urlPlaying, handlePause }: Props) => {
   const [userMessage, setUserMessage] = useState<string>("");
   const dispatch: Function = useDispatch();
-  const { loading, currConversationId, validConversations, activeConversationId, model, maxContextNum } = useSelector((state: ChatApiState) => state.chatApi);
+  const { loading, currConversationId, validConversations, currChatType, model, maxContextNum } = useSelector((state: ChatApiState) => state.chatApi);
   const sleep = (t: number) => new Promise((p) => setTimeout(p, t));
-  const [timeoutId, setTimeoutId] = useState<null | number>(null);
+  const textAreaRef = useRef<any>(null);
 
-  async function handleClick() {
+  useEffect(() => {
+    //if words are too long, make the textarea higher,but not higher than 200px,if words are too short,make the textarea lower,but not lower than 36px
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = "auto";
+      textAreaRef.current.style.height = textAreaRef.current.scrollHeight + "px";
+    }
+  }, [userMessage]);
+
+  async function handleClick(type: ChatRequestType = "chat") {
     if (loading === "loading") {
       return;
     }
@@ -24,16 +39,16 @@ const InputRange = () => {
     dispatch(sendUserMessage(userMessage));
 
     const messages: Array<RequestMessage> = [
-      ...validConversations[currConversationId],
+      ...(validConversations[currChatType][currConversationId[currChatType]] as any),
       {
         role: "user",
         content: userMessage,
       } as RequestMessage,
     ].slice(-1 * maxContextNum); //context
 
-    const requestDto: RequestDto = {
-      cardId: currConversationId,
+    const requestDto: ChatRequestDto = {
       model: model,
+      type: type,
       messages: messages,
     };
 
@@ -41,9 +56,11 @@ const InputRange = () => {
     await sleep(1);
     dispatch(getBotMessages(requestDto));
   }
-  return (
-    <div className={styles.inputRangeContainer}>
+
+  const textAreaTypeText = (
+    <div className={styles["inputRangeContainer"]}>
       <textarea
+        ref={textAreaRef}
         onKeyDown={(e) => {
           if (e.key == "Enter") {
             e.preventDefault();
@@ -56,13 +73,24 @@ const InputRange = () => {
         }}
         className={styles.inputRange}
       />
-
       <div className={styles.buttonWrapper}>
-        <Button onClick={handleClick} className={`${styles.sendBtn} ${loading === "loading" ? styles.btnLoading : ""}`} w={36} h={36}>
+        <IconButton onClick={() => handleClick()} className={`${styles.sendBtn} ${loading === "loading" ? styles.btnLoading : ""}`}>
           <SendSharpIcon />
-        </Button>
+        </IconButton>
       </div>
     </div>
   );
+  const textAreaTypeOral = (
+    <div className={styles["inputRangeContainerOral"]}>
+      <OralInputRange handlePause={handlePause} textAreaRef={textAreaRef} handleClick={() => handleClick("voice")} msg={userMessage} setMsg={setUserMessage} />
+    </div>
+  );
+
+  const inputRange: Record<string, JSX.Element> = {
+    text: textAreaTypeText,
+    oral: textAreaTypeOral,
+  };
+
+  return inputRange[currChatType];
 };
 export default InputRange;

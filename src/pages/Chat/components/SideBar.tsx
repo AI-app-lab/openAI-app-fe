@@ -2,9 +2,7 @@ import React, { useEffect } from "react";
 import styles from "../index.module.scss";
 import SessionCard from "./SessionCard";
 import { useSelector, useDispatch } from "react-redux";
-import { getRecentConversations, startNewConversation } from "../../../store/chatApiSlice";
-import Button from "../../../components/Button/Button";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import { ChatApiState, getRecentConversations, startNewConversation } from "../../../store/chatApiSlice";
 import AddIcon from "@mui/icons-material/Add";
 
 type Props = {
@@ -14,10 +12,7 @@ type Props = {
 
 const SideBar = ({ isChatSideBox, setIsChatSdBarOpen }: Props) => {
   const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(getRecentConversations());
-  }, []);
-  const { conversations } = useSelector((state: any) => state.chatApi);
+  const { conversations, currChatType } = useSelector((state: ChatApiState) => state.chatApi);
   const { userInfo } = useSelector((state: any) => state.user);
   return (
     <div className={`${styles.sideBar} ${isChatSideBox ? styles.open : ""}`}>
@@ -30,10 +25,10 @@ const SideBar = ({ isChatSideBox, setIsChatSdBarOpen }: Props) => {
       </div>
       <div onClick={() => setIsChatSdBarOpen(false)} className={styles.sessionCardBox}>
         <div className={styles.sessionCardContainer}>
-          {conversations &&
-            conversations
-              .map((_: never, index: number) => {
-                return <SessionCard key={index} cardId={index} title={conversations[index].topic} />;
+          {conversations[currChatType] &&
+            conversations[currChatType]
+              .map((_: any, index: number) => {
+                return <SessionCard key={index} cardId={index} title={conversations[currChatType][index].topic} />;
               })
               .reverse()}
         </div>

@@ -15,11 +15,7 @@ import LightModeSharpIcon from "@mui/icons-material/LightModeSharp";
 import { nanoid } from "nanoid";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "antd";
-
-type Props = {
-  isSideBarOpen: boolean;
-  setIsSideBarOpen: React.Dispatch<React.SetStateAction<boolean>>;
-};
+import { CpntsState, setIsSideBarOpen } from "../../store/cpntsSlice";
 
 const groupTop = [
   {
@@ -40,10 +36,11 @@ const groupBottom = [
     route: "/",
   },
 ];
-const SideBar = ({ setIsSideBarOpen, isSideBarOpen }: Props) => {
+const SideBar = () => {
   const { pathname } = useLocation();
   const dispatch = useDispatch();
   const { theme } = useSelector((state: ConfigState) => state.config);
+  const { isSideBarOpen } = useSelector((state: CpntsState) => state.cpnts);
   const mode = {
     dark: true,
     light: false,
@@ -99,9 +96,9 @@ const SideBar = ({ setIsSideBarOpen, isSideBarOpen }: Props) => {
   return (
     <div
       onClick={() => {
-        setIsSideBarOpen(false);
+        dispatch(setIsSideBarOpen(false));
       }}
-      className={`${styles.sideBarWrapper} ${isSideBarOpen ? "" : styles.closed}`}>
+      className={`${styles.sideBarWrapper} ${isSideBarOpen ? "" : styles.closed} `}>
       <div
         onClick={(e) => {
           e.stopPropagation();

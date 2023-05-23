@@ -15,7 +15,7 @@ type Props = {
 
 const ChatBoxHeader = ({ isChatSideBox, setIsChatSdBarOpen }: Props) => {
   const dispatch = useDispatch();
-  const { conversations, currConversationId } = useSelector((state: ChatApiState) => state.chatApi);
+  const { conversations, currConversationId, currChatType } = useSelector((state: ChatApiState) => state.chatApi);
 
   const [isEdit, setIsEdit] = useState(false);
   const spanRef = useRef<any>(null);
@@ -39,7 +39,7 @@ const ChatBoxHeader = ({ isChatSideBox, setIsChatSdBarOpen }: Props) => {
             <input
               className={styles.editInput}
               type="text"
-              defaultValue={conversations[currConversationId].topic}
+              defaultValue={conversations[currChatType][currConversationId[currChatType]].topic}
               onBlur={(e) => {
                 setIsEdit(false);
                 dispatch(modifyTopic(e.currentTarget.value));
@@ -47,10 +47,10 @@ const ChatBoxHeader = ({ isChatSideBox, setIsChatSdBarOpen }: Props) => {
               ref={spanRef}
             />
           ) : (
-            <input disabled className={styles.title} value={conversations[currConversationId].topic} />
+            <input disabled className={styles.title} value={conversations[currChatType][currConversationId[currChatType]].topic} />
           )}
         </div>
-        <div className={styles.subTitle}>{conversations[currConversationId] ? conversations[currConversationId].conList.length : 0} messages width ChatGPT</div>
+        <div className={styles.subTitle}>{conversations[currChatType][currConversationId[currChatType]] ? conversations[currChatType][currConversationId[currChatType]].conList.length : 0} messages width ChatGPT</div>
       </div>
       <IconButton>
         <AiOutlineMenu onClick={() => setIsChatSdBarOpen(!isChatSideBox)} size={20} className={styles.sdBarCaller} />

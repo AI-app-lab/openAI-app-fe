@@ -1,14 +1,18 @@
 import { createSlice, createAsyncThunk, original, Dispatch } from "@reduxjs/toolkit";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { getFormattedDate } from "../utils/date";
-import { GPTTokens } from "gpt-tokens";
-interface ChatRequestDto {
+import { lsSet } from "../utils/localstorage";
+import { getTokensCount } from "../utils/getTokensCount";
+
+import { err } from "../utils/alert";
+
+export type ChatRequestType = "voice" | "chat";
+export interface ChatRequestDto {
   model: string;
+  type: ChatRequestType;
   messages: Array<RequestMessage>;
 }
-export interface RequestDto extends ChatRequestDto {
-  cardId: number;
-}
+
 export interface RequestMessage {
   role: "user" | "system";
   content: string;
@@ -19,18 +23,26 @@ export interface ShownMessage {
   content: string;
 }
 
+export interface Conversation {
+  time: string;
+  topic: string;
+  conList: Array<ShownMessage>;
+  audioArr: Array<any>;
+}
+type ChatType = "text" | "oral";
 export interface ChatApiSliceState {
   loading: string;
   model: string;
-  currConversationId: number;
-  conversations: Array<{
-    time: string;
-    topic: string;
-    conList: Array<ShownMessage>;
-  }>;
-  validConversations: Array<Array<RequestMessage>>;
-  activeConversationId: number;
+  currChatType: ChatType;
+  conversations: Record<ChatType, Array<Conversation>>;
+  currConversationId: Record<ChatType, number>;
+  validConversations: Record<ChatType, Array<Conversation> | [[]]>;
+  activeConversationId: Record<ChatType, number>;
   maxContextNum: number;
+  audioMsg: string;
+  queue: Array<string>;
+  actionMsg: string;
+  msgQueue: Array<string>;
 }
 
 export interface ChatApiState {
@@ -38,27 +50,57 @@ export interface ChatApiState {
 }
 const ctrl = new AbortController();
 const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispatch) => {
-  return fetchEventSource("http://localhost:8080/openAI/chat/completions", {
-    method: "POST",
-    body: JSON.stringify(chatRequestDto),
-    headers: {
-      "Content-Type": "application/json",
-    },
-    signal: ctrl.signal,
+  return new Promise<void>((resolve, reject) => {
+    let timer = setTimeout(() => {
+      ctrl.abort();
+      reject(new Error("Timeout"));
+    }, 3000);
+    let msgChunk = "";
+    fetchEventSource("http://43.139.143.5:9898/v1/chat/completions", {
+      method: "POST",
+      body: JSON.stringify({ ...chatRequestDto, stream: true }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal: ctrl.signal,
+      onmessage(msg) {
+        clearTimeout(timer);
+        if (msg.data === "[DONE]") {
+          if (msgChunk.length) {
+            dispatch(pushToMsgQueue(msgChunk));
+            msgChunk = "";
+          }
+          ctrl.abort();
+          resolve();
+          return;
+        }
+        timer = setTimeout(() => {
+          ctrl.abort();
+          reject(new Error("Timeout"));
+        }, 10000);
 
-    onmessage(msg) {
-      const word = JSON.parse(msg.data).choices[0].delta.content;
-      word && dispatch(receivedUpdate(word));
-    },
-    onerror(err) {
-      throw err;
-    },
+        const word = JSON.parse(msg.data).choices[0].delta.content;
+        word && dispatch(receivedUpdate(word));
+        word && (msgChunk += word);
+        //if msgChunk is a complete sentence, push it to the queue
+        if (msgChunk.endsWith(".") || msgChunk.endsWith("!") || msgChunk.endsWith("?")) {
+          if (msgChunk.length > 250) {
+            dispatch(pushToMsgQueue(msgChunk));
+            msgChunk = "";
+          }
+        }
+      },
+      onerror(err) {
+        console.log("Error:", err);
+        reject(err);
+      },
+    });
   });
 };
-export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async ({ cardId, ...chatRequestDto }: RequestDto, { dispatch, rejectWithValue }) => {
+export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (chatRequestDto: ChatRequestDto, { dispatch, rejectWithValue }) => {
   console.log("[Request] ", JSON.stringify(chatRequestDto.messages, null, 3));
-
-  let tokens = getTokensCount(chatRequestDto);
+  const { type, ...rest } = chatRequestDto;
+  let tokens = getTokensCount(rest);
   const before = tokens;
 
   //当使用的token数超过4000时，将messages中的前两条消息删除直到token数小于4000，如果messages中只有一条消息，那么删除这条消息并且报错
@@ -66,13 +108,13 @@ export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (
   while (tokens > 100) {
     if (chatRequestDto.messages.length <= 1) {
       console.log("压缩失败");
-
       return rejectWithValue({ message: "你的信息太长了" });
     }
     chatRequestDto.messages.shift();
     tokens = getTokensCount(chatRequestDto);
   }
   const after = tokens;
+
   if (before != after) {
     console.log("Token到达阈值:", before);
     console.log("[压缩前]:", before);
@@ -81,115 +123,211 @@ export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (
     console.log("Tokens(当前):", tokens);
   }
 
-  await handleFetchEventSource(chatRequestDto, dispatch);
+  try {
+    await handleFetchEventSource(chatRequestDto, dispatch);
+  } catch (err) {
+    console.log("Error:", err);
+    return rejectWithValue({ message: "" });
+  }
 });
 
-const getTokensCount = (chatRequestDto: ChatRequestDto) => {
-  const usageInfo = new GPTTokens(chatRequestDto as any);
-  return usageInfo.usedTokens;
+const localStorageConversations = {
+  text: "conversations",
+  oral: "oralConversations",
 };
-
+const localStorageValidConversations = {
+  text: "validConversations",
+  oral: "oralValidConversations",
+};
 const initialState: ChatApiSliceState = {
   loading: "idle",
   model: "gpt-3.5-turbo",
-  currConversationId: 0,
-  conversations: [{ time: getFormattedDate(), topic: "New Conversation", conList: [{ time: getFormattedDate(), role: "system", content: "我是AI助手，请问有什么我可以帮您的吗？" }] }],
-  validConversations: [[]],
-  activeConversationId: 0,
+  currChatType: "text",
+  conversations: {
+    text: [{ time: getFormattedDate(), topic: "New Conversation", conList: [], audioArr: [] }],
+    oral: [{ time: getFormattedDate(), topic: "New Conversation", conList: [], audioArr: [] }],
+  },
+  currConversationId: {
+    text: 0,
+    oral: 0,
+  },
+  validConversations: {
+    text: [[]],
+    oral: [[]],
+  },
+  activeConversationId: {
+    text: 0,
+    oral: 0,
+  },
   maxContextNum: 6, //default
+  audioMsg: "",
+  queue: [],
+  actionMsg: "",
+  msgQueue: [],
 };
 export const chatApiSlice = createSlice({
   name: "chatApi",
   initialState: initialState,
   reducers: {
     getRecentConversations(state) {
-      const recentConversations = localStorage.getItem("conversations");
-      const recentValidConversations = localStorage.getItem("validConversations");
+      const type = state.currChatType;
+
+      const recentConversations = localStorage.getItem(localStorageConversations[type]);
+      const recentValidConversations = localStorage.getItem(localStorageValidConversations[type]);
       if (recentConversations && recentValidConversations) {
         try {
-          state.conversations = JSON.parse(recentConversations);
-          state.validConversations = JSON.parse(recentValidConversations);
+          state.conversations[type] = JSON.parse(recentConversations);
+          state.validConversations[type] = JSON.parse(recentValidConversations);
         } catch {
           console.log("Error parsing JSON string");
-          state.conversations = initialState.conversations;
-          state.validConversations = initialState.validConversations;
+          state.conversations[type] = initialState.conversations[type];
+          state.validConversations[type] = initialState.validConversations[type];
         }
       } else {
-        state.conversations = initialState.conversations;
-        state.validConversations = initialState.validConversations;
+        state.conversations[type] = initialState.conversations[type];
+        state.validConversations[type] = initialState.validConversations[type];
       }
     },
-    sendUserMessage(state, action) {
+    sendUserMessage(
+      state,
+      action: {
+        payload: string;
+      }
+    ) {
       //send user message
-      state.activeConversationId = state.currConversationId;
-      state.conversations[state.activeConversationId].conList.push({ time: getFormattedDate(), role: "user", content: action.payload });
-      state.validConversations[state.activeConversationId].push({ role: "user", content: action.payload });
+      const type = state.currChatType;
+      const msg = action.payload;
+      state.activeConversationId[type] = state.currConversationId[type];
+
+      state.conversations[type][state.activeConversationId[type]].conList.push({ time: getFormattedDate(), role: "user", content: msg });
+
+      (state.validConversations[type][state.activeConversationId[type]] as any).push({ role: "user", content: msg });
       //receive system message placeholder
-      state.conversations[state.activeConversationId].conList.push({ time: getFormattedDate(), role: "system", content: "" });
-      state.validConversations[state.activeConversationId].push({ role: "system", content: "" });
+      state.conversations[type][state.activeConversationId[type]].conList.push({ time: getFormattedDate(), role: "system", content: "" });
+      (state.validConversations[type][state.activeConversationId[type]] as any).push({ role: "system", content: "" });
       state.loading = "loading";
     },
-    receivedUpdate(state, action) {
+    receivedUpdate(
+      state,
+      action: {
+        payload: string;
+      }
+    ) {
       const word = action.payload;
-      const last = state.conversations[state.activeConversationId].conList.length - 1;
-      const validLast = state.validConversations[state.activeConversationId].length - 1;
-      state.conversations[state.activeConversationId].conList[last].content += word;
-      state.validConversations[state.activeConversationId][validLast].content += word;
-      localStorage.setItem("conversations", JSON.stringify(state.conversations));
-      localStorage.setItem("validConversations", JSON.stringify(state.validConversations));
+      const type = state.currChatType;
+      const last = state.conversations[type][state.activeConversationId[type]].conList.length - 1;
+      const validLast = (state.validConversations[type][state.activeConversationId[type]] as any).length - 1;
+      state.conversations[type][state.activeConversationId[type]].conList[last].content += word;
+      (state.validConversations as any)[type][state.activeConversationId[type]][validLast].content += word;
+      lsSet(localStorageConversations[type], state.conversations[type]);
+      lsSet(localStorageValidConversations[type], state.validConversations[type]);
     },
     startNewConversation(state) {
-      const last = state.conversations.length - 1;
-      last >= 0 && state.conversations[last].conList.length && state.conversations.push({ time: getFormattedDate(), topic: "New Conversation", conList: [{ time: getFormattedDate(), role: "system", content: "我是AI助手，请问有什么我可以帮您的吗？" }] }) && state.validConversations.push([]) && (state.currConversationId = last + 1);
-
-      console.log(last);
+      const type = state.currChatType;
+      const last = state.conversations[type].length - 1;
+      last >= 0 && state.conversations[type][last].conList.length && state.conversations[type].push({ time: getFormattedDate(), topic: "New Conversation", conList: [], audioArr: [] }) && (state.validConversations as any)[type].push([]) && (state.currConversationId[type] = last + 1);
     },
-    deleteConversation(state, action) {
-      state.activeConversationId === action.payload && ctrl.abort();
+    deleteConversation(
+      state,
+      action: {
+        payload: number;
+      }
+    ) {
+      const id = action.payload;
+      const type = state.currChatType;
+      state.activeConversationId[type] === id && ctrl.abort();
 
-      state.conversations = state.conversations.filter((_, index) => index !== action.payload);
-      state.validConversations = state.validConversations.filter((_, index) => index !== action.payload);
+      state.conversations[type] = state.conversations[type].filter((_, index) => index !== id);
+      state.validConversations[type] = (state.validConversations[type] as any).filter((_: any, index: any) => index !== action.payload);
 
-      !state.conversations.length && (state.conversations = [{ time: getFormattedDate(), topic: "New Conversation", conList: [{ time: getFormattedDate(), role: "system", content: "我是AI助手，请问有什么我可以帮您的吗？" }] }]);
-      !state.validConversations.length && (state.validConversations = [[]]);
-      state.currConversationId = state.conversations.length - 1;
-      localStorage.setItem("conversations", JSON.stringify(state.conversations));
-      localStorage.setItem("validConversations", JSON.stringify(state.validConversations));
+      !state.conversations[type].length && (state.conversations[type] = [{ time: getFormattedDate(), topic: "New Conversation", conList: [], audioArr: [] }]);
+      !state.validConversations[type].length && (state.validConversations[type] = [[]]);
+      state.currConversationId[type] = state.conversations[type].length - 1;
+      lsSet(localStorageConversations[type], state.conversations[type]);
+      lsSet(localStorageValidConversations[type], state.validConversations[type]);
     },
     refreshValidConversations(state, action) {
-      state.validConversations[state.activeConversationId] = action.payload;
-      localStorage.setItem("validConversations", JSON.stringify(state.validConversations));
+      const type = state.currChatType;
+      (state.validConversations as any)[type][state.activeConversationId[type]] = action.payload;
+      lsSet(localStorageValidConversations[type], state.validConversations[type]);
     },
-    switchConversation(state, action) {
-      state.currConversationId = action.payload;
+    switchConversation(state, action: { payload: number }) {
+      const type = state.currChatType;
+      const id = action.payload;
+      state.currConversationId[type] = id;
     },
-    modifyTopic(state, action) {
-      state.conversations[state.currConversationId].topic = action.payload;
-      localStorage.setItem("conversations", JSON.stringify(state.conversations));
+    modifyTopic(state, action: { payload: string }) {
+      const type = state.currChatType;
+      const topic = action.payload;
+      state.conversations[type][state.currConversationId[type]].topic = topic;
+      lsSet(localStorageConversations[type], state.conversations[type]);
     },
+    setCurrChatType(state, action: { payload: ChatType }) {
+      state.currChatType = action.payload;
+    },
+    clearAudioMsg(state) {
+      state.audioMsg = "";
+    },
+    pushAudioMsg(
+      state,
+      action: {
+        payload: {
+          newUrl: string;
+          originalUrl: string;
+        };
+      }
+    ) {
+      const type = state.currChatType;
+      const audioArr = state.conversations["oral"][state.activeConversationId["oral"]].audioArr;
+      const newUrl = action.payload.newUrl;
+      const oriUrl = action.payload.originalUrl;
+      //if the originalUrl exists, replace it with the newUrl
+      oriUrl
+        ? audioArr.forEach((item, index) => {
+            if (item === oriUrl) {
+              audioArr[index] = newUrl;
+            }
+          })
+        : audioArr.push(newUrl);
+
+      lsSet(localStorageConversations[type], state.conversations[type]);
+    },
+    pushToMsgQueue(state, action: { payload: string }) {
+      state.msgQueue.push(action.payload);
+    },
+    shiftMsgQueue(state) {
+      state.msgQueue.shift();
+    },
+    updateAudioUrl(state, action: { payload: string }) {},
   },
   extraReducers(builder) {
     builder.addCase(getBotMessages.pending, (state) => {});
     builder.addCase(getBotMessages.fulfilled, (state) => {
-      state.validConversations[state.activeConversationId].length > state.maxContextNum && (state.validConversations[state.activeConversationId] = state.validConversations[state.activeConversationId].splice(-1 * state.maxContextNum));
-      localStorage.setItem("validConversations", JSON.stringify(state.validConversations));
+      const type = state.currChatType;
+      (state.validConversations as any)[type][state.activeConversationId[type]].length > state.maxContextNum && (state.validConversations[type][state.activeConversationId[type]] = (state.validConversations as any)[type][state.activeConversationId[type]].splice(-1 * state.maxContextNum));
+
+      lsSet(localStorageValidConversations[type], state.validConversations[type]);
       state.loading = "idle";
+      const currConversation = (state.validConversations as any)[type][state.activeConversationId[type]];
+      const lastBotMsg = currConversation.length - 1;
+      state.currChatType === "oral" && (state.audioMsg = currConversation[lastBotMsg].content);
+      // console.log(currConversation[lastBotMsg].content);
     });
     builder.addCase(getBotMessages.rejected, (state, action: any) => {
-      console.log(action.payload?.message);
-
+      err("请求错误");
       ctrl.abort();
-      const last = state.conversations[state.activeConversationId].conList.length - 1;
-
-      state.validConversations[state.activeConversationId].pop();
-      state.validConversations[state.activeConversationId].pop();
-      const msg = state.conversations[state.activeConversationId].conList[last].content;
-      state.conversations[state.activeConversationId].conList[last] = { time: getFormattedDate(), role: "err", content: msg + `(${action.payload?.message ? action.payload?.message : "error"})` };
-      localStorage.setItem("conversations", JSON.stringify(state.conversations));
-      localStorage.setItem("validConversations", JSON.stringify(state.validConversations));
+      const type = state.currChatType;
+      const last = state.conversations[type][state.activeConversationId[type]].conList.length - 1;
+      state.conversations[type][state.activeConversationId[type]].audioArr.push("");
+      (state.validConversations as any)[type][state.activeConversationId[type]].pop();
+      (state.validConversations as any)[type][state.activeConversationId[type]].pop();
+      const msg = state.conversations[type][state.activeConversationId[type]].conList[last].content;
+      state.conversations[type][state.activeConversationId[type]].conList[last] = { time: getFormattedDate(), role: "err", content: msg + `[${action.payload?.message ? action.payload?.message : "出错了"}]` };
+      lsSet(localStorageConversations[type], state.conversations[type]);
+      lsSet(localStorageValidConversations[type], state.validConversations[type]);
       state.loading = "idle";
     });
   },
 });
-export const { modifyTopic, refreshValidConversations, receivedUpdate, sendUserMessage, getRecentConversations, deleteConversation, startNewConversation, switchConversation } = chatApiSlice.actions;
+export const { modifyTopic, refreshValidConversations, receivedUpdate, sendUserMessage, getRecentConversations, deleteConversation, startNewConversation, switchConversation, setCurrChatType, clearAudioMsg, pushAudioMsg, pushToMsgQueue, shiftMsgQueue } = chatApiSlice.actions;
 export default chatApiSlice.reducer;

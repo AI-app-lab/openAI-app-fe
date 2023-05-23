@@ -12,7 +12,7 @@ type Props = {
 };
 
 const SessionCard = ({ cardId, title }: Props) => {
-  const { currConversationId, conversations } = useSelector((state: ChatApiState) => state.chatApi);
+  const { currConversationId, conversations, currChatType } = useSelector((state: ChatApiState) => state.chatApi);
   const dispatch = useDispatch();
   const handleCardDel = (e: any) => {
     e.stopPropagation();
@@ -23,7 +23,7 @@ const SessionCard = ({ cardId, title }: Props) => {
       onClick={(e) => {
         dispatch(switchConversation(cardId));
       }}
-      className={cardId === currConversationId ? styles.sessionCardSelected : styles.sessionCard}>
+      className={cardId === currConversationId[currChatType] ? styles.sessionCardSelected : styles.sessionCard}>
       <div className={styles.cardTop}>
         <div className={styles.topLeft}>
           <QuestionAnswerSharpIcon />
@@ -33,8 +33,8 @@ const SessionCard = ({ cardId, title }: Props) => {
         <DeleteForeverIcon onClick={handleCardDel} className={styles.closeBtn} />
       </div>
       <div className={styles.cardBottom}>
-        <div>{conversations[cardId].conList.length} 条对话</div>
-        <div>{conversations[cardId].time}</div>
+        <div>{conversations[currChatType][cardId].conList.length} 条对话</div>
+        <div>{conversations[currChatType][cardId].time}</div>
       </div>
     </div>
   );

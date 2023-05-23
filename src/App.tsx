@@ -6,11 +6,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { saveUserInfo } from "./store/userSlice";
 import { ConfigState, getThemeFromLocal } from "./store/configSlice";
 import { SnackbarProvider } from "notistack";
+import { lsGet } from "./utils/localstorage";
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getThemeFromLocal());
-    const userInfoDto = getUserInfoFromLocal();
+    const userInfoDto = lsGet("userInfo");
     userInfoDto && dispatch(saveUserInfo(userInfoDto));
   }, []);
   const { theme } = useSelector((state: ConfigState) => state.config);

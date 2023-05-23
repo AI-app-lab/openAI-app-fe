@@ -1,0 +1,83 @@
+.icon {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 50%;
+    box-sizing: border-box;
+    padding: 5px;
+    background-color: var(--primary);
+    color: var(--text-contrast);
+    transition: 0.2s all;
+
+    &.off {
+        color: red;
+
+    }
+
+    &.step1 {
+        box-shadow: 0 0 10px var(--primary);
+    }
+
+    &.step2 {
+        box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+    }
+
+    //个步骤的阴影值相较于前一步增加10px的模糊度，并且模糊层级增加。以下是一个示例：
+    &.step3 {
+        box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
+    }
+
+    &.step4 {
+        box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary), 0 0 40px var(--primary);
+
+    }
+
+    &.step5 {
+
+        box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary), 0 0 40px var(--primary), 0 0 50px var(--primary);
+
+    }
+
+    &.step6 {
+
+        box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary), 0 0 40px var(--primary), 0 0 50px var(--primary), 0 0 60px var(--primary);
+
+
+
+
+    }
+
+    &.step7 {
+
+
+        box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary), 0 0 40px var(--primary), 0 0 50px var(--primary), 0 0 60px var(--primary), 0 0 70px var(--primary);
+
+    }
+
+    &.step8 {
+
+        box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary), 0 0 40px var(--primary), 0 0 50px var(--primary), 0 0 60px var(--primary), 0 0 70px var(--primary), 0 0 80px var(--primary);
+
+    }
+
+    &.step9 {
+        box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary), 0 0 40px var(--primary), 0 0 50px var(--primary), 0 0 60px var(--primary), 0 0 70px var(--primary), 0 0 80px var(--primary), 0 0 90px var(--primary);
+
+    }
+
+    &.step10 {
+        box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary), 0 0 40px var(--primary), 0 0 50px var(--primary), 0 0 60px var(--primary), 0 0 70px var(--primary), 0 0 80px var(--primary), 0 0 90px var(--primary), 0 0 100px var(--primary);
+
+    }
+
+    &.step10 {
+        box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary), 0 0 40px var(--primary), 0 0 50px var(--primary), 0 0 60px var(--primary), 0 0 70px var(--primary), 0 0 80px var(--primary), 0 0 90px var(--primary), 0 0 100px var(--primary), 0 0 110px var(--primary);
+
+    }
+
+
+
+
+
+
+}

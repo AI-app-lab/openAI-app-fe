@@ -1,6 +1,6 @@
 import { createBrowserRouter, Outlet, Navigate } from "react-router-dom";
 import App from "./App";
-import LandingPage from "./pages/LandingPage/LandingPage1";
+import LandingPage from "./pages/LandingPage/LandingPage";
 
 import Box from "./pages/Chat/Chat";
 import Layout from "./components/Layout/Layout";
@@ -8,21 +8,19 @@ import Apps from "./pages/Apps/Apps";
 import Chat from "./pages/Chat/Chat";
 import { useDispatch, useSelector } from "react-redux";
 
-import { saveUserInfo } from "./store/userSlice";
+import { UserState, saveUserInfo } from "./store/userSlice";
 import Shop from "./pages/Shop/Shop";
 import Login from "./pages/authPages/Login/Login";
 import OralChat from "./pages/OralChat/OralChat";
 import SignUp from "./pages/authPages/SignUp/SignUp";
+import { lsGet } from "./utils/localstorage";
+import { useAuth } from "./hooks/useAuth";
 
 export const GuardRounded = ({ component }: { component: JSX.Element }) => {
-  const userInfoDto = JSON.parse(localStorage.getItem("userInfo") as string);
-
-  return userInfoDto ? component : <Navigate to="/" replace />;
+  return lsGet("userInfo") ? component : <Navigate to="/" replace />;
 };
 export const getUserInfoFromLocal = () => {
-  const userInfoDto = JSON.parse(localStorage.getItem("userInfo") as string);
-
-  return userInfoDto;
+  return lsGet("userInfo");
 };
 export const router = createBrowserRouter([
   {
@@ -47,7 +45,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "apps/chat",
-        element: <GuardRounded component={<Chat type="basic" />} />,
+        element: <GuardRounded component={<Chat type="text" />} />,
       },
       {
         path: "apps/shop",

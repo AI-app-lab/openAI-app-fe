@@ -5,7 +5,7 @@
     --text: #e5e5e5;
     --text-secondary: rgb(212, 211, 211);
     --text-contrast: #ffffff;
-    --secondary: #282828;
+    --secondary: #515050;
     --secondary-bg: #303134;
     --primary: #468efd;
     --primary-activated: #468efd;
@@ -21,7 +21,7 @@
     --text: #171341;
     --text-contrast: #ffffff;
     --text-secondary: #6f6f80;
-    --secondary: #dfdede;
+    --secondary: #dddcdc;
     --secondary-bg: #eaedf0;
     --primary: #468efd;
     --primary-activated: #468efd;
@@ -48,19 +48,23 @@
 :root {
 
     --backdrop-filter-blur: blur(0);
+    --sidebar-fullScreen-backdrop-filter-blur: blur(5);
 
     @media screen and (max-width: 768px) {
-
+        --sidebar-fullScreen-backdrop-filter-blur: blur(5);
         --backdrop-filter-blur: blur(5px);
+
     }
 }
 
 //zIndex
 :root {
     --sidebar-wrapper-z-index: 0;
+    --sidebar-fullscreen-z-index: 1000;
 
     @media screen and (max-width: 768px) {
         --sidebar-wrapper-z-index: 1000;
+        --sidebar-fullscreen-z-index: 1000;
 
     }
 }
@@ -79,7 +83,7 @@
     --sidebar-wrapper-width-on-closed: var(--sidebar-width) --main-padding-top-bottom: 15px;
     --main-height: calc(100vh - var(--navbar-height));
     --main-width: 100vw;
-    --main-content-width-max: 90%;
+    --main-content-width-max: 100%;
     --main-content-width-min: 600px;
     --box-width: calc(100vw - var(--sidebar-width));
     --box-height: calc(100vh - var(--navbar-height) - 2 * var(--main-padding-top-bottom));
