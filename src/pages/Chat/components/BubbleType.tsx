@@ -14,7 +14,7 @@ type Props = {
 
 const BubbleType = ({ type }: Props) => {
   const [_, message] = useContext(ChatBubbleContext);
-
+  const [urlPlaying, handlePause, __, currAudioSliceShouldPlay, isPlaying, isFinishWhole] = useContext(AudioInfoContext);
   const Bubble = {
     err: (
       <>

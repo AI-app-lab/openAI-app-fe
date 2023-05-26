@@ -10,20 +10,20 @@ type Props = {
   isChatSideBox: boolean;
   setIsChatSdBarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
-const audioShouldPlay = new Audio();
+const currAudioSliceShouldPlay = new Audio();
 const ChatBox = ({ isChatSideBox, setIsChatSdBarOpen }: Props) => {
   const type = useContext(ChatTypeContext);
   const currCon = useCurrCon();
   const currConId = useCurrConId();
   const [urlPlaying, setUrlPlaying] = useState("");
   const handlePause = () => {
-    audioShouldPlay.pause();
+    currAudioSliceShouldPlay.pause();
     setUrlPlaying("");
   };
   return (
     <div className={styles.chatBox}>
       <ChatBoxHeader isChatSideBox={isChatSideBox} setIsChatSdBarOpen={setIsChatSdBarOpen} />
-      <ChatWindow urlPlaying={urlPlaying} setUrlPlaying={setUrlPlaying} audioShouldPlay={audioShouldPlay} audioBlobList={currCon.audioArr} messageList={currCon.conList} conId={currConId} />
+      <ChatWindow urlPlaying={urlPlaying} setUrlPlaying={setUrlPlaying} currAudioSliceShouldPlay={currAudioSliceShouldPlay} messageList={currCon.conList} conId={currConId} />
       <InputRange urlPlaying={urlPlaying} handlePause={handlePause} />
     </div>
   );

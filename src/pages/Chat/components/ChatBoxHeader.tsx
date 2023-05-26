@@ -4,9 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import styles from "../index.module.scss";
 import ModeIcon from "@mui/icons-material/Mode";
 import { AiOutlineMenu } from "react-icons/ai";
-import { UserState, openModal } from "../../../store/userSlice";
-import { ChatApiState, modifyTopic } from "../../../store/chatApiSlice";
 import IconButton from "../../../components/IconButon/IconButton";
+import { ChatApiState, modifyTopic } from "../../../store/chatApiSlice";
 
 type Props = {
   isChatSideBox: boolean;

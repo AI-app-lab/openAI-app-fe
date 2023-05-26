@@ -15,3 +15,15 @@ export const useCurrChatType = () => {
   const { currChatType } = useSelector((state: ChatApiState) => state.chatApi);
   return currChatType;
 };
+export const useCurrBotAudioURL = (id: number) => {
+  const currCon = useCurrCon();
+  const url = currCon.conList.find((con) => con.id === id && con.role === "system")?.audioURL;
+
+  return url;
+};
+export const useCurrBotId = () => {
+  const currCon = useCurrCon();
+  const id = currCon.idPlaying;
+
+  return id;
+};

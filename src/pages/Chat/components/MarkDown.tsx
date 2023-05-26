@@ -12,7 +12,7 @@ const WRONG_IDENTIFIER = "[出错了]";
 const TOO_LONG_IDENTIFIER = "[你的信息太长了]";
 const MarkDown = () => {
   const codeRef = useRef<any>({});
-  const [_, message] = useContext(ChatBubbleContext);
+  const [message] = useContext(ChatBubbleContext);
 
   let msg: string = "";
   const handleCopy = async (e: any, isInline: boolean = false) => {

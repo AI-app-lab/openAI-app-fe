@@ -2,19 +2,18 @@ import React, { createContext, useMemo, useContext, useState } from "react";
 import styles from "../index.module.scss";
 import { useSelector } from "react-redux";
 import Loading from "../../../components/Loading/Loading";
-
 import { ChatApiState } from "../../../store/chatApiSlice";
-
 import BubbleType from "./BubbleType";
+
 type Props = {
   type: "system" | "user" | "err";
   message: string;
   time: string;
   showAll: boolean;
-  audioURL: string;
+  id: number;
 };
-export const ChatBubbleContext = createContext<[string, string]>(["", ""]);
-const ChatBubble = ({ audioURL, showAll, time, type, message }: Props) => {
+export const ChatBubbleContext = createContext<[string, number]>(["", -1]);
+const ChatBubble = ({ showAll, time, type, message, id }: Props) => {
   const style = useMemo(() => ({ system: styles.bubbleContainerBot, user: styles.bubbleContainerUser, err: styles.bubbleContainerBot }), []);
   const { currChatType } = useSelector((state: ChatApiState) => state.chatApi);
 
@@ -59,7 +58,7 @@ const ChatBubble = ({ audioURL, showAll, time, type, message }: Props) => {
     return <BotBubble type={currChatType} />;
   };
 
-  return <ChatBubbleContext.Provider value={[audioURL, message]}>{type === "user" ? <BubbleRight /> : <BubbleLeft />}</ChatBubbleContext.Provider>;
+  return <ChatBubbleContext.Provider value={[message, id]}>{type === "user" ? <BubbleRight /> : <BubbleLeft />}</ChatBubbleContext.Provider>;
 };
 
 export default ChatBubble;

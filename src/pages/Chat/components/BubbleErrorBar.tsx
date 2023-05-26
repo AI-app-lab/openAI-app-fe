@@ -8,7 +8,7 @@ const messages: Record<string, string> = {
   "[你的信息太长了]": "你的信息太长了",
 };
 const BubbleErrorBar = (props: Props) => {
-  const [_, message] = useContext(ChatBubbleContext);
+  const [message] = useContext(ChatBubbleContext);
   return (
     <>
       {Object.entries(messages).map(

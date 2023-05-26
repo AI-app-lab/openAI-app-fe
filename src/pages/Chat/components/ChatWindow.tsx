@@ -2,70 +2,88 @@ import React, { Dispatch, SetStateAction, WheelEvent, createContext, useEffect, 
 import styles from "../index.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import ChatBubble from "./ChatBubble";
-import { ChatApiState, ShownMessage, clearAudioMsg, getRecentConversations, pushAudioMsg, shiftMsgQueue } from "../../../store/chatApiSlice";
+import { ChatApiState, ShownMessage, clearAudioMsg, clearAudioPlaying, clearMsgQueue, getRecentConversations, shiftMsgQueue, startAudioPlaying, updateAudioUrl } from "../../../store/chatApiSlice";
 import { nanoid } from "nanoid";
-import { encode, decode, toUint8Array } from "js-base64";
+import { toUint8Array } from "js-base64";
 import { getFormattedDate } from "../../../utils/date";
 import { useToken } from "../../../hooks/useToken";
 import { err, info, warn } from "../../../utils/alert";
 import { ttsReq } from "../../../api/reqDto";
+import { useCurrBotAudioURL, useCurrCon } from "../../../hooks/useCon";
 
 type Props = {
   messageList: Array<ShownMessage>;
-  audioBlobList: Array<string>;
+
   conId: number;
-  audioShouldPlay: HTMLAudioElement;
+  currAudioSliceShouldPlay: HTMLAudioElement;
   urlPlaying: string;
   setUrlPlaying: Dispatch<SetStateAction<string>>;
 };
 
-type AudioInfoContextType = [string, () => void, (url: string, message: string) => void];
+type AudioInfoContextType = [string, (url: string) => void, (message: string, index: number) => void, HTMLAudioElement, boolean, boolean];
 let ws: WebSocket;
 let audio = new Uint8Array([]);
 let count = 0;
 const _audio = new Audio();
 let audioQ: any = [];
-export const AudioInfoContext = createContext<AudioInfoContextType>(["", () => {}, () => {}]);
-const ChatWindow = ({ urlPlaying, setUrlPlaying, audioShouldPlay, audioBlobList, messageList, conId }: Props) => {
+let wholeAudioUrl = "";
+let preAudioSlice: any = [];
+
+export const AudioInfoContext = createContext<AudioInfoContextType>(["", () => {}, () => {}, new Audio(), false, false]);
+const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messageList, conId }: Props) => {
   const dispatch: Function = useDispatch();
   useEffect(() => {
     dispatch(getRecentConversations());
   }, []);
   const token = useToken();
-  const { conversations, activeConversationId, currChatType, audioMsg, msgQueue } = useSelector((state: ChatApiState) => state.chatApi);
+  const { currChatType, msgQueue } = useSelector((state: ChatApiState) => state.chatApi);
   const messagesEndRef = useRef<any>(null);
   const [isAutoEnd, setIsAutoEnd] = useState(true);
   const [showAll, setShowAll] = useState(true);
-
   const [isRequesting, setIsRequesting] = useState(false);
   const [audioQueue, setAudioQueue] = useState([]); // [url1,url2,url3
   const [isPlaying, setIsPlaying] = useState(false);
-  const handlePlay = (url: string, message: string) => {
+  const [isFinishWhole, setIsFinishWhole] = useState(false);
+  const handlePlay = (message: string, id: number) => {
     if (isRequesting) {
       info("正在请求中，稍等片刻");
       return;
     }
-    audioShouldPlay.src = url;
+    const url = useCurrBotAudioURL(id);
+    url && (currAudioSliceShouldPlay.src = url);
 
-    audioShouldPlay.play();
+    currAudioSliceShouldPlay.play();
 
-    audioShouldPlay.onerror = (e) => {
-      requestForExpiredResource(message, url);
+    currAudioSliceShouldPlay.onerror = (e) => {
+      audioSliceTTSRequest(message);
     };
-    audioShouldPlay.onpause = () => {
+    currAudioSliceShouldPlay.onpause = () => {
       setUrlPlaying("");
     };
-    setUrlPlaying(url);
+    url && setUrlPlaying(url);
   };
 
-  const handlePause = () => {
+  const handlePause = (url: string) => {
     if (ws && ws.readyState !== ws.CLOSED) {
-      ws.close(4403, "abort");
+      ws.close(3403, "abort");
     }
-    audioShouldPlay.pause();
+
+    currAudioSliceShouldPlay.src === url && currAudioSliceShouldPlay.pause();
     setUrlPlaying("");
   };
-  const requestForExpiredResource = (msg: string, originalUrl: string = "") => {
+
+  const audioSliceTTSRequest = (msg: string, stream: boolean = true) => {
+    console.log(msg);
+
+    if (msg === "[#OVER#]") {
+      console.log("[finish playing whole audio]");
+      setIsRequesting(false);
+      preAudioSlice = [];
+      audio = new Uint8Array([]);
+      dispatch(clearMsgQueue());
+      return;
+    }
+    setIsFinishWhole(false);
     count++;
     console.log("[requesting for expired resource]", count);
 
@@ -76,52 +94,61 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, audioShouldPlay, audioBlobList,
       setIsRequesting(true);
       await new Promise((resolve) => setTimeout(resolve, 200));
       console.log("connected");
-
-      ws.send(JSON.stringify(ttsReq(msg, 60, 70)));
+      ws.send(JSON.stringify(ttsReq(msg, 60, 80)));
     };
     ws.onmessage = async (e) => {
       let audioChunk;
-      if (e.data === "连接成功") {
-        return;
-      }
+      if (e.data === "连接成功") return;
+
       audioChunk = JSON.parse(e.data);
       try {
         audio = new Uint8Array([...audio, ...toUint8Array(audioChunk.data.audio)]);
       } catch (e) {}
 
-      if (audioChunk.data.status === 2) {
-        ws.close();
-      }
+      audioChunk.data.status === 2 && ws.close(3200, "ok");
     };
     ws.onclose = (e) => {
-      if (e.code === 4403) {
+      if (e.code === 3403) {
         setIsRequesting(false);
         warn("请求被中断");
         return;
       }
-      dispatch(shiftMsgQueue());
-      const blob = new Blob([audio], { type: "audio/mpeg" });
-      const url = URL.createObjectURL(blob);
+      if (e.code === 4503) {
+        setIsRequesting(false);
+        err("服务暂不可用");
+        return;
+      }
+      console.log(e.code, e.reason);
 
-      audioShouldPlay.src = url;
-      // audioShouldPlay.play();
+      if (e) dispatch(shiftMsgQueue());
+      let blob = new Blob([audio], { type: "audio/mpeg" });
+      const url = URL.createObjectURL(blob);
+      blob = new Blob([...preAudioSlice, audio], { type: "audio/mpeg" });
+      wholeAudioUrl = URL.createObjectURL(blob);
+
+      stream ? dispatch(updateAudioUrl({ wholeAudioUrl, id: -1 })) : dispatch(updateAudioUrl({ wholeAudioUrl, id: -1 }));
+      preAudioSlice = [...preAudioSlice, audio];
+      currAudioSliceShouldPlay.src = url;
       audioQ = [...audioQ, url];
       setAudioQueue(audioQ);
-      audioShouldPlay.onerror = (e) => {
-        err("播放失败");
+      //更新当前url
+
+      currAudioSliceShouldPlay.onerror = (e) => {
+        err("播放出错");
         setIsRequesting(false);
         setUrlPlaying("");
       };
-      audioShouldPlay.onpause = () => {
+      currAudioSliceShouldPlay.onpause = () => {
         setUrlPlaying("");
+        !stream && setIsRequesting(false);
       };
       setUrlPlaying(url);
 
-      dispatch(pushAudioMsg({ newUrl: url, originalUrl: originalUrl }));
+      //initialize data
       dispatch(clearAudioMsg());
-      console.log("closed");
       audio = new Uint8Array([]);
-      setIsRequesting(false);
+
+      stream && setIsRequesting(false);
     };
     ws.onerror = (e) => {
       setIsRequesting(false);
@@ -131,17 +158,19 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, audioShouldPlay, audioBlobList,
   };
   _audio.onpause = () => {
     audioQ.shift();
+    dispatch(clearAudioPlaying());
+
     setIsPlaying(false);
   };
   _audio.onplay = () => {
+    dispatch(startAudioPlaying());
     setIsPlaying(true);
   };
-
+  //play audio in audioQueue
   useEffect(() => {
     if (isPlaying || audioQ.length <= 0) {
       return;
     }
-
     const nextAudio = audioQ[0];
     _audio.src = nextAudio;
 
@@ -149,25 +178,27 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, audioShouldPlay, audioBlobList,
 
     setIsPlaying(true);
   }, [isPlaying, audioQueue]);
+  //request audio in msgQueue
   useEffect(() => {
     if (msgQueue.length > 0 && !isRequesting) {
       const temp = msgQueue[0];
 
-      requestForExpiredResource(temp as string);
+      audioSliceTTSRequest(temp);
     }
   }, [msgQueue, isRequesting]);
-
+  //when conId changes, pause audio
   useEffect(() => {
-    handlePause();
+    handlePause(currAudioSliceShouldPlay.src);
   }, [conId]);
+  //pause audio when component unmount
   useEffect(() => {
-    return handlePause;
+    return handlePause(currAudioSliceShouldPlay.src);
   }, []);
   // useEffect(() => {
   //   if (!audioMsg) {
   //     return;
   //   } else {
-  //     requestForExpiredResource(audioMsg);
+  //     audioSliceTTSRequest(audioMsg);
   //     index_1++;
   //   }
   // }, [audioMsg]);
@@ -189,17 +220,17 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, audioShouldPlay, audioBlobList,
     );
   };
   return (
-    <AudioInfoContext.Provider value={[urlPlaying, handlePause, handlePlay]}>
+    <AudioInfoContext.Provider value={[urlPlaying, handlePause, handlePlay, currAudioSliceShouldPlay, isPlaying, isFinishWhole]}>
       <div onWheel={(e) => handleWheel(e)} ref={messagesEndRef} className={styles.chatWindow}>
         {currChatType === "oral" ? (
           <>
             <ShowAllBtn />
           </>
         ) : (
-          <ChatBubble audioURL={""} time={getFormattedDate()} showAll={true} type="system" message="Hey, there! How can I assist you today?" />
+          <ChatBubble id={-1} time={getFormattedDate()} showAll={true} type="system" message="Hey, there! How can I assist you today?" />
         )}
 
-        {messageList && messageList.map(({ time, role, content }: ShownMessage, index: number) => <ChatBubble audioURL={role === "system" ? audioBlobList[Math.floor(index / 2)] : ""} showAll={showAll} time={time} key={nanoid()} type={role} message={content} />)}
+        {messageList && messageList.map(({ time, role, content, id }: ShownMessage) => <ChatBubble showAll={showAll} time={time} key={nanoid()} type={role} id={id} message={content} />)}
       </div>
     </AudioInfoContext.Provider>
   );
