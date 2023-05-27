@@ -20,7 +20,7 @@ type Props = {
   setUrlPlaying: Dispatch<SetStateAction<string>>;
 };
 
-type AudioInfoContextType = [string, (url: string) => void, (message: string, index: number) => void, HTMLAudioElement, boolean, boolean];
+type AudioInfoContextType = [string, (url: string) => void, (message: string, index: number) => void, HTMLAudioElement, boolean, boolean, (msg: string, stream?: boolean, id?: number) => void];
 let ws: WebSocket;
 let audio = new Uint8Array([]);
 let count = 0;
@@ -29,7 +29,7 @@ let audioQ: any = [];
 let wholeAudioUrl = "";
 let preAudioSlice: any = [];
 
-export const AudioInfoContext = createContext<AudioInfoContextType>(["", () => {}, () => {}, new Audio(), false, false]);
+export const AudioInfoContext = createContext<AudioInfoContextType>(["", () => {}, () => {}, new Audio(), false, false, () => {}]);
 const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messageList, conId }: Props) => {
   const dispatch: Function = useDispatch();
   useEffect(() => {
@@ -72,7 +72,7 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messa
     setUrlPlaying("");
   };
 
-  const audioSliceTTSRequest = (msg: string, stream: boolean = true) => {
+  const audioSliceTTSRequest = (msg: string, stream: boolean = true, id: number = -1) => {
     console.log(msg);
 
     if (msg === "[#OVER#]") {
@@ -126,7 +126,7 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messa
       blob = new Blob([...preAudioSlice, audio], { type: "audio/mpeg" });
       wholeAudioUrl = URL.createObjectURL(blob);
 
-      stream ? dispatch(updateAudioUrl({ wholeAudioUrl, id: -1 })) : dispatch(updateAudioUrl({ wholeAudioUrl, id: -1 }));
+      dispatch(updateAudioUrl({ wholeAudioUrl, id: id }));
       preAudioSlice = [...preAudioSlice, audio];
       currAudioSliceShouldPlay.src = url;
       audioQ = [...audioQ, url];
@@ -149,6 +149,7 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messa
       audio = new Uint8Array([]);
 
       stream && setIsRequesting(false);
+      !stream && audioSliceTTSRequest("[#OVER#]", true, id);
     };
     ws.onerror = (e) => {
       setIsRequesting(false);
@@ -156,14 +157,15 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messa
       console.log(e);
     };
   };
+
   _audio.onpause = () => {
     audioQ.shift();
     dispatch(clearAudioPlaying());
 
     setIsPlaying(false);
   };
+
   _audio.onplay = () => {
-    dispatch(startAudioPlaying());
     setIsPlaying(true);
   };
   //play audio in audioQueue
@@ -220,7 +222,7 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messa
     );
   };
   return (
-    <AudioInfoContext.Provider value={[urlPlaying, handlePause, handlePlay, currAudioSliceShouldPlay, isPlaying, isFinishWhole]}>
+    <AudioInfoContext.Provider value={[urlPlaying, handlePause, handlePlay, currAudioSliceShouldPlay, isPlaying, isFinishWhole, audioSliceTTSRequest]}>
       <div onWheel={(e) => handleWheel(e)} ref={messagesEndRef} className={styles.chatWindow}>
         {currChatType === "oral" ? (
           <>

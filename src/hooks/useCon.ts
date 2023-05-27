@@ -6,7 +6,10 @@ export const useCurrCon = () => {
   const { conversations, currConversationId, currChatType } = useSelector((state: ChatApiState) => state.chatApi);
   return conversations[currChatType][currConversationId[currChatType]];
 };
-
+export const useActiveCon = () => {
+  const { conversations, activeConversationId, currChatType } = useSelector((state: ChatApiState) => state.chatApi);
+  return conversations[currChatType][activeConversationId[currChatType]];
+};
 export const useCurrConId = () => {
   const { currConversationId, currChatType } = useSelector((state: ChatApiState) => state.chatApi);
   return currConversationId[currChatType];
@@ -21,9 +24,9 @@ export const useCurrBotAudioURL = (id: number) => {
 
   return url;
 };
-export const useCurrBotId = () => {
-  const currCon = useCurrCon();
-  const id = currCon.idPlaying;
+export const useActiveBotId = () => {
+  const { audioIdPlaying } = useSelector((state: ChatApiState) => state.chatApi);
+  console.log("id", audioIdPlaying);
 
-  return id;
+  return audioIdPlaying;
 };

@@ -31,7 +31,6 @@ export interface Conversation {
   time: string;
   topic: string;
   conList: Array<ShownMessage>;
-  idPlaying: number;
 }
 type ChatType = "text" | "oral";
 export interface ChatApiSliceState {
@@ -47,6 +46,7 @@ export interface ChatApiSliceState {
   queue: Array<string>;
   msgQueue: Array<string>;
   lastMsg: string;
+  audioIdPlaying: number;
 }
 
 export interface ChatApiState {
@@ -149,8 +149,8 @@ const initialState: ChatApiSliceState = {
   model: "gpt-3.5-turbo",
   currChatType: "text",
   conversations: {
-    text: [{ time: getFormattedDate(), topic: "New Conversation", conList: [], idPlaying: -1 }],
-    oral: [{ time: getFormattedDate(), topic: "New Conversation", conList: [], idPlaying: -1 }],
+    text: [{ time: getFormattedDate(), topic: "New Conversation", conList: [] }],
+    oral: [{ time: getFormattedDate(), topic: "New Conversation", conList: [] }],
   },
   currConversationId: {
     text: 0,
@@ -169,6 +169,7 @@ const initialState: ChatApiSliceState = {
   queue: [],
   msgQueue: [],
   lastMsg: "",
+  audioIdPlaying: -1,
 };
 export const chatApiSlice = createSlice({
   name: "chatApi",
@@ -210,7 +211,7 @@ export const chatApiSlice = createSlice({
       const newCon = (character: Role) => {
         let id = state.conversations[type][state.activeConversationId[type]].conList.length;
         const _msg = character === "system" ? "" : msg;
-        const _id = character === "system" ? id - 1 : id;
+        const _id = character === "system" ? (id - 1) / 2 : id;
         return { time: getFormattedDate(), role: character, content: _msg, id: _id, audioURL: "" };
       };
       state.conversations[type][state.activeConversationId[type]].conList.push(newCon("user"));
@@ -239,7 +240,7 @@ export const chatApiSlice = createSlice({
     startNewConversation(state) {
       const type = state.currChatType;
       const last = state.conversations[type].length - 1;
-      last >= 0 && state.conversations[type][last].conList.length && state.conversations[type].push({ time: getFormattedDate(), topic: "New Conversation", conList: [], idPlaying: -1 }) && (state.validConversations as any)[type].push([]) && (state.currConversationId[type] = last + 1);
+      last >= 0 && state.conversations[type][last].conList.length && state.conversations[type].push({ time: getFormattedDate(), topic: "New Conversation", conList: [] }) && (state.validConversations as any)[type].push([]) && (state.currConversationId[type] = last + 1);
     },
     deleteConversation(
       state,
@@ -254,7 +255,7 @@ export const chatApiSlice = createSlice({
       state.conversations[type] = state.conversations[type].filter((_, index) => index !== id);
       state.validConversations[type] = (state.validConversations[type] as any).filter((_: any, index: any) => index !== action.payload);
 
-      !state.conversations[type].length && (state.conversations[type] = [{ time: getFormattedDate(), topic: "New Conversation", conList: [], idPlaying: -1 }]);
+      !state.conversations[type].length && (state.conversations[type] = [{ time: getFormattedDate(), topic: "New Conversation", conList: [] }]);
       !state.validConversations[type].length && (state.validConversations[type] = [[]]);
       state.currConversationId[type] = state.conversations[type].length - 1;
       lsSet(localStorageConversations[type], state.conversations[type]);
@@ -307,14 +308,18 @@ export const chatApiSlice = createSlice({
       const last = state.conversations[type][state.activeConversationId[type]].conList.length - 1;
       const currCon = state.conversations[type][state.activeConversationId[type]].conList[last];
       currCon.audioURL = wholeAudioUrl;
-      if (id !== -1) {
-        console.log("sadsad", id);
 
+      if (id !== -1) {
         state.conversations[type][state.activeConversationId[type]].conList.forEach((item) => {
           if (item.id === id && item.role === "system") {
+            console.log("捕获id");
+
             item.audioURL = wholeAudioUrl;
           }
         });
+        state.audioIdPlaying = id;
+      } else {
+        state.audioIdPlaying = currCon.id;
       }
 
       lsSet(localStorageConversations[type], state.conversations[type]);
@@ -322,13 +327,11 @@ export const chatApiSlice = createSlice({
     startAudioPlaying(state) {
       const type = state.currChatType;
       const last = state.conversations[type][state.activeConversationId[type]].conList.length - 1;
-      state.conversations[type][state.activeConversationId[type]].idPlaying = state.conversations[type][state.activeConversationId[type]].conList[last].id;
-      lsSet(localStorageConversations[type], state.conversations[type]);
+      state.audioIdPlaying = state.conversations[type][state.activeConversationId[type]].conList[last].id;
     },
     clearAudioPlaying(state) {
       const type = state.currChatType;
-      state.conversations[type][state.activeConversationId[type]].idPlaying = -1;
-      lsSet(localStorageConversations[type], state.conversations[type]);
+      state.audioIdPlaying = -1;
     },
   },
   extraReducers(builder) {

@@ -600,7 +600,7 @@ $padding: 10px;
             }
 
             .buttonWrapper {
-                bottom: $padding/2;
+                bottom: calc($padding/2);
                 right: 2*$padding;
                 position: absolute;
 
