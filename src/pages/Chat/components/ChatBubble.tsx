@@ -24,25 +24,10 @@ const ChatBubble = ({ showAll, time, type, message, id }: Props) => {
     </div>
   );
   const BubbleLeft = () => {
-    const PublicElem = ({ typeChat = "text", showAll = true }: { typeChat?: string; showAll?: boolean }) => {
-      const [isShown, setIsShown] = useState(false);
-      const handleClick = () => {
-        return {
-          oral: () => {
-            setIsShown(true);
-          },
-          text: () => {},
-        }[typeChat];
-      };
-      const style_chatBubbleShown = () => {
-        if (isShown || showAll) return styles.chatBubbleShown;
-        return "";
-      };
+    const PublicElem = ({ showAll = true }: { typeChat?: string; showAll?: boolean }) => {
       return (
         <div className={style[type]}>
-          <div onClick={handleClick} className={`${styles.chatBubble} ${style_chatBubbleShown()}`}>
-            {message ? <BubbleType type={type} /> : <Loading size={8} />}
-          </div>
+          <div className={`${styles.chatBubble}`}>{message ? <BubbleType type={type} showAll={showAll} /> : <Loading size={8} />}</div>
 
           <div className={styles.time}>{time}</div>
         </div>

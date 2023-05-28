@@ -2,25 +2,28 @@ import React, { Dispatch, SetStateAction, WheelEvent, createContext, useEffect, 
 import styles from "../index.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import ChatBubble from "./ChatBubble";
-import { ChatApiState, ShownMessage, clearAudioMsg, clearAudioPlaying, clearMsgQueue, getRecentConversations, shiftMsgQueue, startAudioPlaying, updateAudioUrl } from "../../../store/chatApiSlice";
+import { ChatApiState, ShownMessage, abortGenerating, clearAudioMsg, clearAudioPlaying, clearMsgQueue, ctrl, getRecentConversations, shiftMsgQueue, startAudioPlaying, updateAudioUrl } from "../../../store/chatApiSlice";
 import { nanoid } from "nanoid";
 import { toUint8Array } from "js-base64";
 import { getFormattedDate } from "../../../utils/date";
 import { useToken } from "../../../hooks/useToken";
 import { err, info, warn } from "../../../utils/alert";
 import { ttsReq } from "../../../api/reqDto";
-import { useCurrBotAudioURL, useCurrCon } from "../../../hooks/useCon";
+import { useActiveBotId, useCurrBotAudioURL, useCurrCon, useCurrConId } from "../../../hooks/useCon";
+import Button from "../../../components/Button/Button";
+import { BsFillSquareFill } from "react-icons/bs";
+import IconButton from "../../../components/IconButon/IconButton";
 
 type Props = {
   messageList: Array<ShownMessage>;
-
+  handleAudioStop: (_audio: HTMLAudioElement) => void;
   conId: number;
   currAudioSliceShouldPlay: HTMLAudioElement;
   urlPlaying: string;
   setUrlPlaying: Dispatch<SetStateAction<string>>;
 };
 
-type AudioInfoContextType = [string, (url: string) => void, (message: string, index: number) => void, HTMLAudioElement, boolean, boolean, (msg: string, stream?: boolean, id?: number) => void];
+type AudioInfoContextType = [string, (url: string) => void, (message: string, index: number) => void, HTMLAudioElement, boolean, boolean, (msg: string, stream?: boolean, id?: number) => void, HTMLAudioElement, Dispatch<SetStateAction<string[]>>, boolean];
 let ws: WebSocket;
 let audio = new Uint8Array([]);
 let count = 0;
@@ -28,22 +31,26 @@ const _audio = new Audio();
 let audioQ: any = [];
 let wholeAudioUrl = "";
 let preAudioSlice: any = [];
-
-export const AudioInfoContext = createContext<AudioInfoContextType>(["", () => {}, () => {}, new Audio(), false, false, () => {}]);
-const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messageList, conId }: Props) => {
+let isAutoEnd = true;
+export const AudioInfoContext = createContext<AudioInfoContextType>(["", () => {}, () => {}, new Audio(), false, false, () => {}, _audio, () => {}, false]);
+const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messageList, conId }: Props) => {
   const dispatch: Function = useDispatch();
   useEffect(() => {
     dispatch(getRecentConversations());
   }, []);
   const token = useToken();
-  const { currChatType, msgQueue } = useSelector((state: ChatApiState) => state.chatApi);
+  const { currChatType, msgQueue, loading } = useSelector((state: ChatApiState) => state.chatApi);
   const messagesEndRef = useRef<any>(null);
-  const [isAutoEnd, setIsAutoEnd] = useState(true);
-  const [showAll, setShowAll] = useState(true);
+  const [showAll, setShowAll] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
-  const [audioQueue, setAudioQueue] = useState([]); // [url1,url2,url3
+  const [audioQueue, setAudioQueue] = useState<Array<string>>([]); // [url1,url2,url3
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFinishWhole, setIsFinishWhole] = useState(false);
+  const activeAudioBotId = useActiveBotId();
+
+  useEffect(() => {
+    ws && ws.close(3403, "abort");
+  }, [activeAudioBotId]);
   const handlePlay = (message: string, id: number) => {
     if (isRequesting) {
       info("正在请求中，稍等片刻");
@@ -73,7 +80,7 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messa
   };
 
   const audioSliceTTSRequest = (msg: string, stream: boolean = true, id: number = -1) => {
-    console.log(msg);
+    if (currChatType === "text") return;
 
     if (msg === "[#OVER#]") {
       console.log("[finish playing whole audio]");
@@ -81,6 +88,7 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messa
       preAudioSlice = [];
       audio = new Uint8Array([]);
       dispatch(clearMsgQueue());
+      !stream && (audioQ = []);
       return;
     }
     setIsFinishWhole(false);
@@ -160,7 +168,8 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messa
 
   _audio.onpause = () => {
     audioQ.shift();
-    dispatch(clearAudioPlaying());
+
+    !audioQ.length && dispatch(clearAudioPlaying());
 
     setIsPlaying(false);
   };
@@ -175,7 +184,6 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messa
     }
     const nextAudio = audioQ[0];
     _audio.src = nextAudio;
-
     _audio.play();
 
     setIsPlaying(true);
@@ -189,12 +197,23 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messa
     }
   }, [msgQueue, isRequesting]);
   //when conId changes, pause audio
-  useEffect(() => {
-    handlePause(currAudioSliceShouldPlay.src);
-  }, [conId]);
+
   //pause audio when component unmount
   useEffect(() => {
     return handlePause(currAudioSliceShouldPlay.src);
+  }, []);
+
+  //destroy audio when component unmount and when conId changes
+  useEffect(() => {
+    handleAudioStop(_audio);
+    setShowAll(false);
+  }, [conId]);
+
+  useEffect(() => {
+    return () => {
+      handleAudioStop(_audio);
+      setShowAll(false);
+    };
   }, []);
   // useEffect(() => {
   //   if (!audioMsg) {
@@ -211,28 +230,51 @@ const ChatWindow = ({ urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messa
   });
   const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
     const { deltaY } = e;
-    messagesEndRef.current.scrollTop + 700 > messagesEndRef.current.scrollHeight && setIsAutoEnd(true);
-    deltaY < 0 && setIsAutoEnd(false);
+
+    messagesEndRef.current.scrollTop + 700 > messagesEndRef.current.scrollHeight && (isAutoEnd = true);
+    deltaY < 0 && (isAutoEnd = false);
   };
   const ShowAllBtn = () => {
     return (
-      <div className={styles.btnShowAll} onClick={() => setShowAll(!showAll)}>
-        Show All
-      </div>
+      <Button className={styles.btnShowAll} onClick={() => setShowAll(!showAll)}>
+        {showAll ? "隐藏" : "显示"}
+      </Button>
     );
   };
-  return (
-    <AudioInfoContext.Provider value={[urlPlaying, handlePause, handlePlay, currAudioSliceShouldPlay, isPlaying, isFinishWhole, audioSliceTTSRequest]}>
-      <div onWheel={(e) => handleWheel(e)} ref={messagesEndRef} className={styles.chatWindow}>
-        {currChatType === "oral" ? (
-          <>
-            <ShowAllBtn />
-          </>
-        ) : (
-          <ChatBubble id={-1} time={getFormattedDate()} showAll={true} type="system" message="Hey, there! How can I assist you today?" />
-        )}
 
-        {messageList && messageList.map(({ time, role, content, id }: ShownMessage) => <ChatBubble showAll={showAll} time={time} key={nanoid()} type={role} id={id} message={content} />)}
+  return (
+    <AudioInfoContext.Provider value={[urlPlaying, handlePause, handlePlay, currAudioSliceShouldPlay, isPlaying, isFinishWhole, audioSliceTTSRequest, _audio, setAudioQueue, showAll]}>
+      <div className={styles.chatWindowContainer}>
+        <div onWheel={(e) => handleWheel(e)} ref={messagesEndRef} className={styles.chatWindow}>
+          {currChatType === "oral" ? <ShowAllBtn /> : <ChatBubble id={-1} time={getFormattedDate()} showAll={showAll} type="system" message="Hey, there! How can I assist you today?" />}
+
+          {messageList && messageList.map(({ time, role, content, id }: ShownMessage) => <ChatBubble showAll={showAll} time={time} key={nanoid()} type={role} id={id} message={content} />)}
+
+          {activeAudioBotId !== -1 && (
+            <IconButton
+              className={styles.audioStopBtn}
+              onClick={() => {
+                handleAudioStop(_audio);
+              }}>
+              <>
+                <BsFillSquareFill />
+                &nbsp;停止音频
+              </>
+            </IconButton>
+          )}
+
+          {loading}
+          {loading === "loading" ? (
+            <IconButton className={styles.audioStopBtn} onClick={() => {}}>
+              <>
+                <BsFillSquareFill />
+                &nbsp;停止生成
+              </>
+            </IconButton>
+          ) : (
+            <></>
+          )}
+        </div>
       </div>
     </AudioInfoContext.Provider>
   );

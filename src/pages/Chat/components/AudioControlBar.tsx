@@ -1,48 +1,68 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useCurrBotAudioURL, useActiveBotId, useCurrChatType } from "../../../hooks/useCon";
 import { ChatBubbleContext } from "./ChatBubble";
 import styles from "./../index.module.scss";
 import IconButton from "../../../components/IconButon/IconButton";
-import { BsFillSquareFill } from "react-icons/bs";
+
 import { FaPlay } from "react-icons/fa";
 
 import { AudioInfoContext } from "./ChatWindow";
+import { useDispatch, useSelector } from "react-redux";
+import { ChatApiState, changeIdPlaying, clearAudioPlaying } from "../../../store/chatApiSlice";
+import { err, info } from "../../../utils/alert";
 
 type Props = {};
 
 const AudioControlElem = () => {
   const currChatType = useCurrChatType();
   const [message, id] = useContext(ChatBubbleContext);
-  const [urlPlaying, handlePause, _, currAudioSliceShouldPlay, isPlaying, isFinishWhole, audioSliceTTSRequest] = useContext(AudioInfoContext);
+
+  const [urlPlaying, handlePause, _, currAudioSliceShouldPlay, isPlaying, isFinishWhole, audioSliceTTSRequest, _audio, setAudioQueue] = useContext(AudioInfoContext);
   const currBotId = useActiveBotId();
   const currBotAudioURL = useCurrBotAudioURL(id);
+
+  const dispatch = useDispatch();
   const handlePlay = () => {
+    console.log("handlePlay", id);
+
     const play = () => {
+      _audio && _audio.pause();
+
+      audioSliceTTSRequest("[#OVER#]", false);
       currAudioSliceShouldPlay.play();
+      dispatch(changeIdPlaying(id));
+      console.log("change to ", id);
+
       currAudioSliceShouldPlay.onerror = (e) => {
         audioSliceTTSRequest(message, false, id);
 
-        alert("播放失败");
+        info("正在请求中，稍等片刻");
+      };
+      currAudioSliceShouldPlay.onplay = () => {};
+
+      currAudioSliceShouldPlay.onpause = () => {
+        dispatch(clearAudioPlaying());
       };
     };
+
     currBotAudioURL && (currAudioSliceShouldPlay.src = currBotAudioURL);
     currBotAudioURL && play();
   };
-  return {
-    oral:
-      id === currBotId ? (
-        <IconButton className={styles.stopBtn} onClick={() => currAudioSliceShouldPlay.pause()}>
-          <BsFillSquareFill />
-          <span>停止</span>
-        </IconButton>
-      ) : (
-        <IconButton className={styles.playBtn} onClick={handlePlay}>
-          <FaPlay />
-          <span>播放{id}</span>
-        </IconButton>
-      ),
-    text: <></>,
-  }[currChatType];
+  return (
+    <div>
+      {
+        {
+          oral: (
+            <IconButton className={`${styles.playBtn}   ${id === currBotId ? styles.playBtnPlaying : ""}`} onClick={id === currBotId ? () => {} : handlePlay}>
+              <FaPlay />
+              <span>播放</span>
+            </IconButton>
+          ),
+          text: <></>,
+        }[currChatType]
+      }
+    </div>
+  );
 };
 
 const AudioControlBar = (props: Props) => {

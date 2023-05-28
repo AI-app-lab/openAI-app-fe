@@ -1,5 +1,5 @@
 import { type } from "os";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import MarkDown from "./MarkDown";
 import { useCurrChatType } from "../../../hooks/useCon";
 import styles from "./../index.module.scss";
@@ -10,22 +10,33 @@ import AudioControlBar from "./AudioControlBar";
 import BubbleErrorBar from "./BubbleErrorBar";
 type Props = {
   type: "err" | "system" | "user";
+  showAll: boolean;
 };
 
-const BubbleType = ({ type }: Props) => {
-  const [_, message] = useContext(ChatBubbleContext);
-  const [urlPlaying, handlePause, __, currAudioSliceShouldPlay, isPlaying, isFinishWhole] = useContext(AudioInfoContext);
+const BubbleType = ({ type, showAll }: Props) => {
+  const [message] = useContext(ChatBubbleContext);
+  const [urlPlaying, handlePause, __, currAudioSliceShouldPlay, isPlaying, isFinishWhole, ___, ____, _____] = useContext(AudioInfoContext);
+  const [isShown, setIsShown] = useState(false);
+
+  useEffect(() => {
+    if (isShown) {
+    }
+  }, [isShown]);
   const Bubble = {
     err: (
       <>
-        <BubbleErrorBar />
         <MarkDown />
+        <BubbleErrorBar />
       </>
     ),
     system: (
       <>
         <AudioControlBar />
-        <MarkDown />
+        {
+          <div onClick={() => setIsShown(!isShown)} style={{ filter: showAll ? "" : "blur(5px)" }}>
+            <MarkDown />
+          </div>
+        }
       </>
     ),
     user: <>{message}</>,

@@ -29,6 +29,7 @@ const InputRange = ({ urlPlaying, handlePause }: Props) => {
   }, [userMessage]);
 
   async function handleClick(type: ChatRequestType = "chat") {
+    type === "voice" && handlePause();
     if (loading === "loading") {
       return;
     }
@@ -82,7 +83,15 @@ const InputRange = ({ urlPlaying, handlePause }: Props) => {
   );
   const textAreaTypeOral = (
     <div className={styles["inputRangeContainerOral"]}>
-      <OralInputRange handlePause={handlePause} textAreaRef={textAreaRef} handleClick={() => handleClick("voice")} msg={userMessage} setMsg={setUserMessage} />
+      <OralInputRange
+        handlePause={handlePause}
+        textAreaRef={textAreaRef}
+        handleClick={() => {
+          handleClick("voice");
+        }}
+        msg={userMessage}
+        setMsg={setUserMessage}
+      />
     </div>
   );
 

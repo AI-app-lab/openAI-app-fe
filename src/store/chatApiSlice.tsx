@@ -52,7 +52,7 @@ export interface ChatApiSliceState {
 export interface ChatApiState {
   chatApi: ChatApiSliceState;
 }
-const ctrl = new AbortController();
+export const ctrl = new AbortController();
 const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispatch) => {
   return new Promise<void>((resolve, reject) => {
     let timer = setTimeout(() => {
@@ -95,6 +95,7 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
         }
       },
       onerror(err) {
+        alert("请求错误");
         console.log("Error:", err);
         reject(err);
       },
@@ -305,9 +306,8 @@ export const chatApiSlice = createSlice({
       const { wholeAudioUrl, id } = action.payload;
 
       const type = state.currChatType;
-      const last = state.conversations[type][state.activeConversationId[type]].conList.length - 1;
-      const currCon = state.conversations[type][state.activeConversationId[type]].conList[last];
-      currCon.audioURL = wholeAudioUrl;
+
+      let activeCon;
 
       if (id !== -1) {
         state.conversations[type][state.activeConversationId[type]].conList.forEach((item) => {
@@ -318,8 +318,12 @@ export const chatApiSlice = createSlice({
           }
         });
         state.audioIdPlaying = id;
+        activeCon = state.conversations[type][state.activeConversationId[type]].conList[id];
       } else {
-        state.audioIdPlaying = currCon.id;
+        const last = state.conversations[type][state.activeConversationId[type]].conList.length - 1;
+        activeCon = state.conversations[type][state.activeConversationId[type]].conList[last];
+        state.audioIdPlaying = activeCon.id;
+        activeCon.audioURL = wholeAudioUrl;
       }
 
       lsSet(localStorageConversations[type], state.conversations[type]);
@@ -330,8 +334,13 @@ export const chatApiSlice = createSlice({
       state.audioIdPlaying = state.conversations[type][state.activeConversationId[type]].conList[last].id;
     },
     clearAudioPlaying(state) {
-      const type = state.currChatType;
       state.audioIdPlaying = -1;
+    },
+    changeIdPlaying(state, action: { payload: number }) {
+      state.audioIdPlaying = action.payload;
+    },
+    abortGenerating(state) {
+      ctrl.abort();
     },
   },
   extraReducers(builder) {
@@ -365,5 +374,5 @@ export const chatApiSlice = createSlice({
     });
   },
 });
-export const { modifyTopic, refreshValidConversations, receivedUpdate, sendUserMessage, getRecentConversations, deleteConversation, startNewConversation, switchConversation, setCurrChatType, clearAudioMsg, pushToMsgQueue, shiftMsgQueue, setLastMsg, updateAudioUrl, clearMsgQueue, clearAudioPlaying, startAudioPlaying } = chatApiSlice.actions;
+export const { modifyTopic, refreshValidConversations, receivedUpdate, sendUserMessage, getRecentConversations, deleteConversation, startNewConversation, switchConversation, setCurrChatType, clearAudioMsg, pushToMsgQueue, shiftMsgQueue, setLastMsg, updateAudioUrl, clearMsgQueue, clearAudioPlaying, startAudioPlaying, changeIdPlaying, abortGenerating } = chatApiSlice.actions;
 export default chatApiSlice.reducer;
