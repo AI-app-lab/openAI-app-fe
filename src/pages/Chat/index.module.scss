@@ -361,7 +361,7 @@ $padding: 10px;
                 color: var(--text);
 
                 $bubble-border-radius: 10px;
-                $bubble-padding: 10px;
+                $bubble-padding: 15px;
 
 
 
@@ -370,6 +370,7 @@ $padding: 10px;
 
                 .bubbleContainer {
                     display: flex;
+
 
                     .chatBubble {
 
@@ -381,9 +382,10 @@ $padding: 10px;
                         background-color: var(--secondary-bg);
                         overflow-wrap: break-word;
                         box-sizing: border-box;
+                        font-size: 16px;
 
                         .reactMarkdown {
-                            font-size: 16px;
+
 
                             &.err {
                                 border-bottom: 1px solid var(--secondary-bg);

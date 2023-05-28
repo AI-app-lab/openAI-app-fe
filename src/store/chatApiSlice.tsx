@@ -5,6 +5,8 @@ import { lsSet } from "../utils/localstorage";
 import { getTokensCount } from "../utils/getTokensCount";
 
 import { err } from "../utils/alert";
+import { clear } from "console";
+import { Prompts } from "../utils/prompt";
 
 export type ChatRequestType = "voice" | "chat";
 export type Role = "err" | "user" | "system";
@@ -52,13 +54,16 @@ export interface ChatApiSliceState {
 export interface ChatApiState {
   chatApi: ChatApiSliceState;
 }
-export const ctrl = new AbortController();
+export let ctrl = new AbortController();
+
 const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispatch) => {
+  ctrl = new AbortController();
+
   return new Promise<void>((resolve, reject) => {
     let timer = setTimeout(() => {
       ctrl.abort();
       reject(new Error("Timeout"));
-    }, 10000);
+    }, 5000);
     let msgChunk = "";
 
     fetchEventSource("http://43.139.143.5:9898/v1/chat/completions", {
@@ -84,7 +89,7 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
         timer = setTimeout(() => {
           ctrl.abort();
           reject(new Error("Timeout"));
-        }, 10000);
+        }, 5000);
 
         const word = JSON.parse(msg.data).choices[0].delta.content;
         word && dispatch(receivedUpdate(word));
@@ -95,7 +100,6 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
         }
       },
       onerror(err) {
-        alert("请求错误");
         console.log("Error:", err);
         reject(err);
       },
@@ -110,7 +114,7 @@ export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (
 
   //当使用的token数超过4000时，将messages中的前两条消息删除直到token数小于4000，如果messages中只有一条消息，那么删除这条消息并且报错
   tokens > 100 && console.log("Token到达阈值开始压缩....:", tokens);
-  while (tokens > 100) {
+  while (tokens > 4000) {
     if (chatRequestDto.messages.length <= 1) {
       console.log("压缩失败");
       return rejectWithValue({ message: "你的信息太长了" });
@@ -129,6 +133,15 @@ export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (
   }
 
   try {
+    chatRequestDto.messages = [
+      {
+        role: "system",
+        content: Prompts.englishTeacherAndImprover,
+      },
+      ...chatRequestDto.messages,
+    ];
+    console.log("[Request] ", JSON.stringify(chatRequestDto.messages, null, 3));
+
     await handleFetchEventSource(chatRequestDto, dispatch);
   } catch (err) {
     console.log("Error:", err);
@@ -341,6 +354,7 @@ export const chatApiSlice = createSlice({
     },
     abortGenerating(state) {
       ctrl.abort();
+      state.loading = "idle";
     },
   },
   extraReducers(builder) {
@@ -359,7 +373,8 @@ export const chatApiSlice = createSlice({
       // console.log(currConversation[lastBotMsg].content);
     });
     builder.addCase(getBotMessages.rejected, (state, action: any) => {
-      err("请求错误");
+      state.loading !== "idle" && err("请求错误");
+
       ctrl.abort();
       const type = state.currChatType;
       const last = state.conversations[type][state.activeConversationId[type]].conList.length - 1;

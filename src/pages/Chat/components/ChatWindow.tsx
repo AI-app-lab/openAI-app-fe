@@ -265,7 +265,11 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
 
           {loading}
           {loading === "loading" ? (
-            <IconButton className={styles.audioStopBtn} onClick={() => {}}>
+            <IconButton
+              className={styles.audioStopBtn}
+              onClick={() => {
+                dispatch(abortGenerating());
+              }}>
               <>
                 <BsFillSquareFill />
                 &nbsp;停止生成
