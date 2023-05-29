@@ -33,7 +33,7 @@ const BubbleType = ({ type, showAll }: Props) => {
       <>
         <AudioControlBar />
         {
-          <div onClick={() => setIsShown(!isShown)} style={{ filter: showAll ? "" : "blur(5px)" }}>
+          <div onClick={() => setIsShown(!isShown)} style={{ filter: showAll ? "" : "blur(3px)" }}>
             <MarkDown />
           </div>
         }

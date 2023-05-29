@@ -332,11 +332,11 @@ $padding: 10px;
             right: 0;
             top: 0px;
             height: 25px !important;
-            width: 80px !important;
+            width: 70px !important;
             border-radius: 5px;
             z-index: 1;
             margin: 0 auto !important;
-            transform: translateY(-10px);
+            transform: translateY(-15px);
             font-weight: 600;
 
 
@@ -361,7 +361,7 @@ $padding: 10px;
                 color: var(--text);
 
                 $bubble-border-radius: 10px;
-                $bubble-padding: 15px;
+                $bubble-padding: 10px;
 
 
 
@@ -419,7 +419,7 @@ $padding: 10px;
                             }
 
                             .rmdP+.rmdP {
-                                margin-top: 20px;
+                                margin-top: 10px;
                             }
 
                             ol li {
@@ -561,7 +561,7 @@ $padding: 10px;
 
                         padding-bottom: 5px;
                         margin-bottom: 5px;
-                        border-bottom: 1px solid var(--secondary);
+                        border-bottom: 2px solid var(--secondary);
 
                         .stopBtn {
                             color: red;
@@ -642,6 +642,11 @@ $padding: 10px;
                 border-radius: var(--border-radius);
                 background-color: var(--primary-bg);
                 bottom: 0px;
+
+                textarea {
+                    display: block;
+                    height: 100%;
+                }
             }
 
             .inputRange:focus {
