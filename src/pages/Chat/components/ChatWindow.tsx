@@ -118,12 +118,20 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
     ws.onclose = (e) => {
       if (e.code === 3403) {
         setIsRequesting(false);
+        audioSliceTTSRequest("[#OVER#]");
         warn("请求被中断");
         return;
       }
       if (e.code === 4503) {
         setIsRequesting(false);
+        audioSliceTTSRequest("[#OVER#]");
         err("服务暂不可用");
+        return;
+      }
+      if (e.code === 4403) {
+        setIsRequesting(false);
+        audioSliceTTSRequest("[#OVER#]");
+        err("服务已过期");
         return;
       }
       console.log(e.code, e.reason);
@@ -215,14 +223,6 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
       setShowAll(false);
     };
   }, []);
-  // useEffect(() => {
-  //   if (!audioMsg) {
-  //     return;
-  //   } else {
-  //     audioSliceTTSRequest(audioMsg);
-  //     index_1++;
-  //   }
-  // }, [audioMsg]);
 
   useEffect(() => {
     const scroll = messagesEndRef.current.scrollHeight - messagesEndRef.current.clientHeight;
@@ -263,7 +263,6 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
             </IconButton>
           )}
 
-          {loading}
           {loading === "loading" ? (
             <IconButton
               className={styles.audioStopBtn}

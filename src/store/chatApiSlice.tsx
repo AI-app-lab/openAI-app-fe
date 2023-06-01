@@ -1,11 +1,9 @@
 import { createSlice, createAsyncThunk, original, Dispatch } from "@reduxjs/toolkit";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { getFormattedDate } from "../utils/date";
-import { lsSet } from "../utils/localstorage";
+import { lsGet, lsSet } from "../utils/localstorage";
 import { getTokensCount } from "../utils/getTokensCount";
-
 import { err } from "../utils/alert";
-import { clear } from "console";
 import { Prompts } from "../utils/prompt";
 
 export type ChatRequestType = "voice" | "chat";
@@ -58,7 +56,8 @@ export let ctrl = new AbortController();
 
 const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispatch) => {
   ctrl = new AbortController();
-
+  console.log(lsGet("userInfo").token);
+  let count = 0;
   return new Promise<void>((resolve, reject) => {
     let timer = setTimeout(() => {
       ctrl.abort();
@@ -70,6 +69,7 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
       method: "POST",
       body: JSON.stringify({ ...chatRequestDto, stream: true }),
       headers: {
+        token: lsGet("userInfo").token,
         "Content-Type": "application/json",
       },
       signal: ctrl.signal,
@@ -96,7 +96,8 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
         word && (msgChunk += word);
         //if msgChunk is a complete sentence, push it to the queue
         if (msgChunk.endsWith(".") || msgChunk.endsWith("!") || msgChunk.endsWith("?")) {
-          msgChunk.length > 250 && dispatch(pushToMsgQueue(msgChunk)) && (msgChunk = "");
+          count === 0 && msgChunk.length > 50 && dispatch(pushToMsgQueue(msgChunk)) && (msgChunk = "") && count++;
+          count >= 0 && msgChunk.length > 250 && dispatch(pushToMsgQueue(msgChunk)) && (msgChunk = "");
         }
       },
       onerror(err) {
@@ -106,6 +107,7 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
     });
   });
 };
+
 export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (chatRequestDto: ChatRequestDto, { dispatch, rejectWithValue }) => {
   console.log("[Request] ", JSON.stringify(chatRequestDto.messages, null, 3));
   const { type, ...rest } = chatRequestDto;

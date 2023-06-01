@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import SendSharpIcon from "@mui/icons-material/SendSharp";
 import { FaMicrophoneSlash } from "react-icons/fa";
 import { useToken } from "../../../hooks/useToken";
+import { err } from "../../../utils/alert";
 
 type Props = {
   msg: string;
@@ -124,6 +125,9 @@ const OralInputRange = ({ handlePause, textAreaRef, handleClick, msg, setMsg }: 
       }
     };
     ws.onclose = (e: any) => {
+      if (e.code === 4403) {
+        err("服务已过期");
+      }
       _isRecording = false;
       setIsRecording(false);
 

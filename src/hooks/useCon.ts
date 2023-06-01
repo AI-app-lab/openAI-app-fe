@@ -26,7 +26,6 @@ export const useCurrBotAudioURL = (id: number) => {
 };
 export const useActiveBotId = () => {
   const { audioIdPlaying } = useSelector((state: ChatApiState) => state.chatApi);
-  console.log("id", audioIdPlaying);
 
   return audioIdPlaying;
 };

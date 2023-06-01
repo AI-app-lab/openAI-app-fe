@@ -246,6 +246,7 @@ export const userSlice = createSlice({
       state.userInfo = action.payload.data;
       localStorage.setItem("userInfo", JSON.stringify(action.payload.data));
       state.status = { status: "idle", message: "注册成功", sCode: null };
+      success("注册成功");
     });
     builder.addCase(signUp.pending, (state, action) => {
       state.status = { status: "loading", message: null, sCode: null };
