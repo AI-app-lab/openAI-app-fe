@@ -2,7 +2,10 @@ $captchaBtnWidth: 105px;
 $form-elem-margin-top: 16px;
 
 .modalWrapper {
-
+    background: url(/src/assets/landingbg.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
     background-color: var(--primary-bg);
     position: absolute;
     height: 100vh;
@@ -16,14 +19,16 @@ $form-elem-margin-top: 16px;
     .modal {
         border-radius: var(--border-radius);
         position: absolute;
-        background-color: var(--primary-bg);
-
+        padding: 40px 30px;
+        border: 1px solid var(--secondary);
 
         color: var(--text);
 
         display: flex;
         flex-direction: column;
         align-items: center;
+        background-color: var(--primary-bg);
+
 
         form {
 
@@ -96,6 +101,8 @@ $form-elem-margin-top: 16px;
                 display: flex;
                 justify-content: space-between;
                 cursor: pointer;
+                font-size: 20px;
+                font-weight: 700;
 
                 .loginMethod {
                     width: 50%;
@@ -141,7 +148,9 @@ $form-elem-margin-top: 16px;
 
             .sendBtn {
                 color: var(--text-contrast);
-
+                font-weight: 700;
+                letter-spacing: 2px;
+                font-size: 16px;
                 height: var(--input-lg-h);
                 width: 30%;
 
@@ -174,6 +183,9 @@ $form-elem-margin-top: 16px;
         }
 
         .btn {
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-size: 16px;
             color: var(--text-contrast);
             margin-top: $form-elem-margin-top;
             width: var(--modal-lg-w) !important;
@@ -188,6 +200,9 @@ $form-elem-margin-top: 16px;
 
 
         .btn {
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-size: 16px;
             margin-top: $form-elem-margin-top;
 
             width: var(--modal-su-w) !important;
@@ -203,7 +218,9 @@ $form-elem-margin-top: 16px;
             }
 
             .sendBtn {
-
+                font-weight: 700;
+                letter-spacing: 2px;
+                font-size: 16px;
                 height: var(--input-su-h);
                 width: 30% !important;
             }

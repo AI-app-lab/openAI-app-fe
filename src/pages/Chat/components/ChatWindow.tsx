@@ -41,7 +41,7 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
   const token = useToken();
   const { currChatType, msgQueue, loading } = useSelector((state: ChatApiState) => state.chatApi);
   const messagesEndRef = useRef<any>(null);
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);
   const [audioQueue, setAudioQueue] = useState<Array<string>>([]); // [url1,url2,url3
   const [isPlaying, setIsPlaying] = useState(false);
@@ -134,6 +134,12 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
         err("服务已过期");
         return;
       }
+      if (e.code === 4000) {
+        setIsRequesting(false);
+        audioSliceTTSRequest("[#OVER#]");
+        err("未知错误");
+        return;
+      }
       console.log(e.code, e.reason);
 
       if (e) dispatch(shiftMsgQueue());
@@ -214,7 +220,7 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
   //destroy audio when component unmount and when conId changes
   useEffect(() => {
     handleAudioStop(_audio);
-    setShowAll(false);
+    setShowAll(true);
   }, [conId]);
 
   useEffect(() => {

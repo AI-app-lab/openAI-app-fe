@@ -1,10 +1,12 @@
 import React from "react";
 import styles from "./index.module.scss";
 
-type Props = {};
+type Props = {
+  className?: string;
+};
 
-const Logo = (props: Props) => {
-  return <div className={styles.logo}>Kit Zone</div>;
+const Logo = ({ className = "" }: Props) => {
+  return <div className={`${styles.logo} ${className}`}>Kit Zone</div>;
 };
 
 export default Logo;

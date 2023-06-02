@@ -19,37 +19,37 @@ type CardType = {
   media: JSX.Element;
   bg: string;
 };
+export const cards = [
+  {
+    title: "对话",
+    content: "在这里，您可以与AI进行实时的文字对话，讨论各种主题，获取帮助或咨询。",
+    media: <QuestionAnswerSharpIcon />,
+    bg: useColor(),
+    to: "chat",
+  },
+  {
+    title: "口语",
+    content: "通过语音输入，您可以与AI进行口语交流，提高您的发音和口语能力。",
+    media: <HeadsetMicIcon />,
+    bg: useColor(),
+    to: "oral-chat",
+  },
+  {
+    title: "作图",
+    content: "AI将帮助您创建绘图和设计，让您的想法在视觉上呈现出来。",
+    media: <DrawIcon />,
+    bg: useColor(),
+    to: "draw",
+  },
+  {
+    title: "翻译",
+    content: "利用AI翻译功能，快速准确地将文本翻译成多种语言。",
+    media: <TranslateIcon />,
+    bg: useColor(),
+    to: "translator",
+  },
+];
 const Apps = (props: Props) => {
-  const cards = [
-    {
-      title: "对话",
-      content: "在这里，您可以与AI进行实时的文字对话，讨论各种主题，获取帮助或咨询。",
-      media: <QuestionAnswerSharpIcon />,
-      bg: useColor(),
-      to: "chat",
-    },
-    {
-      title: "口语",
-      content: "通过语音输入，您可以与AI进行口语交流，提高您的发音和口语能力。",
-      media: <HeadsetMicIcon />,
-      bg: useColor(),
-      to: "oral-chat",
-    },
-    {
-      title: "作图",
-      content: "AI将帮助您创建绘图和设计，让您的想法在视觉上呈现出来。",
-      media: <DrawIcon />,
-      bg: useColor(),
-      to: "draw",
-    },
-    {
-      title: "翻译",
-      content: "利用AI翻译功能，快速准确地将文本翻译成多种语言。",
-      media: <TranslateIcon />,
-      bg: useColor(),
-      to: "translate",
-    },
-  ];
   return (
     <div className={styles.wrapper}>
       <div className={styles.title}>我的应用</div>

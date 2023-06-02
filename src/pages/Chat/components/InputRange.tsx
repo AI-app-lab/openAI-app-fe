@@ -7,6 +7,7 @@ import { ChatApiState, ChatRequestDto, ChatRequestType, RequestMessage, getBotMe
 import SendSharpIcon from "@mui/icons-material/SendSharp";
 import OralInputRange from "../../OralChat/components/OralInputRange";
 import IconButton from "../../../components/IconButon/IconButton";
+import { useToken } from "../../../hooks/useToken";
 
 type Props = {
   urlPlaying: string;
@@ -19,7 +20,7 @@ const InputRange = ({ urlPlaying, handlePause }: Props) => {
   const { loading, currConversationId, validConversations, currChatType, model, maxContextNum } = useSelector((state: ChatApiState) => state.chatApi);
   const sleep = (t: number) => new Promise((p) => setTimeout(p, t));
   const textAreaRef = useRef<any>(null);
-
+  const token = useToken();
   useEffect(() => {
     //if words are too long, make the textarea higher,but not higher than 200px,if words are too short,make the textarea lower,but not lower than 36px
     if (textAreaRef.current) {
@@ -48,6 +49,7 @@ const InputRange = ({ urlPlaying, handlePause }: Props) => {
     ].slice(-1 * maxContextNum); //context
 
     const requestDto: ChatRequestDto = {
+      token: token || "",
       model: model,
       type: type,
       messages: messages,

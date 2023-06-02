@@ -7,21 +7,30 @@ type Props = {
   media: JSX.Element;
   bg: string;
   className?: string;
+  mediaStyle?: React.CSSProperties;
+
+  cardTitleStyle?: React.CSSProperties;
+  contentStyle?: React.CSSProperties;
 };
 
-const Card = ({ bg, title, content, media }: Props) => {
+const Card = ({ mediaStyle, cardTitleStyle, contentStyle, bg, title, content, media }: Props) => {
   return (
     <div className={`${styles.cardContainer} ${styles.className}`}>
       <div
         style={{
           backgroundColor: bg,
+          ...mediaStyle,
         }}
         className={styles.media}>
         {media}
       </div>
       <div className={styles.rightPart}>
-        <div className={styles.cardTitle}>{title}</div>
-        <div className={styles.content}>{content}</div>
+        <div style={cardTitleStyle} className={styles.cardTitle}>
+          {title}
+        </div>
+        <div style={contentStyle} className={styles.content}>
+          {content}
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,8 @@ import chatApiSlice from "./chatApiSlice";
 import configSlice from "./configSlice";
 import userSlice from "./userSlice";
 import cpntsSlice from "./cpntsSlice";
+import aiDrawApiSlice from "./aiDrawApiSlice";
+import aiTranslateApiSlice from "./aiTranslateApiSlice";
 // import chatOralSlice from "./chatOralSlice";
 export default configureStore({
   reducer: {
@@ -10,6 +12,8 @@ export default configureStore({
     config: configSlice,
     user: userSlice,
     cpnts: cpntsSlice,
+    aiDraw: aiDrawApiSlice,
+    aiTranslate: aiTranslateApiSlice,
   },
 });
 // oral: chatOralSlice,

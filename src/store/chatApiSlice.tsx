@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, original, Dispatch } from "@reduxjs/toolkit";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { getFormattedDate } from "../utils/date";
-import { lsGet, lsSet } from "../utils/localstorage";
+import { lsSet } from "../utils/localstorage";
 import { getTokensCount } from "../utils/getTokensCount";
 import { err } from "../utils/alert";
 import { Prompts } from "../utils/prompt";
@@ -9,6 +9,7 @@ import { Prompts } from "../utils/prompt";
 export type ChatRequestType = "voice" | "chat";
 export type Role = "err" | "user" | "system";
 export interface ChatRequestDto {
+  token: string;
   model: string;
   type: ChatRequestType;
   messages: Array<RequestMessage>;
@@ -56,7 +57,7 @@ export let ctrl = new AbortController();
 
 const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispatch) => {
   ctrl = new AbortController();
-  console.log(lsGet("userInfo").token);
+  const { token } = chatRequestDto;
   let count = 0;
   return new Promise<void>((resolve, reject) => {
     let timer = setTimeout(() => {
@@ -69,8 +70,8 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
       method: "POST",
       body: JSON.stringify({ ...chatRequestDto, stream: true }),
       headers: {
-        token: lsGet("userInfo").token,
-        "Content-Type": "application/json",
+        token: token,
+        "Content-Type": "application/json; charset=utf-8",
       },
       signal: ctrl.signal,
       onmessage(msg) {
@@ -107,19 +108,20 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
     });
   });
 };
-
-export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (chatRequestDto: ChatRequestDto, { dispatch, rejectWithValue }) => {
-  console.log("[Request] ", JSON.stringify(chatRequestDto.messages, null, 3));
-  const { type, ...rest } = chatRequestDto;
-  let tokens = getTokensCount(rest);
-  const before = tokens;
-
-  //当使用的token数超过4000时，将messages中的前两条消息删除直到token数小于4000，如果messages中只有一条消息，那么删除这条消息并且报错
+//当使用的token数超过4000时，将messages中的前两条消息删除直到token数小于4000，如果messages中只有一条消息，那么删除这条消息并且报错
+const compress = (
+  tokens: number,
+  chatRequestDto: ChatRequestDto,
+  before: number
+): {
+  isCompress: boolean;
+  _chatRequestDto: ChatRequestDto;
+} => {
   tokens > 100 && console.log("Token到达阈值开始压缩....:", tokens);
   while (tokens > 4000) {
     if (chatRequestDto.messages.length <= 1) {
       console.log("压缩失败");
-      return rejectWithValue({ message: "你的信息太长了" });
+      return { isCompress: false, _chatRequestDto: chatRequestDto };
     }
     chatRequestDto.messages.shift();
     tokens = getTokensCount(chatRequestDto);
@@ -133,7 +135,19 @@ export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (
   } else {
     console.log("Tokens(当前):", tokens);
   }
+  return { isCompress: true, _chatRequestDto: chatRequestDto };
+};
+export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (chatRequestDto: ChatRequestDto, { dispatch, rejectWithValue }) => {
+  console.log("[Request] ", JSON.stringify(chatRequestDto.messages, null, 3));
+  const { type, ...rest } = chatRequestDto;
+  let tokens = getTokensCount(rest);
+  const before = tokens;
 
+  const { isCompress, _chatRequestDto } = compress(tokens, chatRequestDto, before);
+
+  if (!isCompress) return rejectWithValue({ message: "你的信息太长了" });
+
+  chatRequestDto = _chatRequestDto;
   try {
     chatRequestDto.messages = [
       {

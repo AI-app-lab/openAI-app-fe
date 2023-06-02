@@ -38,10 +38,23 @@
 :root {
     --chatbox-sidebar-position: initial;
     --transform-x-full: translateX(0);
+    --draw-image-container-margin-left: 20px;
 
     @media screen and (max-width: 768px) {
         --chatbox-sidebar-position: absolute;
         --transform-x-full: translateX(-100%);
+        --draw-image-container-margin-left: 0px;
+    }
+}
+
+//display
+:root {
+    --translate-flex-direction: row;
+    --draw-flex-direction: row;
+
+    @media screen and (max-width: 768px) {
+        --translate-flex-direction: column;
+        --draw-flex-direction: column-reverse;
     }
 }
 
@@ -101,8 +114,9 @@
     --modal-su-w: var(--modal-lg-w);
     --input-lg-h: 56px;
     --input-su-h: var(--input-lg-h);
-
-
+    //draw
+    --draw-image-size: 450px;
+    --draw-prompt-container-width: 45%;
 
     @media screen and (max-width: 768px) {
         --sidebar-wrapper-width-on-closed: 0px;
@@ -116,6 +130,9 @@
         --chatbox-sidebar-width: 100%;
         --modal-lg-w: 350px;
         --input-lg-h: 46px;
+        //draw
+        --draw-image-size: 400px;
+        --draw-prompt-container-width: 70%;
         // --chatbox-sidebar-width: 0px;
     }
 }

@@ -1,20 +1,19 @@
 import { createBrowserRouter, Outlet, Navigate } from "react-router-dom";
-import App from "./App";
-import LandingPage from "./pages/LandingPage/LandingPage";
 
-import Box from "./pages/Chat/Chat";
+import LandingPage, { Main } from "./pages/LandingPage/LandingPage";
+
 import Layout from "./components/Layout/Layout";
 import Apps from "./pages/Apps/Apps";
 import Chat from "./pages/Chat/Chat";
-import { useDispatch, useSelector } from "react-redux";
 
-import { UserState, saveUserInfo } from "./store/userSlice";
 import Shop from "./pages/Shop/Shop";
 import Login from "./pages/authPages/Login/Login";
 import OralChat from "./pages/OralChat/OralChat";
 import SignUp from "./pages/authPages/SignUp/SignUp";
 import { lsGet } from "./utils/localstorage";
-import { useAuth } from "./hooks/useAuth";
+import Translator from "./pages/Translator/Translator";
+import Draw from "./pages/Draw/Draw";
+import Product from "./pages/Product/Product";
 
 export const GuardRounded = ({ component }: { component: JSX.Element }) => {
   return lsGet("userInfo") ? component : <Navigate to="/" replace />;
@@ -26,11 +25,22 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage />,
+    children: [
+      {
+        path: "/",
+        element: <Main />,
+      },
+      {
+        path: "/product",
+        element: <Product />,
+      },
+    ],
   },
   {
     path: "/login",
     element: <Login />,
   },
+
   {
     path: "/sign-up",
     element: <SignUp />,
@@ -54,6 +64,14 @@ export const router = createBrowserRouter([
       {
         path: "apps/oral-chat",
         element: <GuardRounded component={<OralChat />} />,
+      },
+      {
+        path: "apps/translator",
+        element: <GuardRounded component={<Translator />} />,
+      },
+      {
+        path: "apps/draw",
+        element: <GuardRounded component={<Draw />} />,
       },
     ],
   },

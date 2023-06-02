@@ -4,7 +4,7 @@ export interface Country {
 export const cn = {
   login: "登录",
   send: "发送",
-  loginTitle: "欢迎！",
+  loginTitle: "注册",
   phoneNum: "手机号",
   pwd: "密码",
   captcha: "验证码",
@@ -14,4 +14,5 @@ export const cn = {
   guest: "游客",
   normalUsers: "普通用户",
   hasAcc: "已有账号？立即登录",
+  languages: ["English", "Français", "Deutsch", "日本語", "한국어", "中文"],
 };

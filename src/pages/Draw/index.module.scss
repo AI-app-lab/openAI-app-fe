@@ -1,0 +1,79 @@
+$border: 1px solid var(--secondary);
+$border-radius: 5px;
+
+.container {
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: var(--draw-flex-direction);
+
+    .promptContainer {
+        width: var(--draw-prompt-container-width);
+        justify-content: center;
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+
+        .generateBtn {
+            border-radius: 20px;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 180px !important;
+            height: 45px !important;
+
+            &.btnDisabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        }
+
+        .input {
+            padding: 15px;
+            resize: none;
+            border: none;
+            border: $border;
+            border-radius: $border-radius;
+            width: 100%;
+            height: 170px;
+            font-size: 16px;
+            color: var(--text);
+            background: var(--primary-bg);
+            font-weight: 500;
+            margin-top: 10px;
+
+
+            &:focus {
+                outline: none;
+                border: 1px solid var(--primary);
+            }
+        }
+    }
+
+
+    .imageContainer {
+        overflow: hidden;
+        border-radius: $border-radius;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: var(--draw-image-size);
+        height: var(--draw-image-size);
+        border: $border;
+        border-radius: $border-radius;
+        margin-left: var(--draw-image-container-margin-left);
+        background-color: var(--primary-bg);
+        color: var(--text);
+        font-size: 16px;
+        font-weight: 600;
+
+        .image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+    }
+}

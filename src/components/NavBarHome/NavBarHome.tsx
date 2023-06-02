@@ -18,12 +18,14 @@ import Menu from "../Menu/Menu";
 import MenuItem from "../Menu/MenuItem";
 import { useNavigate } from "react-router-dom";
 import { CpntsState, setIsSideBarOpen } from "../../store/cpntsSlice";
+import { useUserInfo } from "../../hooks/useUserInfo";
 
 type Props = {};
 
 const NavBarHome = () => {
   const { isSideBarOpen } = useSelector((state: CpntsState) => state.cpnts);
-  const { userInfo } = useSelector((state: UserState) => state.user);
+
+  const userInfo = useUserInfo();
   useEffect(() => {
     !localStorage.getItem("userInfo") && navigate("/");
     const handleClickOutside = (e: Event) => {
@@ -40,6 +42,7 @@ const NavBarHome = () => {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const menuRef = useRef<HTMLDivElement>(null);
+
   return (
     <>
       <NavBar>
@@ -57,7 +60,7 @@ const NavBarHome = () => {
               )}
             </ListItem>
           }
-          <ListItem onClick={() => navigate("/apps")}>
+          <ListItem className={styles.logoContainer} onClick={() => navigate("/apps")}>
             <Logo />
           </ListItem>
         </ListContainer>
@@ -67,10 +70,10 @@ const NavBarHome = () => {
             <MenuItem btn={false}>
               <ListContainer className={styles.menuItemFirst} fd="column">
                 <ListItem btn={false} className={styles.name}>
-                  Hang Hu
+                  {userInfo?.username}
                 </ListItem>
                 <ListItem btn={false} className={styles.email}>
-                  hang717616@gmail.com
+                  {userInfo?.email}
                 </ListItem>
               </ListContainer>
             </MenuItem>
@@ -79,7 +82,7 @@ const NavBarHome = () => {
             <MenuItem onClick={() => dispatch(logout())}>登出</MenuItem>
           </Menu>
           <ListItem onClick={() => setOpen(!open)} className={styles.avatar}>
-            <div>H</div>
+            <div>{userInfo?.email.slice(0, 1)}</div>
           </ListItem>
           <ListItem>
             <IconButton onClick={() => setOpen(!open)} children={<KeyboardArrowDownSharpIcon />} />
