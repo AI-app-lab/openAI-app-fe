@@ -68,7 +68,18 @@ export const aiTranslateApiSlice = createSlice({
       console.log("getTranslatedResult.fulfilled", action);
     });
     builder.addCase(getTranslatedResult.rejected, (state, action) => {
-      err("翻译失败 CODE: " + action.payload);
+      switch (action.payload) {
+        case 400:
+          err("文本为空或长度超过限制");
+          break;
+        case 401:
+          err("未登录或未授权");
+          break;
+        case 403:
+          err("服务已过期");
+        default:
+          err("未知错误");
+      }
       state.result = "翻译失败";
       console.log("getTranslatedResult.rejected", action);
     });

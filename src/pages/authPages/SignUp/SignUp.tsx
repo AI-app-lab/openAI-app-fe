@@ -78,7 +78,7 @@ const SignUp = (props: Props) => {
   ) : (
     <div onMouseDown={() => dispatch(openModal("close"))} className={styles.modalWrapper}>
       <div onMouseDown={(e) => e.stopPropagation()} className={styles.signUpModal}>
-        <h2> {locations[location].loginTitle}</h2>
+        <div className={styles.suTitle}> {locations[location].loginTitle}</div>
         <form onSubmit={(e) => e.preventDefault()}>
           <label>
             <input id="email" value={userPostDto.email} autoComplete="text" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, email: e.target.value }))} placeholder="请输入邮箱" type="text" />

@@ -30,9 +30,29 @@ $length: 60px;
         min-height: 480px;
         max-width: var(--main-content-width-max);
         width: 100%;
+        display: flex;
+        justify-content: center;
+
+
+        .gridC {
+
+            display: flex;
+            min-width: 300px;
+            max-width: 1200px;
+            height: 250px;
+
+
+
+            .grid {}
+
+        }
 
         .cardLink {
+
+
+
             .item {
+
                 display: flex;
                 justify-content: center;
                 align-items: center;

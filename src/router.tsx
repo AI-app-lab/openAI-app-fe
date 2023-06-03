@@ -14,6 +14,7 @@ import { lsGet } from "./utils/localstorage";
 import Translator from "./pages/Translator/Translator";
 import Draw from "./pages/Draw/Draw";
 import Product from "./pages/Product/Product";
+import Account from "./pages/Account/Account";
 
 export const GuardRounded = ({ component }: { component: JSX.Element }) => {
   return lsGet("userInfo") ? component : <Navigate to="/" replace />;
@@ -58,7 +59,7 @@ export const router = createBrowserRouter([
         element: <GuardRounded component={<Chat type="text" />} />,
       },
       {
-        path: "apps/shop",
+        path: "shop",
         element: <GuardRounded component={<Shop />} />,
       },
       {
@@ -73,6 +74,21 @@ export const router = createBrowserRouter([
         path: "apps/draw",
         element: <GuardRounded component={<Draw />} />,
       },
+      {
+        path: "account",
+        element: <GuardRounded component={<Account />} />,
+      },
     ],
+  },
+  {
+    path: "*",
+    element: (
+      <h1
+        style={{
+          textAlign: "center",
+        }}>
+        404 NOT FOUND
+      </h1>
+    ),
   },
 ]);

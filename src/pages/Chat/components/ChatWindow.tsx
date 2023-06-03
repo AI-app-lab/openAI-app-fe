@@ -39,7 +39,7 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
     dispatch(getRecentConversations());
   }, []);
   const token = useToken();
-  const { currChatType, msgQueue, loading } = useSelector((state: ChatApiState) => state.chatApi);
+  const { currChatType, msgQueue, loading, currConversationId } = useSelector((state: ChatApiState) => state.chatApi);
   const messagesEndRef = useRef<any>(null);
   const [showAll, setShowAll] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);
@@ -84,11 +84,20 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
 
     if (msg === "[#OVER#]") {
       console.log("[finish playing whole audio]");
+
+      !stream && (audioQ = []) && _audio.pause();
+      if (!stream) {
+        console.log("清理");
+        ctrl.abort();
+        dispatch(clearAudioPlaying());
+      }
+
+      dispatch(abortGenerating());
       setIsRequesting(false);
       preAudioSlice = [];
       audio = new Uint8Array([]);
       dispatch(clearMsgQueue());
-      !stream && (audioQ = []);
+
       return;
     }
     setIsFinishWhole(false);
@@ -131,10 +140,10 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
       if (e.code === 4403) {
         setIsRequesting(false);
         audioSliceTTSRequest("[#OVER#]");
-        err("服务已过期");
+        err("出错");
         return;
       }
-      if (e.code === 4000) {
+      if (e.code > 4000) {
         setIsRequesting(false);
         audioSliceTTSRequest("[#OVER#]");
         err("未知错误");
@@ -206,6 +215,7 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
   useEffect(() => {
     if (msgQueue.length > 0 && !isRequesting) {
       const temp = msgQueue[0];
+      console.log("message queue", msgQueue);
 
       audioSliceTTSRequest(temp);
     }
@@ -221,6 +231,9 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
   useEffect(() => {
     handleAudioStop(_audio);
     setShowAll(true);
+    console.log("切换");
+
+    audioSliceTTSRequest("[#OVER#]", false);
   }, [conId]);
 
   useEffect(() => {
@@ -256,15 +269,18 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
 
           {messageList && messageList.map(({ time, role, content, id }: ShownMessage) => <ChatBubble showAll={showAll} time={time} key={nanoid()} type={role} id={id} message={content} />)}
 
-          {activeAudioBotId !== -1 && (
+          {activeAudioBotId === -1 ? (
+            <>{activeAudioBotId}</>
+          ) : (
             <IconButton
               className={styles.audioStopBtn}
               onClick={() => {
                 handleAudioStop(_audio);
+                audioSliceTTSRequest("[#OVER#]", false);
               }}>
               <>
                 <BsFillSquareFill />
-                &nbsp;停止音频
+                &nbsp;停止音频{activeAudioBotId}
               </>
             </IconButton>
           )}

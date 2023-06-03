@@ -53,6 +53,7 @@ const InputRange = ({ urlPlaying, handlePause }: Props) => {
       model: model,
       type: type,
       messages: messages,
+      temperature: 0.7,
     };
 
     setUserMessage("");

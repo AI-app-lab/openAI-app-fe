@@ -13,6 +13,7 @@ const Link = ({ children, className = "", to }: Props) => {
       to={to}
       className={className}
       style={{
+        width: "100%",
         textDecoration: "none",
         color: "inherit",
       }}>

@@ -1,0 +1,161 @@
+input {
+    outline: none;
+    border: none;
+    background-color: transparent;
+    padding: 5px;
+    margin-right: 1px;
+    border-bottom: 2px solid var(--secondary);
+
+    &:focus {
+        border-bottom: 2px solid var(--primary);
+    }
+}
+
+.container {
+
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 370px;
+    color: var(--text);
+}
+
+.infoContainer {
+    box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+
+    font-size: 18px;
+    padding: 20px;
+
+    width: 100%;
+
+
+    .email {
+        padding: 5px;
+        margin-top: 10px;
+        border-bottom: 1px solid var(--secondary);
+        width: 100%;
+
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .username {
+        @extend .email;
+    }
+
+    .time {
+        width: 100%;
+        margin-top: 10px;
+
+        .timeTitle {
+            margin: auto;
+        }
+
+        .timeContainer {
+
+            width: 100%;
+
+            .service {
+                @extend .email;
+                margin-top: 20px;
+                display: block;
+                width: 100%;
+
+                display: flex;
+
+
+
+            }
+        }
+
+    }
+
+
+
+
+    .pwdResetContainer {
+
+        align-items: center;
+
+        width: 100%;
+        margin-top: 10px;
+
+        .confirmBtn {
+            margin-top: 20px;
+            width: 100px;
+            height: 30px;
+
+            background-color: var(--primary);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .vCodeGroup {
+            input {
+                width: 150px;
+            }
+
+            .sendBtn {
+                width: 50px !important;
+            }
+
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .pwdReset {
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-top: 10px;
+            color: var(--text);
+            font-size: 16px;
+            border-bottom: 1px solid var(--secondary);
+            background-color: transparent;
+            cursor: pointer;
+            font-weight: 700;
+
+
+        }
+
+        .pwdResetForm {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+
+            &.hide {
+                display: none;
+            }
+        }
+
+        .newPwd {
+            input {
+                width: 200px;
+
+            }
+
+            &.hide {
+                display: none;
+            }
+
+            margin-top: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+
+        }
+
+    }
+
+}

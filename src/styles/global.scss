@@ -110,10 +110,11 @@
     --chatbox-window-height: calc(100% - var(--chatbox-input-range-height) - var(--chatbox-header-height));
     --main-margin-left-width: var(--sidebar-width);
 
-    --modal-lg-w: 396px;
+    --modal-lg-w: 360px;
     --modal-su-w: var(--modal-lg-w);
     --input-lg-h: 56px;
     --input-su-h: var(--input-lg-h);
+    --modal-font-size: 18px;
     //draw
     --draw-image-size: 450px;
     --draw-prompt-container-width: 45%;
@@ -128,8 +129,9 @@
         --main-content-width-min: 100%;
         --chatbox-width: 100%;
         --chatbox-sidebar-width: 100%;
-        --modal-lg-w: 350px;
+        --modal-lg-w: 330px;
         --input-lg-h: 46px;
+        --modal-font-size: 16px;
         //draw
         --draw-image-size: 400px;
         --draw-prompt-container-width: 70%;

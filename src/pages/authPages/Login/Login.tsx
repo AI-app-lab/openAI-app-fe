@@ -51,7 +51,6 @@ const Login = (props: Props) => {
     pwd: { clsSms: `${styles.loginMethod}`, clsPwd: `${styles.loginMethod}  ${styles.pwdLg}`, placeHolderL1: "请输入邮箱", placeHolderL2: "请输入密码" },
     sms: { clsSms: `${styles.loginMethod} ${styles.smsLg}`, clsPwd: `${styles.loginMethod}`, placeHolderL1: "请输入邮箱", placeHolderL2: "请输入验证码" },
   };
-  const alert = {};
 
   const [userLoginPostDto, setUserLoginPostDto] = useState<UserLoginPostDto>({ email: "", password: "", verificationCode: "" });
 

@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk, original, Dispatch } from "@reduxjs/toolkit";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
-import { getFormattedDate } from "../utils/date";
+import { getCurrFormattedDate } from "../utils/date";
 import { lsSet } from "../utils/localstorage";
 import { getTokensCount } from "../utils/getTokensCount";
 import { err } from "../utils/alert";
 import { Prompts } from "../utils/prompt";
+import { clear } from "console";
 
 export type ChatRequestType = "voice" | "chat";
 export type Role = "err" | "user" | "system";
@@ -13,6 +14,7 @@ export interface ChatRequestDto {
   model: string;
   type: ChatRequestType;
   messages: Array<RequestMessage>;
+  temperature: number;
 }
 
 export interface RequestMessage {
@@ -57,14 +59,22 @@ export let ctrl = new AbortController();
 
 const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispatch) => {
   ctrl = new AbortController();
+  let stopQuick = false;
+
   const { token } = chatRequestDto;
-  let count = 0;
+
   return new Promise<void>((resolve, reject) => {
     let timer = setTimeout(() => {
-      ctrl.abort();
-      reject(new Error("Timeout"));
+      clearTimeout(timer);
+
+      reject(new Error("TIMEOUT"));
     }, 5000);
     let msgChunk = "";
+    let count = 0;
+    ctrl.signal.onabort = () => {
+      clearTimeout(timer);
+      reject(new Error("ABORT"));
+    };
 
     fetchEventSource("http://43.139.143.5:9898/v1/chat/completions", {
       method: "POST",
@@ -74,6 +84,7 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
         "Content-Type": "application/json; charset=utf-8",
       },
       signal: ctrl.signal,
+
       onmessage(msg) {
         clearTimeout(timer);
         if (msg.data === "[DONE]") {
@@ -83,13 +94,12 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
             msgChunk = "";
           }
           dispatch(pushToMsgQueue("[#OVER#]"));
-          ctrl.abort();
           resolve();
           return;
         }
         timer = setTimeout(() => {
-          ctrl.abort();
-          reject(new Error("Timeout"));
+          clearTimeout(timer);
+          reject(new Error("TIMEOUT"));
         }, 5000);
 
         const word = JSON.parse(msg.data).choices[0].delta.content;
@@ -97,12 +107,19 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
         word && (msgChunk += word);
         //if msgChunk is a complete sentence, push it to the queue
         if (msgChunk.endsWith(".") || msgChunk.endsWith("!") || msgChunk.endsWith("?")) {
-          count === 0 && msgChunk.length > 50 && dispatch(pushToMsgQueue(msgChunk)) && (msgChunk = "") && count++;
-          count >= 0 && msgChunk.length > 250 && dispatch(pushToMsgQueue(msgChunk)) && (msgChunk = "");
+          if (count === 0 && msgChunk.length > 100) {
+            dispatch(pushToMsgQueue(msgChunk));
+            count += 1;
+            msgChunk = "";
+          } else if (msgChunk.length > 250) {
+            dispatch(pushToMsgQueue(msgChunk));
+            msgChunk = "";
+          }
+
+          console.log(count, msgChunk.length);
         }
       },
       onerror(err) {
-        console.log("Error:", err);
         reject(err);
       },
     });
@@ -149,19 +166,22 @@ export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (
 
   chatRequestDto = _chatRequestDto;
   try {
-    chatRequestDto.messages = [
-      {
-        role: "system",
-        content: Prompts.englishTeacherAndImprover,
-      },
-      ...chatRequestDto.messages,
-    ];
+    type === "voice" &&
+      (chatRequestDto.messages = [
+        {
+          role: "system",
+          content: Prompts.englishTeacherAndImprover,
+        },
+        ...chatRequestDto.messages,
+      ]);
     console.log("[Request] ", JSON.stringify(chatRequestDto.messages, null, 3));
 
     await handleFetchEventSource(chatRequestDto, dispatch);
   } catch (err) {
-    console.log("Error:", err);
-    dispatch(pushToMsgQueue("[#OVER#]"));
+    console.log("Errorasdas:", err);
+    if (err === "TIMEOUT") {
+      dispatch(pushToMsgQueue("[#OVER#]"));
+    }
     return rejectWithValue({ message: "" });
   }
 });
@@ -179,8 +199,8 @@ const initialState: ChatApiSliceState = {
   model: "gpt-3.5-turbo",
   currChatType: "text",
   conversations: {
-    text: [{ time: getFormattedDate(), topic: "New Conversation", conList: [] }],
-    oral: [{ time: getFormattedDate(), topic: "New Conversation", conList: [] }],
+    text: [{ time: getCurrFormattedDate(), topic: "New Conversation", conList: [] }],
+    oral: [{ time: getCurrFormattedDate(), topic: "New Conversation", conList: [] }],
   },
   currConversationId: {
     text: 0,
@@ -242,7 +262,7 @@ export const chatApiSlice = createSlice({
         let id = state.conversations[type][state.activeConversationId[type]].conList.length;
         const _msg = character === "system" ? "" : msg;
         const _id = character === "system" ? (id - 1) / 2 : id;
-        return { time: getFormattedDate(), role: character, content: _msg, id: _id, audioURL: "" };
+        return { time: getCurrFormattedDate(), role: character, content: _msg, id: _id, audioURL: "" };
       };
       state.conversations[type][state.activeConversationId[type]].conList.push(newCon("user"));
 
@@ -270,7 +290,7 @@ export const chatApiSlice = createSlice({
     startNewConversation(state) {
       const type = state.currChatType;
       const last = state.conversations[type].length - 1;
-      last >= 0 && state.conversations[type][last].conList.length && state.conversations[type].push({ time: getFormattedDate(), topic: "New Conversation", conList: [] }) && (state.validConversations as any)[type].push([]) && (state.currConversationId[type] = last + 1);
+      last >= 0 && state.conversations[type][last].conList.length && state.conversations[type].push({ time: getCurrFormattedDate(), topic: "New Conversation", conList: [] }) && (state.validConversations as any)[type].push([]) && (state.currConversationId[type] = last + 1);
     },
     deleteConversation(
       state,
@@ -285,7 +305,7 @@ export const chatApiSlice = createSlice({
       state.conversations[type] = state.conversations[type].filter((_, index) => index !== id);
       state.validConversations[type] = (state.validConversations[type] as any).filter((_: any, index: any) => index !== action.payload);
 
-      !state.conversations[type].length && (state.conversations[type] = [{ time: getFormattedDate(), topic: "New Conversation", conList: [] }]);
+      !state.conversations[type].length && (state.conversations[type] = [{ time: getCurrFormattedDate(), topic: "New Conversation", conList: [] }]);
       !state.validConversations[type].length && (state.validConversations[type] = [[]]);
       state.currConversationId[type] = state.conversations[type].length - 1;
       lsSet(localStorageConversations[type], state.conversations[type]);
@@ -315,7 +335,7 @@ export const chatApiSlice = createSlice({
     },
 
     pushToMsgQueue(state, action: { payload: string }) {
-      state.msgQueue.push(action.payload);
+      state.currChatType === "oral" && state.msgQueue.push(action.payload);
     },
     clearMsgQueue(state) {
       state.msgQueue = [];
@@ -364,6 +384,7 @@ export const chatApiSlice = createSlice({
     },
     clearAudioPlaying(state) {
       state.audioIdPlaying = -1;
+      console.log("carry");
     },
     changeIdPlaying(state, action: { payload: number }) {
       state.audioIdPlaying = action.payload;
@@ -376,6 +397,7 @@ export const chatApiSlice = createSlice({
   extraReducers(builder) {
     builder.addCase(getBotMessages.pending, (state) => {});
     builder.addCase(getBotMessages.fulfilled, (state) => {
+      ctrl.abort();
       const type = state.currChatType;
       (state.validConversations as any)[type][state.activeConversationId[type]].length > state.maxContextNum && (state.validConversations[type][state.activeConversationId[type]] = (state.validConversations as any)[type][state.activeConversationId[type]].splice(-1 * state.maxContextNum));
 
@@ -390,7 +412,7 @@ export const chatApiSlice = createSlice({
     });
     builder.addCase(getBotMessages.rejected, (state, action: any) => {
       state.loading !== "idle" && err("请求错误");
-
+      state.audioIdPlaying = -1;
       ctrl.abort();
       const type = state.currChatType;
       const last = state.conversations[type][state.activeConversationId[type]].conList.length - 1;
@@ -398,7 +420,7 @@ export const chatApiSlice = createSlice({
       (state.validConversations as any)[type][state.activeConversationId[type]].pop();
       (state.validConversations as any)[type][state.activeConversationId[type]].pop();
       const msg = state.conversations[type][state.activeConversationId[type]].conList[last].content;
-      state.conversations[type][state.activeConversationId[type]].conList[last] = { time: getFormattedDate(), role: "err", content: msg + `[${action.payload?.message ? action.payload?.message : "出错了"}]`, id: -1, audioURL: "" };
+      state.conversations[type][state.activeConversationId[type]].conList[last] = { time: getCurrFormattedDate(), role: "err", content: msg + `[${action.payload?.message ? action.payload?.message : "出错了"}]`, id: -1, audioURL: "" };
       lsSet(localStorageConversations[type], state.conversations[type]);
       lsSet(localStorageValidConversations[type], state.validConversations[type]);
       state.loading = "idle";

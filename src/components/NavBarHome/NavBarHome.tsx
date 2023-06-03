@@ -5,10 +5,7 @@ import ListItem from "../ListItem/ListItem";
 import KeyboardArrowDownSharpIcon from "@mui/icons-material/KeyboardArrowDownSharp";
 
 import { useDispatch, useSelector } from "react-redux";
-import { UserState, logout, openModal } from "../../store/userSlice";
-import { ConfigState } from "../../store/configSlice";
-
-import { nanoid } from "nanoid";
+import { logout } from "../../store/userSlice";
 
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import IconButton from "../IconButon/IconButton";
@@ -19,6 +16,7 @@ import MenuItem from "../Menu/MenuItem";
 import { useNavigate } from "react-router-dom";
 import { CpntsState, setIsSideBarOpen } from "../../store/cpntsSlice";
 import { useUserInfo } from "../../hooks/useUserInfo";
+import Link from "../Link/Link";
 
 type Props = {};
 
@@ -77,8 +75,12 @@ const NavBarHome = () => {
                 </ListItem>
               </ListContainer>
             </MenuItem>
-            <MenuItem>资费</MenuItem>
-            <MenuItem>账户管理</MenuItem>
+            <MenuItem onClick={() => setOpen(!open)}>
+              <Link to="shop">资费</Link>
+            </MenuItem>
+            <MenuItem onClick={() => setOpen(!open)}>
+              <Link to="account">账户管理</Link>
+            </MenuItem>
             <MenuItem onClick={() => dispatch(logout())}>登出</MenuItem>
           </Menu>
           <ListItem onClick={() => setOpen(!open)} className={styles.avatar}>

@@ -54,9 +54,9 @@ const Apps = (props: Props) => {
     <div className={styles.wrapper}>
       <div className={styles.title}>我的应用</div>
       <div className={styles.container}>
-        <Grid container rowSpacing={5}>
+        <Grid className={styles.gridC} container rowSpacing={8}>
           {cards.map(({ to, title, content, media, bg }) => (
-            <Grid key={nanoid()} xs={12} md={6}>
+            <Grid className={styles.grid} key={nanoid()} xs={12} md={6}>
               <Link className={styles.cardLink} to={to}>
                 <div className={styles.item}>
                   <Card bg={bg} title={title} content={content} media={media} />

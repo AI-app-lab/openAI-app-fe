@@ -16,7 +16,7 @@ const Product = (props: Props) => {
         <Grid container rowSpacing={5}>
           {cards.map(({ title, content, media, bg }) => (
             <Grid key={nanoid()} xs={12} sm={6}>
-              <div className={`${styles.item}  ${title === "口语" || title === "对话" ? styles.itemRecommended : ""}`}>
+              <div className={`${styles.item}  ${title === "口语" ? styles.itemRecommended : ""}`}>
                 <Card
                   mediaStyle={{
                     color: "white",
@@ -33,7 +33,7 @@ const Product = (props: Props) => {
                   content={content}
                   media={media}
                 />
-                {title === "口语" || title === "对话" ? (
+                {title === "口语" ? (
                   <div className={styles.recommended}>
                     <FaCrown />
                   </div>

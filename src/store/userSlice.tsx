@@ -3,14 +3,22 @@ import axios, { AxiosResponse, isAxiosError } from "axios";
 import { enqueueSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import { err, success } from "../utils/alert";
+
+type EmailVerifyType = "signup" | "resetPwd";
 export interface UserEmailVerifyDto {
   email: string;
+  type?: EmailVerifyType;
 }
 
 export interface UserPostDto {
   username: string;
   email: string;
   password: string;
+  verificationCode: string;
+}
+export interface PwdResetDto {
+  email: string;
+  newPassword: string;
   verificationCode: string;
 }
 export interface UserLoginPostDto {
@@ -26,17 +34,38 @@ export interface UserInfo {
   username: string;
   id: number;
   timeSet: string;
+  expireTime1: string; //AI助理
+  expireTime2: string; //口语
+  expireTime3: string; //图片
+  expireTime4: string; //翻译
 }
 
 export interface UserState {
   user: UserInitialState;
 }
-
-export const verifyEmail = createAsyncThunk("users/verifyEmail", async (userEmailVerifyDto: UserEmailVerifyDto, { dispatch, rejectWithValue }) => {
+export const resetPwd = createAsyncThunk("users/resetPwd", async (pwdResetDto: PwdResetDto, { dispatch, rejectWithValue }) => {
+  const url = "http://43.139.143.5:9999/user/set/password";
   try {
-    const response = await axios.post("http://43.139.143.5:9999/signup/verification", userEmailVerifyDto);
+    const response = await axios.post(url, pwdResetDto);
 
-    return "已发送";
+    return { status: response.status };
+  } catch (err) {
+    if (isAxiosError(err)) {
+      const errCode = err.response?.status;
+      return rejectWithValue(errCode);
+    }
+  }
+});
+
+export const verifyEmail = createAsyncThunk("users/verifyEmail", async ({ type = "signup", ...userEmailVerifyDto }: UserEmailVerifyDto, { dispatch, rejectWithValue }) => {
+  const url = {
+    signup: "http://43.139.143.5:9999/signup/verification",
+    resetPwd: "http://43.139.143.5:9999/user/reset/password",
+  };
+  try {
+    const response = await axios.post(url[type], userEmailVerifyDto);
+
+    return { data: type, status: response.status };
   } catch (err) {
     if (isAxiosError(err)) {
       const errCode = err.response?.status;
@@ -100,11 +129,11 @@ export const loginWithVCode = createAsyncThunk("users/loginWithVCode", async (vC
   }
 });
 export interface Status {
-  status: "idle" | "loading" | "failed";
+  status: "idle" | "loading";
   sCode: any;
   message: any;
 }
-export type NextTryTime = Record<"login" | "signup", number>;
+export type NextTryTime = Record<"login" | "signup" | "resetPwd", number>;
 export interface UserInitialState {
   userInfo: UserInfo | null;
   vCode: number | null;
@@ -122,6 +151,7 @@ const initialState: UserInitialState = {
   nextTryTime: {
     login: 0,
     signup: 0,
+    resetPwd: 0,
   },
   status: { status: "idle", sCode: null, message: null },
   currentModal: "close",
@@ -147,6 +177,35 @@ export const userSlice = createSlice({
   },
 
   extraReducers: (builder) => {
+    builder.addCase(resetPwd.fulfilled, (state, action) => {
+      state.status = { status: "idle", message: "重置成功", sCode: action.payload?.status };
+      success("重置成功");
+    });
+    builder.addCase(resetPwd.pending, (state, action) => {
+      state.status = { status: "loading", message: null, sCode: null };
+    });
+    builder.addCase(resetPwd.rejected, (state, action) => {
+      let errMsg = "";
+      switch (action.payload) {
+        case 404:
+          err("邮箱不存在");
+          state.status = { status: "idle", message: "邮箱不存在", sCode: action.error.code };
+          break;
+        case 500:
+          err("服务器暂时无法提供服务，请稍后再试");
+          state.status = { status: "idle", message: "服务器暂时无法提供服务，请稍后再试", sCode: action.error.code };
+          break;
+
+        case 400:
+          err("重置密码失败");
+          state.status = { status: "idle", message: "重置密码失败", sCode: action.error.code };
+          break;
+        default:
+          err("网络错误");
+          state.status = { status: "idle", message: "网络错误", sCode: action.error.code };
+      }
+    });
+
     builder.addCase(loginWithVCode.fulfilled, (state, action) => {
       if (!action.payload) {
         return;
@@ -164,23 +223,23 @@ export const userSlice = createSlice({
       switch (action.payload) {
         case 404:
           errMsg = "邮箱不存在";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
           break;
         case 500:
           errMsg = "服务器暂时无法提供服务，请稍后再试";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
           break;
         case 401:
           errMsg = "验证码无效";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
           break;
         case 400:
           errMsg = "邮箱格式有误";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
           break;
         default:
           errMsg = "网络错误";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
       }
       err(errMsg);
     });
@@ -211,16 +270,21 @@ export const userSlice = createSlice({
         default:
           errMsg = "网络错误！";
       }
-      state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+      state.status = { status: "idle", message: errMsg, sCode: action.error.code };
     });
 
     builder.addCase(verifyEmail.fulfilled, (state, action) => {
-      state.nextTryTime["signup"] = new Date().getTime() + 60 * 1000;
+      const type = action.payload?.data;
+      console.log(type);
+
+      type && (state.nextTryTime[type] = new Date().getTime() + 60 * 1000);
       state.status = { status: "idle", message: "发送成功", sCode: null };
       success("发送成功");
     });
     builder.addCase(verifyEmail.pending, (state, action) => {
       state.nextTryTime["signup"] = 0;
+      state.nextTryTime["resetPwd"] = 0;
+
       state.status = { status: "loading", message: null, sCode: null };
     });
     builder.addCase(verifyEmail.rejected, (state, action) => {
@@ -228,16 +292,24 @@ export const userSlice = createSlice({
 
       switch (action.payload) {
         case 409:
-          state.status = { status: "failed", message: "邮箱已存在", sCode: action.error.code };
+          err("邮箱已存在");
+          state.status = { status: "idle", message: "邮箱已存在", sCode: action.error.code };
           break;
-
+        case 429:
+          err("发送太频繁");
+          state.status = { status: "idle", message: "发送太频繁", sCode: action.error.code };
         case 400:
-          state.status = { status: "failed", message: "发送失败", sCode: action.error.code };
+          err("发送失败");
+          state.status = { status: "idle", message: "发送失败", sCode: action.error.code };
           break;
         case 500:
-          state.status = { status: "failed", message: "服务器错误", sCode: action.error.code };
+          err("服务器错误");
+          state.status = { status: "idle", message: "服务器错误", sCode: action.error.code };
+          break;
         default:
-          state.status = { status: "failed", message: "网络错误", sCode: action.error.code };
+          err("网络错误");
+          state.status = { status: "idle", message: "网络错误", sCode: action.error.code };
+          break;
       }
     });
     builder.addCase(signUp.fulfilled, (state, action) => {
@@ -258,11 +330,11 @@ export const userSlice = createSlice({
       switch (action.payload) {
         case 400:
           errMsg = "验证未成功，请重试！";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
           break;
         default:
           errMsg = "未知错误！";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
       }
       err(errMsg);
     });
@@ -276,29 +348,27 @@ export const userSlice = createSlice({
       state.status = { status: "loading", message: null, sCode: null };
     });
     builder.addCase(login.rejected, (state, action) => {
-      console.log(123);
-
       let errMsg = "";
       switch (action.payload) {
         case 400:
           errMsg = "用户名或密码错误！";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
           break;
         case 401:
           errMsg = "用户名或密码错误！";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
           break;
         case 404:
           errMsg = "用户不存在！";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
           break;
         case 500:
           errMsg = "未知错误！";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
           break;
         default:
           errMsg = "网络错误！";
-          state.status = { status: "failed", message: errMsg, sCode: action.error.code };
+          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
       }
       enqueueSnackbar(errMsg, {
         variant: "error",
