@@ -113,6 +113,7 @@ const Account = (props: Props) => {
             </ListItem>
             <ListItem className={`${styles.newPwd} ${isPwdCanSet ? "" : styles.hide}`}>
               <input
+                type="password"
                 onChange={(e) => {
                   setUserPostDto((prev) => ({
                     ...prev,

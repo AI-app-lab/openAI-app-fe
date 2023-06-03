@@ -36,16 +36,14 @@ export const Main = () => {
         </p>
       </div>
 
-      <Button className={styles.goBtn}>
-        <Link to="/sign-up">免费注册</Link>
-      </Button>
+      <Link to="/sign-up">
+        <Button className={styles.goBtn}>免费注册 </Button>
+      </Link>
     </>
   );
 };
 
 const LandingPage = () => {
-  const { theme } = useSelector((state: ConfigState) => state.config);
-
   return (
     <div className={`${styles.landingLayout}`}>
       <NavBarLanding />

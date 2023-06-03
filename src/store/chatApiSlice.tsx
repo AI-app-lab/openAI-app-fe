@@ -59,7 +59,6 @@ export let ctrl = new AbortController();
 
 const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispatch) => {
   ctrl = new AbortController();
-  let stopQuick = false;
 
   const { token } = chatRequestDto;
 
@@ -81,12 +80,27 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
       body: JSON.stringify({ ...chatRequestDto, stream: true }),
       headers: {
         token: token,
-        "Content-Type": "application/json; charset=utf-8",
+        "Content-Type": "application/json",
       },
       signal: ctrl.signal,
+      async onopen(response) {
+        console.log(123456);
 
+        if (response.ok && response.headers.get("content-type") === "text/event-stream") {
+          return; // everything's good
+        } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+          console.log(response.status);
+
+          // client-side errors are usually non-retriable:
+          throw new Error(`${response.status}`);
+        } else {
+          throw new Error("未知错误");
+        }
+      },
       onmessage(msg) {
         clearTimeout(timer);
+        console.log(msg);
+
         if (msg.data === "[DONE]") {
           if (msgChunk.length) {
             dispatch(pushToMsgQueue(msgChunk));
@@ -178,11 +192,11 @@ export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (
 
     await handleFetchEventSource(chatRequestDto, dispatch);
   } catch (err) {
-    console.log("Errorasdas:", err);
+    console.log("Error:", err);
     if (err === "TIMEOUT") {
       dispatch(pushToMsgQueue("[#OVER#]"));
     }
-    return rejectWithValue({ message: "" });
+    return rejectWithValue((err as any).message);
   }
 });
 
@@ -411,7 +425,18 @@ export const chatApiSlice = createSlice({
       // console.log(currConversation[lastBotMsg].content);
     });
     builder.addCase(getBotMessages.rejected, (state, action: any) => {
-      state.loading !== "idle" && err("请求错误");
+      if (state.loading !== "idle") {
+        switch (action.payload) {
+          case "403":
+            err("服务未开通或已过期");
+            break;
+          case "TIMEOUT":
+            err("请求超时");
+            break;
+          default:
+            err("未知错误");
+        }
+      }
       state.audioIdPlaying = -1;
       ctrl.abort();
       const type = state.currChatType;

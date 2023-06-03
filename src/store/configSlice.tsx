@@ -11,7 +11,7 @@ export interface ConfigState {
 
 const initialState: ConfigInitState = {
   location: "cn",
-  theme: "dark",
+  theme: "light",
 };
 export const configSlice = createSlice({
   name: "config",

@@ -6,7 +6,6 @@ import ChatBox from "./components/ChatBox";
 import { useDispatch } from "react-redux";
 import { setIsSideBarOpen } from "../../store/cpntsSlice";
 import { getRecentConversations, setCurrChatType } from "../../store/chatApiSlice";
-import { get } from "http";
 
 type Props = {
   type?: "text" | "oral";
@@ -16,7 +15,6 @@ const Chat = ({ type = "text" }: Props) => {
   const [isChatSideBox, setIsChatSdBarOpen] = useState<boolean>(false);
   const dispatch = useDispatch();
   useEffect(() => {
-    console.log(type, "type");
     dispatch(setIsSideBarOpen(false));
     type == "oral" ? dispatch(setCurrChatType("oral")) : dispatch(setCurrChatType("text"));
     dispatch(getRecentConversations());

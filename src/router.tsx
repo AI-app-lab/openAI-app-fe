@@ -1,27 +1,32 @@
+import React, { Suspense } from "react";
 import { createBrowserRouter, Outlet, Navigate } from "react-router-dom";
 
-import LandingPage, { Main } from "./pages/LandingPage/LandingPage";
+import { Main } from "./pages/LandingPage/LandingPage";
 
-import Layout from "./components/Layout/Layout";
-import Apps from "./pages/Apps/Apps";
-import Chat from "./pages/Chat/Chat";
-
-import Shop from "./pages/Shop/Shop";
-import Login from "./pages/authPages/Login/Login";
-import OralChat from "./pages/OralChat/OralChat";
-import SignUp from "./pages/authPages/SignUp/SignUp";
 import { lsGet } from "./utils/localstorage";
-import Translator from "./pages/Translator/Translator";
+import { lazy } from "react";
+import Layout from "./components/Layout/Layout";
 import Draw from "./pages/Draw/Draw";
-import Product from "./pages/Product/Product";
+import Translator from "./pages/Translator/Translator";
+import OralChat from "./pages/OralChat/OralChat";
+import Shop from "./pages/Shop/Shop";
+import Chat from "./pages/Chat/Chat";
+import Apps from "./pages/Apps/Apps";
 import Account from "./pages/Account/Account";
+import { HashLoader } from "react-spinners";
 
-export const GuardRounded = ({ component }: { component: JSX.Element }) => {
+export const _GuardRounded = ({ component }: { component: JSX.Element }) => {
   return lsGet("userInfo") ? component : <Navigate to="/" replace />;
 };
 export const getUserInfoFromLocal = () => {
   return lsGet("userInfo");
 };
+const GuardRounded = lazy(() => import("./router").then((m) => ({ default: m._GuardRounded })));
+const LandingPage = lazy(() => import("./pages/LandingPage/LandingPage"));
+const Login = lazy(() => import("./pages/authPages/Login/Login"));
+const Product = lazy(() => import("./pages/Product/Product"));
+const SignUp = lazy(() => import("./pages/authPages/SignUp/SignUp"));
+
 export const router = createBrowserRouter([
   {
     path: "/",

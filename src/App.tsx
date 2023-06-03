@@ -1,12 +1,14 @@
 import React, { useEffect } from "react";
 
-import { RouterProvider } from "react-router-dom";
-import { getUserInfoFromLocal, router } from "./router";
+import { router } from "./router";
 import { useDispatch, useSelector } from "react-redux";
 import { saveUserInfo } from "./store/userSlice";
 import { ConfigState, getThemeFromLocal } from "./store/configSlice";
 import { SnackbarProvider } from "notistack";
 import { lsGet } from "./utils/localstorage";
+
+import { RouterProvider } from "react-router-dom";
+
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -15,6 +17,7 @@ function App() {
     userInfoDto && dispatch(saveUserInfo(userInfoDto));
   }, []);
   const { theme } = useSelector((state: ConfigState) => state.config);
+
   return (
     <div className={theme}>
       <SnackbarProvider
@@ -25,6 +28,7 @@ function App() {
           horizontal: "center",
         }}
       />
+
       <RouterProvider router={router} />
     </div>
   );

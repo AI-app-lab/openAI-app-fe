@@ -5,7 +5,7 @@ import ChatBubble from "./ChatBubble";
 import { ChatApiState, ShownMessage, abortGenerating, clearAudioMsg, clearAudioPlaying, clearMsgQueue, ctrl, getRecentConversations, shiftMsgQueue, startAudioPlaying, updateAudioUrl } from "../../../store/chatApiSlice";
 import { nanoid } from "nanoid";
 import { toUint8Array } from "js-base64";
-import { getFormattedDate } from "../../../utils/date";
+import { getCurrFormattedDate } from "../../../utils/date";
 import { useToken } from "../../../hooks/useToken";
 import { err, info, warn } from "../../../utils/alert";
 import { ttsReq } from "../../../api/reqDto";
@@ -265,12 +265,12 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
     <AudioInfoContext.Provider value={[urlPlaying, handlePause, handlePlay, currAudioSliceShouldPlay, isPlaying, isFinishWhole, audioSliceTTSRequest, _audio, setAudioQueue, showAll]}>
       <div className={styles.chatWindowContainer}>
         <div onWheel={(e) => handleWheel(e)} ref={messagesEndRef} className={styles.chatWindow}>
-          {currChatType === "oral" ? <ShowAllBtn /> : <ChatBubble id={-1} time={getFormattedDate()} showAll={showAll} type="system" message="Hey, there! How can I assist you today?" />}
+          {currChatType === "oral" ? <ShowAllBtn /> : <ChatBubble id={-1} time={getCurrFormattedDate()} showAll={showAll} type="system" message="Hey, there! How can I assist you today?" />}
 
           {messageList && messageList.map(({ time, role, content, id }: ShownMessage) => <ChatBubble showAll={showAll} time={time} key={nanoid()} type={role} id={id} message={content} />)}
 
           {activeAudioBotId === -1 ? (
-            <>{activeAudioBotId}</>
+            <></>
           ) : (
             <IconButton
               className={styles.audioStopBtn}

@@ -5,6 +5,7 @@ input {
     padding: 5px;
     margin-right: 1px;
     border-bottom: 2px solid var(--secondary);
+    color: var(--text);
 
     &:focus {
         border-bottom: 2px solid var(--primary);
