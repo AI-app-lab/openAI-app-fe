@@ -8,9 +8,14 @@ import AddIcon from "@mui/icons-material/Add";
 type Props = {
   isChatSideBox: boolean;
   setIsChatSdBarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  type: "text" | "oral";
 };
 
-const SideBar = ({ isChatSideBox, setIsChatSdBarOpen }: Props) => {
+const SideBar = ({ type = "text", isChatSideBox, setIsChatSdBarOpen }: Props) => {
+  const title = {
+    text: "全能AI助理",
+    oral: "强大口语陪练",
+  };
   const dispatch = useDispatch();
   const { conversations, currChatType } = useSelector((state: ChatApiState) => state.chatApi);
   const { userInfo } = useSelector((state: any) => state.user);
@@ -20,7 +25,7 @@ const SideBar = ({ isChatSideBox, setIsChatSdBarOpen }: Props) => {
         <div>
           <div>Kit Zone</div>
 
-          <div>强大的AI助理</div>
+          <div>{title[type]}</div>
         </div>
       </div>
       <div onClick={() => setIsChatSdBarOpen(false)} className={styles.sessionCardBox}>

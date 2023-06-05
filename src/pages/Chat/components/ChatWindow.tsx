@@ -9,10 +9,11 @@ import { getCurrFormattedDate } from "../../../utils/date";
 import { useToken } from "../../../hooks/useToken";
 import { err, info, warn } from "../../../utils/alert";
 import { ttsReq } from "../../../api/reqDto";
-import { useActiveBotId, useCurrBotAudioURL, useCurrCon, useCurrConId } from "../../../hooks/useCon";
+import { useActiveBotId, useCurrBotAudioURL, useCurrCon, useCurrConId, useIsCurrConListEmpty } from "../../../hooks/useCon";
 import Button from "../../../components/Button/Button";
 import { BsFillSquareFill } from "react-icons/bs";
 import IconButton from "../../../components/IconButon/IconButton";
+import TopicList from "./TopicList";
 
 type Props = {
   messageList: Array<ShownMessage>;
@@ -244,6 +245,7 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
   }, []);
 
   useEffect(() => {
+    if (!messagesEndRef.current) return;
     const scroll = messagesEndRef.current.scrollHeight - messagesEndRef.current.clientHeight;
     isAutoEnd && messagesEndRef.current.scrollTo(0, scroll);
   });
@@ -260,48 +262,61 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
       </Button>
     );
   };
-
+  const isCurrConEmpty = useIsCurrConListEmpty();
   return (
-    <AudioInfoContext.Provider value={[urlPlaying, handlePause, handlePlay, currAudioSliceShouldPlay, isPlaying, isFinishWhole, audioSliceTTSRequest, _audio, setAudioQueue, showAll]}>
-      <div className={styles.chatWindowContainer}>
-        <div onWheel={(e) => handleWheel(e)} ref={messagesEndRef} className={styles.chatWindow}>
-          {currChatType === "oral" ? <ShowAllBtn /> : <ChatBubble id={-1} time={getCurrFormattedDate()} showAll={showAll} type="system" message="Hey, there! How can I assist you today?" />}
+    <>
+      {currChatType === "oral" ? (
+        <AudioInfoContext.Provider value={[urlPlaying, handlePause, handlePlay, currAudioSliceShouldPlay, isPlaying, isFinishWhole, audioSliceTTSRequest, _audio, setAudioQueue, showAll]}>
+          <div className={styles.chatWindowContainer}>
+            <div onWheel={(e) => handleWheel(e)} ref={messagesEndRef} className={styles.chatWindow}>
+              <ShowAllBtn />
+              {isCurrConEmpty ? <TopicList /> : <></>}
 
-          {messageList && messageList.map(({ time, role, content, id }: ShownMessage) => <ChatBubble showAll={showAll} time={time} key={nanoid()} type={role} id={id} message={content} />)}
+              {messageList && messageList.map(({ time, role, content, id }: ShownMessage) => <ChatBubble showAll={showAll} time={time} key={nanoid()} type={role} id={id} message={content} />)}
 
-          {activeAudioBotId === -1 ? (
-            <></>
-          ) : (
-            <IconButton
-              className={styles.audioStopBtn}
-              onClick={() => {
-                handleAudioStop(_audio);
-                audioSliceTTSRequest("[#OVER#]", false);
-              }}>
-              <>
-                <BsFillSquareFill />
-                &nbsp;停止音频{activeAudioBotId}
-              </>
-            </IconButton>
-          )}
+              {activeAudioBotId === -1 ? (
+                <></>
+              ) : (
+                <IconButton
+                  className={styles.audioStopBtn}
+                  onClick={() => {
+                    handleAudioStop(_audio);
+                    audioSliceTTSRequest("[#OVER#]", false);
+                  }}>
+                  <>
+                    <BsFillSquareFill />
+                    &nbsp;停止音频
+                  </>
+                </IconButton>
+              )}
+            </div>
+          </div>
+        </AudioInfoContext.Provider>
+      ) : (
+        <div className={styles.chatWindowContainer}>
+          <div onWheel={(e) => handleWheel(e)} ref={messagesEndRef} className={styles.chatWindow}>
+            <ChatBubble id={-1} time={getCurrFormattedDate()} showAll={showAll} type="system" message="您好！有什么可以帮助您的？" />
 
-          {loading === "loading" ? (
-            <IconButton
-              className={styles.audioStopBtn}
-              onClick={() => {
-                dispatch(abortGenerating());
-              }}>
-              <>
-                <BsFillSquareFill />
-                &nbsp;停止生成
-              </>
-            </IconButton>
-          ) : (
-            <></>
-          )}
+            {messageList && messageList.map(({ time, role, content, id }: ShownMessage) => <ChatBubble showAll={showAll} time={time} key={nanoid()} type={role} id={id} message={content} />)}
+
+            {loading === "loading" ? (
+              <IconButton
+                className={styles.audioStopBtn}
+                onClick={() => {
+                  dispatch(abortGenerating());
+                }}>
+                <>
+                  <BsFillSquareFill />
+                  &nbsp;停止生成
+                </>
+              </IconButton>
+            ) : (
+              <></>
+            )}
+          </div>
         </div>
-      </div>
-    </AudioInfoContext.Provider>
+      )}
+    </>
   );
 };
 

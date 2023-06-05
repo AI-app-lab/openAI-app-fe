@@ -11,6 +11,9 @@ import { isEmail } from "../../../utils/formValidation";
 import { useNavigate } from "react-router-dom";
 import { enqueueSnackbar } from "notistack";
 import { err } from "../../../utils/alert";
+import Input from "../../../components/Input/Input";
+import Modal from "../../../components/Modal/Modal";
+import HashLoader from "../../../components/HashLoader/HashLoader";
 
 type Props = {};
 
@@ -94,59 +97,49 @@ const Login = (props: Props) => {
   };
 
   return status.status === "loading" ? (
-    <div className={styles.modalWrapper}>
-      <Loading />
-    </div>
+    <HashLoader />
   ) : (
-    <div onMouseDown={() => dispatch(openModal("close"))} className={styles.modalWrapper}>
-      <div onMouseDown={(e) => e.stopPropagation()} className={styles.lgModal}>
-        <header>
-          <div className={styles.toggle}>
-            <span onClick={() => setMethod("pwd")} className={methods[method].clsPwd}>
-              密码登录
-            </span>
-            <span
-              onClick={() => {
-                setMethod("sms");
-              }}
-              className={methods[method].clsSms}>
-              邮箱验证
-            </span>
-          </div>
-        </header>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}>
-          <label>
-            <input value={userLoginPostDto.email} autoComplete="email" onChange={(e) => setUserLoginPostDto((prev: UserLoginPostDto) => ({ ...prev, email: e.target.value }))} placeholder={methods[method].placeHolderL1} type="email" />
-          </label>
-
-          {method === "sms" ? (
-            <label>
-              <div className={styles.lgCaptchaGroup}>
-                <input value={userLoginPostDto.verificationCode} onChange={(e) => setUserLoginPostDto((prev: UserLoginPostDto) => ({ ...prev, verificationCode: e.target.value }))} autoComplete="text" placeholder="验证码" type="text" />
-                <Button allow={sendBtnText === "发送"} onClick={handleSendVcode} className={styles.sendBtn}>
-                  {sendBtnText}
-                </Button>
-              </div>
-            </label>
-          ) : (
-            <label>
-              <input value={userLoginPostDto.password} autoComplete="curr-password" onChange={(e) => setUserLoginPostDto((prev: UserLoginPostDto) => ({ ...prev, password: e.target.value }))} placeholder={methods[method].placeHolderL2} type="password" />
-            </label>
-          )}
-        </form>
-
-        <Button type="submit" onClick={handleSubmit[method]} className={styles.btn} w={70} h={50}>
-          {locations[location].lgConfirm}
-        </Button>
-        <div className={styles.noAccAndResetPwd}>
-          <span onClick={() => navigate("/sign-up")}>没有账号？</span>
-          <span>忘记密码</span>
+    <Modal>
+      <header>
+        <div className={styles.toggle}>
+          <span onClick={() => setMethod("pwd")} className={methods[method].clsPwd}>
+            密码登录
+          </span>
+          <span
+            onClick={() => {
+              setMethod("sms");
+            }}
+            className={methods[method].clsSms}>
+            邮箱验证
+          </span>
         </div>
+      </header>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}>
+        <Input value={userLoginPostDto.email} autoComplete="email" onChange={(e) => setUserLoginPostDto((prev: UserLoginPostDto) => ({ ...prev, email: e.target.value }))} placeholder={methods[method].placeHolderL1} type="email" />
+
+        {method === "sms" ? (
+          <div className={styles.lgCaptchaGroup}>
+            <Input value={userLoginPostDto.verificationCode} onChange={(e) => setUserLoginPostDto((prev: UserLoginPostDto) => ({ ...prev, verificationCode: e.target.value }))} autoComplete="text" placeholder="验证码" type="text" />
+            <Button allow={sendBtnText === "发送"} onClick={handleSendVcode} className={styles.sendBtn}>
+              {sendBtnText}
+            </Button>
+          </div>
+        ) : (
+          <Input className={styles.pwd} value={userLoginPostDto.password} autoComplete="curr-password" onChange={(e) => setUserLoginPostDto((prev: UserLoginPostDto) => ({ ...prev, password: e.target.value }))} placeholder={methods[method].placeHolderL2} type="password" />
+        )}
+      </form>
+
+      <Button type="submit" onClick={handleSubmit[method]} className={styles.btn} w={70} h={50}>
+        {locations[location].lgConfirm}
+      </Button>
+      <div className={styles.noAccAndResetPwd}>
+        <span onClick={() => navigate("/sign-up")}>没有账号？</span>
+        <span onClick={() => navigate("/reset-password")}> 忘记密码</span>
       </div>
-    </div>
+    </Modal>
   );
 };
 

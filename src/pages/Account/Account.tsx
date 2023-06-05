@@ -8,6 +8,7 @@ import { getFormattedDate } from "../../utils/date";
 import { useDispatch, useSelector } from "react-redux";
 import { UserPostDto, UserState, resetPwd, verifyEmail } from "../../store/userSlice";
 import KeyboardArrowDownSharpIcon from "@mui/icons-material/KeyboardArrowDownSharp";
+import { isEmail, isEmpty } from "../../utils/formValidation";
 
 type Props = {};
 
@@ -63,7 +64,7 @@ const Account = (props: Props) => {
                 style={{
                   color: "#f1a746",
                 }}>
-                到期时间：
+                到期时间
               </span>
             </ListItem>
             {expiredTime.map(({ type, time }, index) => {
@@ -129,6 +130,12 @@ const Account = (props: Props) => {
                 w={50}
                 className={styles.confirmBtn}
                 onClick={() => {
+                  if (!isEmail(userInfo?.email || "")) {
+                    return;
+                  }
+                  if (isEmpty([userPostDto.verificationCode, userPostDto.password])) {
+                    return;
+                  }
                   const { password, verificationCode } = userPostDto;
                   dispatch(resetPwd({ email: userInfo?.email || "", newPassword: password, verificationCode }));
                 }}>

@@ -14,6 +14,7 @@ import Chat from "./pages/Chat/Chat";
 import Apps from "./pages/Apps/Apps";
 import Account from "./pages/Account/Account";
 import { HashLoader } from "react-spinners";
+import PwdReset from "./pages/authPages/PwdReset/PwdReset";
 
 export const _GuardRounded = ({ component }: { component: JSX.Element }) => {
   return lsGet("userInfo") ? component : <Navigate to="/" replace />;
@@ -50,6 +51,10 @@ export const router = createBrowserRouter([
   {
     path: "/sign-up",
     element: <SignUp />,
+  },
+  {
+    path: "/reset-password",
+    element: <PwdReset />,
   },
 
   {

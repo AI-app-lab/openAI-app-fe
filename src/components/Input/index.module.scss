@@ -1,0 +1,20 @@
+input {
+    padding: 10px;
+    font-size: var(--modal-font-size);
+    color: var(--text);
+    background-color: var(--primary-bg);
+    height: var(--input-lg-h);
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border: none;
+    border-bottom: 3px solid var(--secondary);
+    outline: none;
+
+    &:focus {
+        outline: none;
+        border-bottom: 3px solid var(--primary);
+    }
+}

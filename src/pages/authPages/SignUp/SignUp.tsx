@@ -9,6 +9,8 @@ import Loading from "../../../components/Loading/Loading";
 import { isEmail } from "../../../utils/formValidation";
 import { useNavigate } from "react-router-dom";
 import { err } from "../../../utils/alert";
+import Modal from "../../../components/Modal/Modal";
+import Input from "../../../components/Input/Input";
 
 type Props = {};
 
@@ -76,34 +78,26 @@ const SignUp = (props: Props) => {
       <Loading />
     </div>
   ) : (
-    <div onMouseDown={() => dispatch(openModal("close"))} className={styles.modalWrapper}>
-      <div onMouseDown={(e) => e.stopPropagation()} className={styles.signUpModal}>
-        <div className={styles.suTitle}> {locations[location].loginTitle}</div>
-        <form onSubmit={(e) => e.preventDefault()}>
-          <label>
-            <input id="email" value={userPostDto.email} autoComplete="text" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, email: e.target.value }))} placeholder="请输入邮箱" type="text" />
-          </label>
-          <label>
-            <div className={styles.captchaGroup}>
-              <input type="text" id="captcha" name="captcha" autoComplete="off" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, verificationCode: e.target.value }))} placeholder="验证码" />
-              <Button allow={typeof sendBtnText === "string"} onClick={handleSendVcode} className={styles.sendBtn}>
-                {sendBtnText}
-              </Button>
-            </div>
-          </label>
-          <label>
-            <input id="password" autoComplete="current-password" value={userPostDto.password} onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, password: e.target.value }))} placeholder="请输入密码" type="password" />
-          </label>
+    <Modal>
+      <div className={styles.suTitle}> {locations[location].loginTitle}</div>
+      <form onSubmit={(e) => e.preventDefault()}>
+        <input id="email" value={userPostDto.email} autoComplete="text" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, email: e.target.value }))} placeholder="请输入邮箱" type="text" />
 
-          <Button onClick={handleSignUp} className={styles.btn} w={70} h={50}>
-            {locations[location].singUp}
+        <div className={styles.captchaGroup}>
+          <Input type="text" id="captcha" name="captcha" autoComplete="off" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, verificationCode: e.target.value }))} placeholder="验证码" />
+          <Button allow={typeof sendBtnText === "string"} onClick={handleSendVcode} className={styles.sendBtn}>
+            {sendBtnText}
           </Button>
-          <div onClick={() => navigate("/login")} className={styles.login}>
-            {locations[location].hasAcc}
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+        <Input className={styles.pwd} id="password" autoComplete="current-password" value={userPostDto.password} onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, password: e.target.value }))} placeholder="请输入密码" type="password" />
+        <Button onClick={handleSignUp} className={styles.btn} w={70} h={50}>
+          {locations[location].singUp}
+        </Button>
+        <div onClick={() => navigate("/login")} className={styles.login}>
+          {locations[location].hasAcc}
+        </div>
+      </form>
+    </Modal>
   );
 };
 

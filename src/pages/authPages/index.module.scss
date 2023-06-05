@@ -1,262 +1,173 @@
 $captchaBtnWidth: 105px;
 $form-elem-margin-top: 16px;
+$rowGap: 10px;
 
-.modalWrapper {
-    background: url(/src/assets/landingbg.jpg);
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
+.suTitle {
+    padding-bottom: 16px;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 5px;
+}
 
-    position: absolute;
-    height: 100vh;
-    width: 100vw;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 16px;
 
-    .suTitle {
-        padding-bottom: 16px;
-        font-size: 24px;
-        font-weight: 700;
+
+header {
+    margin: 0 auto;
+    text-align: center;
+    width: var(--modal-lg-w);
+
+    .toggle {
+
         margin-bottom: 10px;
-        letter-spacing: 5px;
-    }
-
-    .modal {
-        border-radius: var(--border-radius);
-        position: absolute;
-        padding: 20px 15px 30px;
-
-
-        color: var(--text);
-
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        background-color: var(--primary-bg);
+        justify-content: space-between;
+        cursor: pointer;
+        font-size: 20px;
+        font-weight: 700;
 
+        .loginMethod {
+            width: 50%;
+            border-bottom: 3px solid inherit;
 
-        form {
-
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            width: var(--modal-lg-w);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-
-            input {
-                padding: 10px;
-                font-size: var(--modal-font-size);
-                color: var(--text);
-                background-color: var(--primary-bg);
-                height: var(--input-lg-h);
-                width: 100%;
-                box-sizing: border-box;
-                border-radius: 5px;
-                border-bottom-left-radius: 0;
-                border-bottom-right-radius: 0;
-                border: none;
-                border-bottom: 3px solid var(--secondary);
-                outline: none;
-
-                &:focus {
-                    outline: none;
-                    border-bottom: 3px solid var(--primary);
-                }
-            }
-        }
-
-        label+label {
-            margin-top: $form-elem-margin-top;
-        }
-
-
-        .errAlert {
-
-
-
-
-            border-radius: 5px;
-            font-size: 14px;
-
-            font-weight: 700;
-        }
-
-
-    }
-
-    .lgModal {
-        @extend .modal;
-        width: var(--modal-lg-w);
-
-
-        header {
-            margin: 0 auto;
-            text-align: center;
-            width: var(--modal-lg-w);
-
-
-
-
-            .toggle {
-
-                margin-bottom: 10px;
-                display: flex;
-                justify-content: space-between;
-                cursor: pointer;
-                font-size: 20px;
-                font-weight: 700;
-
-                .loginMethod {
-                    width: 50%;
-                    border-bottom: 3px solid inherit;
-
-
-                    &:hover {
-                        opacity: 0.8;
-                    }
-
-                    &:active {
-                        opacity: 0.6;
-                    }
-                }
-
-                .smsLg {
-                    @extend .loginMethod;
-                    color: var(--primary);
-                    box-sizing: border-box;
-                    border-bottom: 3px solid var(--primary);
-                }
-
-                .pwdLg {
-                    @extend .loginMethod;
-                    color: var(--primary);
-                    box-sizing: border-box;
-                    border-bottom: 3px solid var(--primary);
-                }
-
-            }
-        }
-
-        form {
-            margin-top: 10px;
-
-        }
-
-        .lgCaptchaGroup {
-            display: flex;
-            width: 100%;
-            justify-content: space-between;
-
-            input {
-                font-size: var(--modal-font-size);
-                width: 65%;
-            }
-
-            .sendBtn {
-                color: var(--text-contrast);
-                font-weight: 700;
-                letter-spacing: 2px;
-                font-size: 16px;
-                height: var(--input-lg-h);
-                width: 30%;
-
-            }
-        }
-
-        .noAccAndResetPwd {
-            margin-top: $form-elem-margin-top;
-            font-size: 16px;
-            width: calc(var(--modal-lg-w) - 20px);
-            display: flex;
-            justify-content: space-between;
-
-
-            font-style: italic;
-            cursor: pointer;
-
-            span {
-                &:hover {
-                    text-decoration: underline;
-                }
-
-                &:active {
-                    opacity: 0.8;
-                }
-            }
-
-
-
-        }
-
-        .btn {
-            font-weight: 700;
-            letter-spacing: 2px;
-            font-size: 16px;
-            color: var(--text-contrast);
-            margin-top: $form-elem-margin-top;
-            width: var(--modal-lg-w) !important;
-        }
-
-
-    }
-
-    .signUpModal {
-        @extend .modal;
-        width: var(--modal-su-w);
-
-
-        .btn {
-            font-weight: 700;
-            letter-spacing: 2px;
-            font-size: 16px;
-            margin-top: $form-elem-margin-top;
-
-            width: var(--modal-su-w) !important;
-        }
-
-        .captchaGroup {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-
-            input {
-                font-size: var(--modal-font-size);
-                width: 65%;
-            }
-
-            .sendBtn {
-                font-weight: 700;
-                letter-spacing: 2px;
-                font-size: 16px;
-                height: var(--input-su-h);
-                width: 30% !important;
-            }
-        }
-
-        .login {
-
-            margin-top: $form-elem-margin-top;
-            font-style: italic;
-            cursor: pointer;
 
             &:hover {
-                text-decoration: underline;
+                opacity: 0.8;
             }
 
             &:active {
-                opacity: 0.8;
+                opacity: 0.6;
             }
         }
 
+        .smsLg {
+            @extend .loginMethod;
+            color: var(--primary);
+            box-sizing: border-box;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .pwdLg {
+            @extend .loginMethod;
+            color: var(--primary);
+            box-sizing: border-box;
+            border-bottom: 3px solid var(--primary);
+        }
+
+    }
+}
+
+form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: $rowGap;
+
+    .pwd {
+        margin-top: $rowGap !important;
+
+    }
+
+}
+
+
+
+
+
+
+.lgCaptchaGroup {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: $rowGap;
+
+    input {
+        font-size: var(--modal-font-size);
+        width: 65%;
+    }
+
+    .sendBtn {
+        color: var(--text-contrast);
+        font-weight: 700;
+        letter-spacing: 2px;
+        font-size: 16px;
+        height: var(--input-lg-h);
+        width: 30%;
+
+    }
+}
+
+
+.captchaGroup {
+
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: $rowGap;
+
+    input {
+        font-size: var(--modal-font-size);
+        width: 65%;
+    }
+
+    .sendBtn {
+        font-weight: 700;
+        letter-spacing: 2px;
+        font-size: 16px;
+        height: var(--input-su-h);
+        width: 30% !important;
+    }
+}
+
+.noAccAndResetPwd {
+    margin-top: $form-elem-margin-top;
+    font-size: 16px;
+    width: calc(var(--modal-lg-w) - 20px);
+    display: flex;
+    justify-content: space-between;
+
+
+    font-style: italic;
+    cursor: pointer;
+
+    span {
+        &:hover {
+            text-decoration: underline;
+        }
+
+        &:active {
+            opacity: 0.8;
+        }
+    }
+
+
+
+}
+
+.btn {
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-size: 16px;
+    color: var(--text-contrast);
+    margin-top: $form-elem-margin-top;
+    width: var(--modal-lg-w) !important;
+}
+
+
+
+
+.login {
+
+    margin-top: $form-elem-margin-top;
+    font-style: italic;
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
+
+    &:active {
+        opacity: 0.8;
     }
 }

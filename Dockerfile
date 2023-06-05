@@ -19,6 +19,10 @@ RUN npm run build
 # 使用nginx作为基础镜像，来部署React应用
 FROM nginx:stable-alpine as production-stage
 
+#SSL证书
+COPY ./certs/kitzone.cn_bundle.crt /etc/nginx/ssl/
+COPY ./certs/kitzone.cn.key /etc/nginx/ssl/
+
 # 将React应用打包后的文件复制到nginx的默认托管目录
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 

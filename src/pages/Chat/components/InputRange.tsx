@@ -13,12 +13,12 @@ type Props = {
   urlPlaying: string;
   handlePause: () => void;
 };
-
+export const sleep = (t: number) => new Promise((p) => setTimeout(p, t));
 const InputRange = ({ urlPlaying, handlePause }: Props) => {
   const [userMessage, setUserMessage] = useState<string>("");
   const dispatch: Function = useDispatch();
   const { loading, currConversationId, validConversations, currChatType, model, maxContextNum } = useSelector((state: ChatApiState) => state.chatApi);
-  const sleep = (t: number) => new Promise((p) => setTimeout(p, t));
+
   const textAreaRef = useRef<any>(null);
   const token = useToken();
   useEffect(() => {

@@ -6,6 +6,17 @@ export const useCurrCon = () => {
   const { conversations, currConversationId, currChatType } = useSelector((state: ChatApiState) => state.chatApi);
   return conversations[currChatType][currConversationId[currChatType]];
 };
+export const useIsCurrConListEmpty = () => {
+  const currCon = useCurrCon();
+  return currCon.conList.length === 0;
+};
+export const useCurrValidCon = () => {
+  const { validConversations, currConversationId, currChatType } = useSelector((state: ChatApiState) => state.chatApi);
+
+  const currValidCon = validConversations[currChatType][currConversationId[currChatType]];
+
+  return currValidCon;
+};
 export const useActiveCon = () => {
   const { conversations, activeConversationId, currChatType } = useSelector((state: ChatApiState) => state.chatApi);
   return conversations[currChatType][activeConversationId[currChatType]];

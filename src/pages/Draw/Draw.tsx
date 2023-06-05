@@ -4,6 +4,7 @@ import Button from "../../components/Button/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { AiDrawApiRequestDto, AiDrawState, getPictures } from "../../store/aiDrawApiSlice";
 import Loading from "../../components/Loading/Loading";
+import { FaPaintBrush } from "react-icons/fa";
 
 type Props = {};
 
@@ -19,6 +20,20 @@ const Draw = (props: Props) => {
     };
     dispatch(getPictures(requestDto));
   };
+  const Img = () => {
+    if (!images.length)
+      return (
+        <h1
+          style={{
+            fontSize: "5rem",
+            color: "#808080",
+            marginTop: "5rem",
+          }}>
+          <FaPaintBrush />
+        </h1>
+      );
+    return <img className={styles.image} src={images[0]} alt={prompt} />;
+  };
   return (
     <div className={styles.container}>
       <div className={styles.promptContainer}>
@@ -27,7 +42,7 @@ const Draw = (props: Props) => {
           生成
         </Button>
       </div>
-      <div className={styles.imageContainer}>{isLoading ? <Loading size={10} /> : <img className={styles.image} src={images[0]} alt={prompt} />}</div>
+      <div className={styles.imageContainer}>{isLoading ? <Loading size={10} /> : <Img />}</div>
     </div>
   );
 };

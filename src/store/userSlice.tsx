@@ -133,7 +133,8 @@ export interface Status {
   sCode: any;
   message: any;
 }
-export type NextTryTime = Record<"login" | "signup" | "resetPwd", number>;
+export type EmailSendType = "signup" | "resetPwd" | "login";
+export type NextTryTime = Record<EmailSendType, number>;
 export interface UserInitialState {
   userInfo: UserInfo | null;
   vCode: number | null;
@@ -185,8 +186,11 @@ export const userSlice = createSlice({
       state.status = { status: "loading", message: null, sCode: null };
     });
     builder.addCase(resetPwd.rejected, (state, action) => {
-      let errMsg = "";
       switch (action.payload) {
+        case 401:
+          err("验证码无效");
+          state.status = { status: "idle", message: "验证码无效", sCode: action.error.code };
+          break;
         case 404:
           err("邮箱不存在");
           state.status = { status: "idle", message: "邮箱不存在", sCode: action.error.code };

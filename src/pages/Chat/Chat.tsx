@@ -22,7 +22,7 @@ const Chat = ({ type = "text" }: Props) => {
   return (
     <ChatTypeContext.Provider value={type}>
       <div className={styles.box}>
-        <SideBar isChatSideBox={isChatSideBox} setIsChatSdBarOpen={setIsChatSdBarOpen} />
+        <SideBar type={type} isChatSideBox={isChatSideBox} setIsChatSdBarOpen={setIsChatSdBarOpen} />
         <ChatBox isChatSideBox={isChatSideBox} setIsChatSdBarOpen={setIsChatSdBarOpen} />
       </div>
     </ChatTypeContext.Provider>

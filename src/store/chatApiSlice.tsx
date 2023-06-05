@@ -84,13 +84,9 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
       },
       signal: ctrl.signal,
       async onopen(response) {
-        console.log(123456);
-
         if (response.ok && response.headers.get("content-type") === "text/event-stream") {
           return; // everything's good
         } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-          console.log(response.status);
-
           // client-side errors are usually non-retriable:
           throw new Error(`${response.status}`);
         } else {
@@ -99,7 +95,6 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
       },
       onmessage(msg) {
         clearTimeout(timer);
-        console.log(msg);
 
         if (msg.data === "[DONE]") {
           if (msgChunk.length) {
@@ -129,8 +124,6 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
             dispatch(pushToMsgQueue(msgChunk));
             msgChunk = "";
           }
-
-          console.log(count, msgChunk.length);
         }
       },
       onerror(err) {
@@ -304,7 +297,13 @@ export const chatApiSlice = createSlice({
     startNewConversation(state) {
       const type = state.currChatType;
       const last = state.conversations[type].length - 1;
-      last >= 0 && state.conversations[type][last].conList.length && state.conversations[type].push({ time: getCurrFormattedDate(), topic: "New Conversation", conList: [] }) && (state.validConversations as any)[type].push([]) && (state.currConversationId[type] = last + 1);
+      if (last <= 6) {
+        state.conversations[type].push({ time: getCurrFormattedDate(), topic: "New Conversation", conList: [] });
+        (state.validConversations as any)[type].push([]);
+        state.currConversationId[type] = last + 1;
+      }
+      lsSet(localStorageConversations[type], state.conversations[type]);
+      lsSet(localStorageValidConversations[type], state.validConversations[type]);
     },
     deleteConversation(
       state,
@@ -375,8 +374,6 @@ export const chatApiSlice = createSlice({
       if (id !== -1) {
         state.conversations[type][state.activeConversationId[type]].conList.forEach((item) => {
           if (item.id === id && item.role === "system") {
-            console.log("捕获id");
-
             item.audioURL = wholeAudioUrl;
           }
         });
@@ -398,7 +395,6 @@ export const chatApiSlice = createSlice({
     },
     clearAudioPlaying(state) {
       state.audioIdPlaying = -1;
-      console.log("carry");
     },
     changeIdPlaying(state, action: { payload: number }) {
       state.audioIdPlaying = action.payload;
@@ -421,8 +417,6 @@ export const chatApiSlice = createSlice({
       const lastBotMsg = currConversation.length - 1;
 
       state.currChatType === "oral" && (state.audioMsg = currConversation[lastBotMsg].content);
-
-      // console.log(currConversation[lastBotMsg].content);
     });
     builder.addCase(getBotMessages.rejected, (state, action: any) => {
       if (state.loading !== "idle") {
