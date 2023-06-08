@@ -10,11 +10,11 @@ import IconButton from "../../../components/IconButon/IconButton";
 import { useToken } from "../../../hooks/useToken";
 
 type Props = {
-  urlPlaying: string;
   handlePause: () => void;
+  beforeRecordingFn: () => void;
 };
 export const sleep = (t: number) => new Promise((p) => setTimeout(p, t));
-const InputRange = ({ urlPlaying, handlePause }: Props) => {
+const InputRange = ({ beforeRecordingFn, handlePause }: Props) => {
   const [userMessage, setUserMessage] = useState<string>("");
   const dispatch: Function = useDispatch();
   const { loading, currConversationId, validConversations, currChatType, model, maxContextNum } = useSelector((state: ChatApiState) => state.chatApi);
@@ -87,6 +87,7 @@ const InputRange = ({ urlPlaying, handlePause }: Props) => {
   const textAreaTypeOral = (
     <div className={styles["inputRangeContainerOral"]}>
       <OralInputRange
+        beforeRecordingFn={beforeRecordingFn}
         handlePause={handlePause}
         textAreaRef={textAreaRef}
         handleClick={() => {

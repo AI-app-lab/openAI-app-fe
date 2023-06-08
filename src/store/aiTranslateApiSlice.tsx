@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import { err } from "../utils/alert";
-import axiosInstance from "../config/axiosConfig";
+import axiosInstance, { apiBaseUrl } from "../config/axiosConfig";
 import { isAxiosError } from "axios";
 
 export type Language = "English" | "Français" | "Deutsch" | "日本語" | "한국어" | "中文";
@@ -27,7 +27,7 @@ export const getTranslatedResult = createAsyncThunk("aiTranslateApi/getTranslate
   console.log(123);
 
   try {
-    const response = await axiosInstance.post("http://43.139.143.5:9999/translate/text", drawRequestDto);
+    const response = await axiosInstance.post(apiBaseUrl + ":9999/translate/text", drawRequestDto);
     const { data, status } = response;
     return { data, status };
   } catch (err) {

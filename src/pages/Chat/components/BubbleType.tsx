@@ -8,6 +8,7 @@ import { AudioInfoContext } from "./ChatWindow";
 
 import AudioControlBar from "./AudioControlBar";
 import BubbleErrorBar from "./BubbleErrorBar";
+import Avatar from "../../../components/Avatar/Avatar";
 type Props = {
   type: "err" | "system" | "user";
   showAll: boolean;

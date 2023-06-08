@@ -1,8 +1,9 @@
-import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios, { AxiosResponse, isAxiosError } from "axios";
 import { enqueueSnackbar } from "notistack";
-import { useNavigate } from "react-router-dom";
+
 import { err, success } from "../utils/alert";
+import { apiBaseUrl } from "../config/axiosConfig";
 
 type EmailVerifyType = "signup" | "resetPwd";
 export interface UserEmailVerifyDto {
@@ -44,7 +45,7 @@ export interface UserState {
   user: UserInitialState;
 }
 export const resetPwd = createAsyncThunk("users/resetPwd", async (pwdResetDto: PwdResetDto, { dispatch, rejectWithValue }) => {
-  const url = "http://43.139.143.5:9999/user/set/password";
+  const url = apiBaseUrl + ":9999/user/set/password";
   try {
     const response = await axios.post(url, pwdResetDto);
 
@@ -59,8 +60,8 @@ export const resetPwd = createAsyncThunk("users/resetPwd", async (pwdResetDto: P
 
 export const verifyEmail = createAsyncThunk("users/verifyEmail", async ({ type = "signup", ...userEmailVerifyDto }: UserEmailVerifyDto, { dispatch, rejectWithValue }) => {
   const url = {
-    signup: "http://43.139.143.5:9999/signup/verification",
-    resetPwd: "http://43.139.143.5:9999/user/reset/password",
+    signup: apiBaseUrl + ":9999/signup/verification",
+    resetPwd: apiBaseUrl + ":9999/user/reset/password",
   };
   try {
     const response = await axios.post(url[type], userEmailVerifyDto);
@@ -76,7 +77,7 @@ export const verifyEmail = createAsyncThunk("users/verifyEmail", async ({ type =
 
 export const signUp = createAsyncThunk("users/signUp", async ({ username, email, password, verificationCode }: UserPostDto, { rejectWithValue }) => {
   try {
-    const response = await axios.post("http://43.139.143.5:9999/signup/registration", { username, email, password, verificationCode });
+    const response = await axios.post(apiBaseUrl + ":9999/signup/registration", { username, email, password, verificationCode });
 
     const { data, status } = response as AxiosResponse<UserInfo>;
     return { data, status };
@@ -90,7 +91,7 @@ export const signUp = createAsyncThunk("users/signUp", async ({ username, email,
 
 export const login = createAsyncThunk("users/login", async ({ email, password }: UserLoginPostDto, { rejectWithValue }) => {
   try {
-    const response = await axios.post("http://43.139.143.5:9999/user/login/email", { email, password });
+    const response = await axios.post(apiBaseUrl + ":9999/user/login/email", { email, password });
     const { data, status } = response as AxiosResponse<UserInfo>;
 
     return { data, status };
@@ -105,7 +106,7 @@ export const login = createAsyncThunk("users/login", async ({ email, password }:
 
 export const getLoginVCode = createAsyncThunk("users/getLoginVCode", async (email: string, { rejectWithValue }) => {
   try {
-    const response = await axios.post("http://43.139.143.5:9999/user/login/email/sendcode", { email });
+    const response = await axios.post(apiBaseUrl + ":9999/user/login/email/sendcode", { email });
     const { data } = response as AxiosResponse<any>;
     return { data };
   } catch (err) {
@@ -118,7 +119,7 @@ export const getLoginVCode = createAsyncThunk("users/getLoginVCode", async (emai
 });
 export const loginWithVCode = createAsyncThunk("users/loginWithVCode", async (vCodeLoginDto: { email: string; verificationCode: string }, { rejectWithValue }) => {
   try {
-    const response = await axios.post("http://43.139.143.5:9999/user/login/email/verifycode", vCodeLoginDto);
+    const response = await axios.post(apiBaseUrl + ":9999/user/login/email/verifycode", vCodeLoginDto);
     const { data, status } = response as AxiosResponse<UserInfo>;
     return { data, status };
   } catch (err) {

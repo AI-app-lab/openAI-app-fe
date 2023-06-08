@@ -4,7 +4,7 @@ import { MdError } from "react-icons/md";
 
 type Props = {};
 const messages: Record<string, string> = {
-  "[出错了]": "生成失败",
+  "[出错了]": "生成中断",
   "[你的信息太长了]": "你的信息太长了",
 };
 const BubbleErrorBar = (props: Props) => {
@@ -20,11 +20,17 @@ const BubbleErrorBar = (props: Props) => {
                 display: "flex",
                 alignItems: "center",
                 fontSize: 14,
-                color: "red",
+                //color warning yellow
+                color: "#f5a623",
                 fontWeight: 600,
               }}>
               <MdError size={16} />
-              {value}
+              <text
+                style={{
+                  marginLeft: 3,
+                }}>
+                {value}
+              </text>
             </div>
           )
       )}

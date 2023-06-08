@@ -6,6 +6,7 @@ import { getTokensCount } from "../utils/getTokensCount";
 import { err } from "../utils/alert";
 import { Prompts } from "../utils/prompt";
 import { clear } from "console";
+import { apiBaseUrl } from "../config/axiosConfig";
 
 export type ChatRequestType = "voice" | "chat";
 export type Role = "err" | "user" | "system";
@@ -75,7 +76,7 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
       reject(new Error("ABORT"));
     };
 
-    fetchEventSource("http://43.139.143.5:9898/v1/chat/completions", {
+    fetchEventSource(apiBaseUrl + ":9898/v1/chat/completions", {
       method: "POST",
       body: JSON.stringify({ ...chatRequestDto, stream: true }),
       headers: {
@@ -136,13 +137,15 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
 const compress = (
   tokens: number,
   chatRequestDto: ChatRequestDto,
-  before: number
+  before: number,
+  type: ChatRequestType
 ): {
   isCompress: boolean;
   _chatRequestDto: ChatRequestDto;
 } => {
   tokens > 100 && console.log("Token到达阈值开始压缩....:", tokens);
-  while (tokens > 4000) {
+  const threshold = type === "chat" ? 4000 : 2000;
+  while (tokens >= threshold) {
     if (chatRequestDto.messages.length <= 1) {
       console.log("压缩失败");
       return { isCompress: false, _chatRequestDto: chatRequestDto };
@@ -167,9 +170,11 @@ export const getBotMessages = createAsyncThunk("chatBox/getBotMessages", async (
   let tokens = getTokensCount(rest);
   const before = tokens;
 
-  const { isCompress, _chatRequestDto } = compress(tokens, chatRequestDto, before);
+  const { isCompress, _chatRequestDto } = compress(tokens, chatRequestDto, before, type);
 
-  if (!isCompress) return rejectWithValue({ message: "你的信息太长了" });
+  if (!isCompress) {
+    return rejectWithValue({ message: "你的信息太长了" });
+  }
 
   chatRequestDto = _chatRequestDto;
   try {
@@ -423,6 +428,9 @@ export const chatApiSlice = createSlice({
         switch (action.payload) {
           case "403":
             err("服务未开通或已过期");
+            break;
+          case "400":
+            err("消息可能过长");
             break;
           case "TIMEOUT":
             err("请求超时");

@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { rejects } from "assert";
 import { AxiosResponse, isAxiosError } from "axios";
 import { err } from "../utils/alert";
-import axiosInstance from "../config/axiosConfig";
+import axiosInstance, { apiBaseUrl } from "../config/axiosConfig";
 type Size = "512x512" | "1024x1024";
 export interface AiDrawApiRequestDto {
   prompt: string;
@@ -21,7 +21,7 @@ export interface AiDrawState {
 }
 export const getPictures = createAsyncThunk("aiDrawApi/getPictures", async (drawRequestDto: AiDrawApiRequestDto, { rejectWithValue }) => {
   try {
-    const response = await axiosInstance.post("http://43.139.143.5:9999/image/generate", drawRequestDto);
+    const response = await axiosInstance.post(apiBaseUrl + ":9999/image/generate", drawRequestDto);
     const { data, status } = response as AxiosResponse<any>;
     return { data, status };
   } catch (err) {

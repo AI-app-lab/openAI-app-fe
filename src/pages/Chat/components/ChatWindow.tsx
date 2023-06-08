@@ -2,14 +2,14 @@ import React, { Dispatch, SetStateAction, WheelEvent, createContext, useEffect, 
 import styles from "../index.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import ChatBubble from "./ChatBubble";
-import { ChatApiState, ShownMessage, abortGenerating, clearAudioMsg, clearAudioPlaying, clearMsgQueue, ctrl, getRecentConversations, shiftMsgQueue, startAudioPlaying, updateAudioUrl } from "../../../store/chatApiSlice";
+import { ChatApiState, ShownMessage, abortGenerating, clearAudioMsg, clearAudioPlaying, clearMsgQueue, ctrl, getRecentConversations, shiftMsgQueue, updateAudioUrl } from "../../../store/chatApiSlice";
 import { nanoid } from "nanoid";
 import { toUint8Array } from "js-base64";
 import { getCurrFormattedDate } from "../../../utils/date";
 import { useToken } from "../../../hooks/useToken";
 import { err, info, warn } from "../../../utils/alert";
 import { ttsReq } from "../../../api/reqDto";
-import { useActiveBotId, useCurrBotAudioURL, useCurrCon, useCurrConId, useIsCurrConListEmpty } from "../../../hooks/useCon";
+import { useActiveBotId, useCurrBotAudioURL, useIsCurrConListEmpty } from "../../../hooks/useCon";
 import Button from "../../../components/Button/Button";
 import { BsFillSquareFill } from "react-icons/bs";
 import IconButton from "../../../components/IconButon/IconButton";
@@ -22,6 +22,7 @@ type Props = {
   currAudioSliceShouldPlay: HTMLAudioElement;
   urlPlaying: string;
   setUrlPlaying: Dispatch<SetStateAction<string>>;
+  setBeforeRecordingFn: Dispatch<SetStateAction<() => void>>;
 };
 
 type AudioInfoContextType = [string, (url: string) => void, (message: string, index: number) => void, HTMLAudioElement, boolean, boolean, (msg: string, stream?: boolean, id?: number) => void, HTMLAudioElement, Dispatch<SetStateAction<string[]>>, boolean];
@@ -34,13 +35,13 @@ let wholeAudioUrl = "";
 let preAudioSlice: any = [];
 let isAutoEnd = true;
 export const AudioInfoContext = createContext<AudioInfoContextType>(["", () => {}, () => {}, new Audio(), false, false, () => {}, _audio, () => {}, false]);
-const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messageList, conId }: Props) => {
+const ChatWindow = ({ setBeforeRecordingFn, handleAudioStop, urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messageList, conId }: Props) => {
   const dispatch: Function = useDispatch();
   useEffect(() => {
     dispatch(getRecentConversations());
   }, []);
   const token = useToken();
-  const { currChatType, msgQueue, loading, currConversationId } = useSelector((state: ChatApiState) => state.chatApi);
+  const { currChatType, msgQueue, loading } = useSelector((state: ChatApiState) => state.chatApi);
   const messagesEndRef = useRef<any>(null);
   const [showAll, setShowAll] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);
@@ -85,12 +86,13 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
 
     if (msg === "[#OVER#]") {
       console.log("[finish playing whole audio]");
-
-      !stream && (audioQ = []) && _audio.pause();
       if (!stream) {
+        audioQ = [];
+        _audio.pause();
         console.log("清理");
         ctrl.abort();
         dispatch(clearAudioPlaying());
+        ws && ws.close(3403, "abort");
       }
 
       dispatch(abortGenerating());
@@ -106,7 +108,7 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
     console.log("[requesting for expired resource]", count);
 
     setIsRequesting(true);
-    ws = new WebSocket(`ws://43.139.143.5:7979/ttsapi/v2/tts?token=${token}`);
+    ws = new WebSocket(`wss://kitzone.cn:7979/ttsapi/v2/tts?token=${token}`);
     ws.onopen = async () => {
       //wait for the connection to be established
       setIsRequesting(true);
@@ -128,7 +130,7 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
     ws.onclose = (e) => {
       if (e.code === 3403) {
         setIsRequesting(false);
-        audioSliceTTSRequest("[#OVER#]");
+        audioSliceTTSRequest("[#OVER#]", false);
         warn("请求被中断");
         return;
       }
@@ -150,6 +152,7 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
         err("未知错误");
         return;
       }
+
       console.log(e.code, e.reason);
 
       if (e) dispatch(shiftMsgQueue());
@@ -201,6 +204,12 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
   _audio.onplay = () => {
     setIsPlaying(true);
   };
+  useEffect(() => {
+    setBeforeRecordingFn(() => () => {
+      audioSliceTTSRequest("[#OVER#]", false);
+      handleAudioStop(_audio);
+    });
+  }, []);
   //play audio in audioQueue
   useEffect(() => {
     if (isPlaying || audioQ.length <= 0) {
@@ -270,6 +279,7 @@ const ChatWindow = ({ handleAudioStop, urlPlaying, setUrlPlaying, currAudioSlice
           <div className={styles.chatWindowContainer}>
             <div onWheel={(e) => handleWheel(e)} ref={messagesEndRef} className={styles.chatWindow}>
               <ShowAllBtn />
+
               {isCurrConEmpty ? <TopicList /> : <></>}
 
               {messageList && messageList.map(({ time, role, content, id }: ShownMessage) => <ChatBubble showAll={showAll} time={time} key={nanoid()} type={role} id={id} message={content} />)}

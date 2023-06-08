@@ -11,6 +11,11 @@ import SendSharpIcon from "@mui/icons-material/SendSharp";
 import { FaMicrophoneSlash } from "react-icons/fa";
 import { useToken } from "../../../hooks/useToken";
 import { err } from "../../../utils/alert";
+import { useActiveBotId } from "../../../hooks/useCon";
+import Loading from "../../../components/Loading/Loading";
+import { ClipLoader, ScaleLoader } from "react-spinners";
+import { useTheme } from "../../../hooks/useConfig";
+import { themes } from "../../../styles/global";
 
 type Props = {
   msg: string;
@@ -18,6 +23,7 @@ type Props = {
   textAreaRef: any;
   handleClick: any;
   handlePause: () => void;
+  beforeRecordingFn: () => void;
 };
 let ws: WebSocket;
 let recorder: any = null;
@@ -25,13 +31,25 @@ let audioContext: any = null;
 let _isRecording = false;
 let mediaRecorder: any = null;
 let count = 0;
-const OralInputRange = ({ handlePause, textAreaRef, handleClick, msg, setMsg }: Props) => {
+const MicrophoneBtn = ({ isRecording, startFn, stopFn, volume }: { isRecording: boolean; startFn: () => void; stopFn: () => void; volume: number }) =>
+  isRecording ? (
+    <IconButton className={`${stylesChat.sendBtn}`} onClick={stopFn}>
+      <FaMicrophoneSlash className={`${styles.icon} ${styles["step" + volume]} ${styles.off}`} />
+    </IconButton>
+  ) : (
+    <IconButton className={`${stylesChat.sendBtn}`} onClick={startFn}>
+      <BiMicrophone className={`${styles.icon}`} />
+    </IconButton>
+  );
+const OralInputRange = ({ beforeRecordingFn, handlePause, textAreaRef, handleClick, msg, setMsg }: Props) => {
   const recorderWorker = new WorkerBuilder(transformpcmWorker);
   const [volume, setVolume] = useState<number>(1);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const { loading } = useSelector((state: ChatApiState) => state.chatApi);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const theme = useTheme();
   const token = useToken();
-
+  const activeAudioBotId = useActiveBotId();
   let buffer: any = [];
   let analyserNode: any;
   const handleSend = () => {
@@ -49,6 +67,8 @@ const OralInputRange = ({ handlePause, textAreaRef, handleClick, msg, setMsg }: 
     });
   };
   const startFn = () => {
+    setIsLoading(true);
+    beforeRecordingFn();
     count = 0;
     handlePause();
     navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then((stream) => {
@@ -57,7 +77,7 @@ const OralInputRange = ({ handlePause, textAreaRef, handleClick, msg, setMsg }: 
   };
 
   const startRecord = (stream: any) => {
-    ws = new WebSocket(`ws://43.139.143.5:7878/asr/v2?token=${token}`);
+    ws = new WebSocket(`wss://kitzone.cn:7878/asr/v2?token=${token}`);
 
     ws.onopen = async (e: any) => {
       audioContext = new AudioContext();
@@ -110,6 +130,7 @@ const OralInputRange = ({ handlePause, textAreaRef, handleClick, msg, setMsg }: 
       }, 30);
       mediaRecorder.start();
       _isRecording = true;
+      setIsLoading(false);
       setIsRecording(true);
     };
     ws.onmessage = (e: any) => {
@@ -128,9 +149,13 @@ const OralInputRange = ({ handlePause, textAreaRef, handleClick, msg, setMsg }: 
       if (e.code === 4403) {
         err("服务已过期");
       }
+      if (e.code === 4400) {
+        err("操作频繁");
+      }
+
       _isRecording = false;
       setIsRecording(false);
-
+      setIsLoading(false);
       console.log(e);
     };
   };
@@ -167,14 +192,16 @@ const OralInputRange = ({ handlePause, textAreaRef, handleClick, msg, setMsg }: 
         </IconButton>
       </div>
       <div className={stylesChat.buttonWrapper}>
-        {isRecording ? (
-          <IconButton className={`${stylesChat.sendBtn}`} onClick={stopFn}>
-            <FaMicrophoneSlash className={`${styles.icon} ${styles["step" + volume]} ${styles.off}`} />
-          </IconButton>
+        {isLoading ? (
+          <ClipLoader
+            cssOverride={{
+              width: 35,
+              height: 35,
+            }}
+            color={themes[theme].primary}
+          />
         ) : (
-          <IconButton className={`${stylesChat.sendBtn}`} onClick={startFn}>
-            <BiMicrophone className={`${styles.icon}`} />
-          </IconButton>
+          <MicrophoneBtn isRecording={isRecording} startFn={startFn} stopFn={stopFn} volume={volume} />
         )}
       </div>
     </>

@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { CpntsState, setIsSideBarOpen } from "../../store/cpntsSlice";
 import { useUserInfo } from "../../hooks/useUserInfo";
 import Link from "../Link/Link";
+import Avatar from "../Avatar/Avatar";
 
 type Props = {};
 
@@ -83,8 +84,8 @@ const NavBarHome = () => {
             </MenuItem>
             <MenuItem onClick={() => dispatch(logout())}>登出</MenuItem>
           </Menu>
-          <ListItem onClick={() => setOpen(!open)} className={styles.avatar}>
-            <div>{userInfo?.email.slice(0, 1)}</div>
+          <ListItem onClick={() => setOpen(!open)}>
+            <Avatar style={{ marginRight: "20px" }} type="user" />
           </ListItem>
           <ListItem>
             <IconButton onClick={() => setOpen(!open)} children={<KeyboardArrowDownSharpIcon />} />
