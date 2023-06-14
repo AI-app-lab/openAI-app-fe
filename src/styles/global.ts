@@ -26,3 +26,7 @@ export const themes = {
     bg: "#3b3f5c",
   },
 };
+
+export const breakPoints = {
+  small: 768,
+};

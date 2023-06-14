@@ -23,6 +23,8 @@ type Props = {
   urlPlaying: string;
   setUrlPlaying: Dispatch<SetStateAction<string>>;
   setBeforeRecordingFn: Dispatch<SetStateAction<() => void>>;
+  isPlaying: boolean;
+  setIsPlaying: Dispatch<React.SetStateAction<boolean>>;
 };
 
 type AudioInfoContextType = [string, (url: string) => void, (message: string, index: number) => void, HTMLAudioElement, boolean, boolean, (msg: string, stream?: boolean, id?: number) => void, HTMLAudioElement, Dispatch<SetStateAction<string[]>>, boolean];
@@ -35,7 +37,7 @@ let wholeAudioUrl = "";
 let preAudioSlice: any = [];
 let isAutoEnd = true;
 export const AudioInfoContext = createContext<AudioInfoContextType>(["", () => {}, () => {}, new Audio(), false, false, () => {}, _audio, () => {}, false]);
-const ChatWindow = ({ setBeforeRecordingFn, handleAudioStop, urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messageList, conId }: Props) => {
+const ChatWindow = ({ setIsPlaying, isPlaying, setBeforeRecordingFn, handleAudioStop, urlPlaying, setUrlPlaying, currAudioSliceShouldPlay, messageList, conId }: Props) => {
   const dispatch: Function = useDispatch();
   useEffect(() => {
     dispatch(getRecentConversations());
@@ -46,7 +48,7 @@ const ChatWindow = ({ setBeforeRecordingFn, handleAudioStop, urlPlaying, setUrlP
   const [showAll, setShowAll] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);
   const [audioQueue, setAudioQueue] = useState<Array<string>>([]); // [url1,url2,url3
-  const [isPlaying, setIsPlaying] = useState(false);
+
   const [isFinishWhole, setIsFinishWhole] = useState(false);
   const activeAudioBotId = useActiveBotId();
 
@@ -93,6 +95,7 @@ const ChatWindow = ({ setBeforeRecordingFn, handleAudioStop, urlPlaying, setUrlP
         ctrl.abort();
         dispatch(clearAudioPlaying());
         ws && ws.close(3403, "abort");
+        setAudioQueue([]);
       }
 
       dispatch(abortGenerating());
@@ -143,7 +146,7 @@ const ChatWindow = ({ setBeforeRecordingFn, handleAudioStop, urlPlaying, setUrlP
       if (e.code === 4403) {
         setIsRequesting(false);
         audioSliceTTSRequest("[#OVER#]");
-        err("出错");
+        err("服务过期/未购买");
         return;
       }
       if (e.code > 4000) {
@@ -204,6 +207,7 @@ const ChatWindow = ({ setBeforeRecordingFn, handleAudioStop, urlPlaying, setUrlP
   _audio.onplay = () => {
     setIsPlaying(true);
   };
+
   useEffect(() => {
     setBeforeRecordingFn(() => () => {
       audioSliceTTSRequest("[#OVER#]", false);
@@ -212,7 +216,7 @@ const ChatWindow = ({ setBeforeRecordingFn, handleAudioStop, urlPlaying, setUrlP
   }, []);
   //play audio in audioQueue
   useEffect(() => {
-    if (isPlaying || audioQ.length <= 0) {
+    if (isPlaying || audioQ.length <= 0 || audioQueue.length <= 0) {
       return;
     }
     const nextAudio = audioQ[0];

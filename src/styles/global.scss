@@ -105,7 +105,7 @@
     --full-hight: 100%;
     --border-radius: 12px;
     --chatbox-input-range-width: 100%;
-    --chatbox-input-range-height: 56px;
+    --chatbox-input-range-height: 30px;
     --chatbox-header-height: 80px;
     --chatbox-window-height: calc(100% - var(--chatbox-input-range-height) - var(--chatbox-header-height));
     --main-margin-left-width: var(--sidebar-width);
@@ -133,7 +133,7 @@
         --input-lg-h: 46px;
         --modal-font-size: 16px;
         //draw
-        --draw-image-size: 400px;
+        --draw-image-size: 380px;
         --draw-prompt-container-width: 70%;
         // --chatbox-sidebar-width: 0px;
     }

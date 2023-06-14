@@ -2,52 +2,76 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios, { AxiosResponse, isAxiosError } from "axios";
 import { enqueueSnackbar } from "notistack";
 
-import { err, success } from "../utils/alert";
-import { apiBaseUrl } from "../config/axiosConfig";
+import { err, info, success } from "../utils/alert";
+import axiosInstance, { apiBaseUrl } from "../config/axiosConfig";
+import { lsSet } from "../utils/localstorage";
+import { encodedPhoneNum, sha256 } from "../utils/encode";
 
-type EmailVerifyType = "signup" | "resetPwd";
-export interface UserEmailVerifyDto {
-  email: string;
-  type?: EmailVerifyType;
+export type VerifyType = "SING_UP" | "RESET_PWD";
+export interface UserPhoneVerifyDto {
+  phoneNumber: string;
+  reCapToken: string;
 }
 
 export interface UserPostDto {
+  phoneNumber: string;
   username: string;
-  email: string;
+  password: string;
+  verificationCode: string;
+  invitedCode?: string;
+}
+
+export interface PwdResetDto {
+  phoneNumber: string;
+  reCapToken: string;
   password: string;
   verificationCode: string;
 }
-export interface PwdResetDto {
-  email: string;
-  newPassword: string;
-  verificationCode: string;
-}
 export interface UserLoginPostDto {
-  email: string;
-  password?: string;
-  verificationCode?: string;
+  reCapToken: string;
+  phoneNumber: string;
+  password: string;
 }
-
-export interface UserInfo {
+export interface Services {
+  expiredTime1: string; //AI助理
+  expiredTime2: string; //口语
+  expiredTime3: string; //图片
+  expiredTime4: string; //翻译
+}
+export interface UserInfo extends Services {
+  telephone: string;
   token: string;
-  email: string;
+  phoneNumber: string;
   authority: string;
   username: string;
-  id: number;
-  timeSet: string;
-  expireTime1: string; //AI助理
-  expireTime2: string; //口语
-  expireTime3: string; //图片
-  expireTime4: string; //翻译
+}
+export interface OrderCheckResponseDto extends Services {
+  token: string;
+  message: string;
 }
 
 export interface UserState {
   user: UserInitialState;
 }
-export const resetPwd = createAsyncThunk("users/resetPwd", async (pwdResetDto: PwdResetDto, { dispatch, rejectWithValue }) => {
-  const url = apiBaseUrl + ":9999/user/set/password";
+export const checkOrder = createAsyncThunk("wechatPay/check", async (_, { rejectWithValue }) => {
+  const url = apiBaseUrl + ":9443/user/expiredtime/refresh";
   try {
-    const response = await axios.post(url, pwdResetDto);
+    const response: AxiosResponse<OrderCheckResponseDto | unknown> = await axiosInstance.get(url);
+
+    return { status: response.status, data: response.data };
+  } catch (err) {
+    if (isAxiosError(err)) {
+      const errCode = err.response?.status;
+      return rejectWithValue(errCode);
+    }
+  }
+});
+export const resetPwd = createAsyncThunk("users/resetPwd", async (pwdResetDto: PwdResetDto, { dispatch, rejectWithValue }) => {
+  const url = apiBaseUrl + ":9999/user/password";
+  try {
+    const _pwdResetDto = { ...pwdResetDto, password: await sha256(pwdResetDto.password) };
+
+    const response = await axios.put(url, _pwdResetDto);
 
     return { status: response.status };
   } catch (err) {
@@ -58,28 +82,44 @@ export const resetPwd = createAsyncThunk("users/resetPwd", async (pwdResetDto: P
   }
 });
 
-export const verifyEmail = createAsyncThunk("users/verifyEmail", async ({ type = "signup", ...userEmailVerifyDto }: UserEmailVerifyDto, { dispatch, rejectWithValue }) => {
-  const url = {
-    signup: apiBaseUrl + ":9999/signup/verification",
-    resetPwd: apiBaseUrl + ":9999/user/reset/password",
-  };
-  try {
-    const response = await axios.post(url[type], userEmailVerifyDto);
+export const verifyPhoneNum = createAsyncThunk(
+  "users/verifyPhoneNum",
+  async (
+    {
+      type = "SING_UP",
+      ...userPhoneVerifyDto
+    }: {
+      type: VerifyType;
+      phoneNumber: string;
+      reCapToken: string;
+    },
+    { dispatch, rejectWithValue }
+  ) => {
+    const url: Record<VerifyType, string> = {
+      SING_UP: apiBaseUrl + ":9999/signup/verification",
+      RESET_PWD: apiBaseUrl + ":9999/user/reset/password",
+    };
+    try {
+      const response = await axios.get(url[type], { params: userPhoneVerifyDto });
+      console.log(response.data);
 
-    return { data: type, status: response.status };
-  } catch (err) {
-    if (isAxiosError(err)) {
-      const errCode = err.response?.status;
-      return rejectWithValue(errCode);
+      info(response.data);
+      return { data: type, status: response.status };
+    } catch (err) {
+      if (isAxiosError(err)) {
+        const errCode = err.response?.status;
+        return rejectWithValue(errCode);
+      }
     }
   }
-});
+);
 
-export const signUp = createAsyncThunk("users/signUp", async ({ username, email, password, verificationCode }: UserPostDto, { rejectWithValue }) => {
+export const signUp = createAsyncThunk("users/signUp", async (userPostDto: UserPostDto, { rejectWithValue }) => {
   try {
-    const response = await axios.post(apiBaseUrl + ":9999/signup/registration", { username, email, password, verificationCode });
+    const _userPostDto = { ...userPostDto, password: await sha256(userPostDto.password) };
+    const response: AxiosResponse<UserInfo, UserPostDto> = await axios.post(apiBaseUrl + ":9999/signup/registration", _userPostDto);
 
-    const { data, status } = response as AxiosResponse<UserInfo>;
+    const { data, status } = response;
     return { data, status };
   } catch (err) {
     if (isAxiosError(err)) {
@@ -88,10 +128,23 @@ export const signUp = createAsyncThunk("users/signUp", async ({ username, email,
     }
   }
 });
-
-export const login = createAsyncThunk("users/login", async ({ email, password }: UserLoginPostDto, { rejectWithValue }) => {
+export const changeName = createAsyncThunk("users/changeName", async (username: string, { rejectWithValue }) => {
   try {
-    const response = await axios.post(apiBaseUrl + ":9999/user/login/email", { email, password });
+    const response: AxiosResponse<UserInfo, UserPostDto> = await axiosInstance.put(apiBaseUrl + ":9999/user/username", { username });
+
+    const { data, status } = response;
+    return { data, status };
+  } catch (err) {
+    if (isAxiosError(err)) {
+      const errCode = err.response?.status;
+      return rejectWithValue(errCode);
+    }
+  }
+});
+export const login = createAsyncThunk("users/login", async (userLoginPostDto: UserLoginPostDto, { rejectWithValue }) => {
+  try {
+    const _userLoginPostDto = { ...userLoginPostDto, password: await sha256(userLoginPostDto.password) };
+    const response = await axios.post(apiBaseUrl + ":9999/user/login/phoneNumber", _userLoginPostDto);
     const { data, status } = response as AxiosResponse<UserInfo>;
 
     return { data, status };
@@ -104,38 +157,13 @@ export const login = createAsyncThunk("users/login", async ({ email, password }:
   }
 });
 
-export const getLoginVCode = createAsyncThunk("users/getLoginVCode", async (email: string, { rejectWithValue }) => {
-  try {
-    const response = await axios.post(apiBaseUrl + ":9999/user/login/email/sendcode", { email });
-    const { data } = response as AxiosResponse<any>;
-    return { data };
-  } catch (err) {
-    if (isAxiosError(err)) {
-      const errCode = err.response?.status;
-
-      return rejectWithValue(errCode);
-    }
-  }
-});
-export const loginWithVCode = createAsyncThunk("users/loginWithVCode", async (vCodeLoginDto: { email: string; verificationCode: string }, { rejectWithValue }) => {
-  try {
-    const response = await axios.post(apiBaseUrl + ":9999/user/login/email/verifycode", vCodeLoginDto);
-    const { data, status } = response as AxiosResponse<UserInfo>;
-    return { data, status };
-  } catch (err) {
-    if (isAxiosError(err)) {
-      const errCode = err.response?.status;
-      return rejectWithValue(errCode);
-    }
-  }
-});
 export interface Status {
   status: "idle" | "loading";
   sCode: any;
   message: any;
 }
-export type EmailSendType = "signup" | "resetPwd" | "login";
-export type NextTryTime = Record<EmailSendType, number>;
+export type PhoneVRange = VerifyType | "LOGIN";
+export type NextTryTime = Record<PhoneVRange, number>;
 export interface UserInitialState {
   userInfo: UserInfo | null;
   vCode: number | null;
@@ -151,9 +179,9 @@ const initialState: UserInitialState = {
   userInfo: null,
   vCode: null,
   nextTryTime: {
-    login: 0,
-    signup: 0,
-    resetPwd: 0,
+    LOGIN: 0,
+    SING_UP: 0,
+    RESET_PWD: 0,
   },
   status: { status: "idle", sCode: null, message: null },
   currentModal: "close",
@@ -165,20 +193,71 @@ export const userSlice = createSlice({
     openModal: (state, action) => {
       state.currentModal = action.payload;
     },
-    destroyStatus: (state) => {
+    destroyStatus: (
+      state,
+      action: {
+        payload: "idle" | "loading";
+      }
+    ) => {
       state.status = { status: "idle", sCode: null, message: null };
     },
     saveUserInfo: (state, action) => {
       state.userInfo = action.payload;
     },
+    setAuthLoading: (
+      state,
+      action: {
+        payload: "idle" | "loading";
+      }
+    ) => {
+      state.status = { status: action.payload, sCode: null, message: null };
+    },
     logout: (state) => {
       state.userInfo = null;
 
       localStorage.clear();
+      info("已退出登录");
+    },
+    clearStatus: (state) => {
+      state.status = { status: "idle", sCode: "", message: "" };
     },
   },
 
   extraReducers: (builder) => {
+    builder.addCase(checkOrder.fulfilled, (state, action) => {
+      if (!action.payload) return;
+      console.log(action.payload);
+
+      switch (action.payload.status) {
+        case 200:
+          const { expiredTime1, expiredTime2, expiredTime3, expiredTime4, token } = action.payload.data as OrderCheckResponseDto;
+          state.userInfo = { ...state.userInfo, expiredTime1, expiredTime2, expiredTime3, expiredTime4, token } as UserInfo;
+          lsSet("userInfo", state.userInfo);
+          success("状态已更新");
+          break;
+      }
+    });
+    builder.addCase(checkOrder.rejected, (state, action) => {
+      console.log(action.payload);
+
+      switch (action.payload) {
+        case 401:
+          err("登录失效，请重新登录");
+          break;
+        case 429:
+          err("请求太频繁");
+          break;
+        case 500:
+          err("服务器错误");
+          break;
+        case 304:
+          err("暂无变化");
+          break;
+        default:
+          err("网络错误");
+      }
+    });
+
     builder.addCase(resetPwd.fulfilled, (state, action) => {
       state.status = { status: "idle", message: "重置成功", sCode: action.payload?.status };
       success("重置成功");
@@ -211,118 +290,52 @@ export const userSlice = createSlice({
       }
     });
 
-    builder.addCase(loginWithVCode.fulfilled, (state, action) => {
+    builder.addCase(verifyPhoneNum.fulfilled, (state, action) => {
       if (!action.payload) {
         return;
       }
-      state.userInfo = action.payload.data;
-      localStorage.setItem("userInfo", JSON.stringify(action.payload.data));
-      state.status = { status: "idle", message: "登录成功", sCode: action.payload?.status };
-      success("登录成功");
-    });
-    builder.addCase(loginWithVCode.pending, (state, action) => {
-      state.status = { status: "loading", message: null, sCode: null };
-    });
-    builder.addCase(loginWithVCode.rejected, (state, action) => {
-      let errMsg = "";
-      switch (action.payload) {
-        case 404:
-          errMsg = "邮箱不存在";
-          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
-          break;
-        case 500:
-          errMsg = "服务器暂时无法提供服务，请稍后再试";
-          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
-          break;
-        case 401:
-          errMsg = "验证码无效";
-          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
-          break;
-        case 400:
-          errMsg = "邮箱格式有误";
-          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
-          break;
-        default:
-          errMsg = "网络错误";
-          state.status = { status: "idle", message: errMsg, sCode: action.error.code };
-      }
-      err(errMsg);
-    });
-    builder.addCase(getLoginVCode.fulfilled, (state, action) => {
-      state.nextTryTime["login"] = new Date().getTime() + 60 * 1000;
-
-      state.status = { status: "idle", message: "发送成功", sCode: 200 };
-      success("发送成功");
-    });
-    builder.addCase(getLoginVCode.pending, (state, action) => {
-      state.status = { status: "loading", message: null, sCode: null };
-    });
-    builder.addCase(getLoginVCode.rejected, (state, action) => {
-      let errMsg = "";
-      switch (action.payload) {
-        case 404:
-          errMsg = "邮箱不存在";
-          break;
-        case 500:
-          errMsg = "服务器暂时无法提供服务，请稍后再试";
-          break;
-        case 429:
-          errMsg = "发送太频繁！";
-          break;
-        case 400:
-          errMsg = "邮箱或密码格式有误";
-          break;
-        default:
-          errMsg = "网络错误！";
-      }
-      state.status = { status: "idle", message: errMsg, sCode: action.error.code };
-    });
-
-    builder.addCase(verifyEmail.fulfilled, (state, action) => {
-      const type = action.payload?.data;
-      console.log(type);
-
+      const type = action.payload.data;
       type && (state.nextTryTime[type] = new Date().getTime() + 60 * 1000);
       state.status = { status: "idle", message: "发送成功", sCode: null };
       success("发送成功");
     });
-    builder.addCase(verifyEmail.pending, (state, action) => {
-      state.nextTryTime["signup"] = 0;
-      state.nextTryTime["resetPwd"] = 0;
+    builder.addCase(verifyPhoneNum.pending, (state, action) => {
+      state.nextTryTime["SING_UP"] = 0;
+      state.nextTryTime["RESET_PWD"] = 0;
 
       state.status = { status: "loading", message: null, sCode: null };
     });
-    builder.addCase(verifyEmail.rejected, (state, action) => {
-      console.log(action.payload);
+    builder.addCase(verifyPhoneNum.rejected, (state, action) => {
+      let message = "";
 
       switch (action.payload) {
         case 409:
-          err("邮箱已存在");
-          state.status = { status: "idle", message: "邮箱已存在", sCode: action.error.code };
+          message = "手机号已存在";
           break;
         case 429:
-          err("发送太频繁");
-          state.status = { status: "idle", message: "发送太频繁", sCode: action.error.code };
+          message = "发送太频繁";
+          break;
         case 400:
-          err("发送失败");
-          state.status = { status: "idle", message: "发送失败", sCode: action.error.code };
+          message = "发送失败";
           break;
         case 500:
-          err("服务器错误");
-          state.status = { status: "idle", message: "服务器错误", sCode: action.error.code };
+          message = "服务器错误";
           break;
         default:
-          err("网络错误");
-          state.status = { status: "idle", message: "网络错误", sCode: action.error.code };
+          message = "网络错误";
           break;
       }
+
+      err(message);
+      state.status = { status: "idle", message: message, sCode: action.error.code };
     });
     builder.addCase(signUp.fulfilled, (state, action) => {
       if (!action.payload) {
         return;
       }
-      state.userInfo = action.payload.data;
-      localStorage.setItem("userInfo", JSON.stringify(action.payload.data));
+      const userInfo = { ...action.payload.data, phoneNumber: encodedPhoneNum(action.payload.data.phoneNumber) };
+      state.userInfo = userInfo;
+      localStorage.setItem("userInfo", JSON.stringify(userInfo));
       state.status = { status: "idle", message: "注册成功", sCode: null };
       success("注册成功");
     });
@@ -344,8 +357,12 @@ export const userSlice = createSlice({
       err(errMsg);
     });
     builder.addCase(login.fulfilled, (state, action) => {
-      state.userInfo = action.payload?.data as UserInfo;
-      localStorage.setItem("userInfo", JSON.stringify(action.payload?.data));
+      if (!action.payload) {
+        return;
+      }
+      const userInfo = { ...action.payload.data, phoneNumber: encodedPhoneNum(action.payload.data.phoneNumber) };
+      state.userInfo = userInfo;
+      lsSet("userInfo", userInfo);
       state.status = { status: "idle", message: action.payload, sCode: action.payload?.status };
       success("登录成功");
     });
@@ -375,11 +392,9 @@ export const userSlice = createSlice({
           errMsg = "网络错误！";
           state.status = { status: "idle", message: errMsg, sCode: action.error.code };
       }
-      enqueueSnackbar(errMsg, {
-        variant: "error",
-      });
+      err(errMsg);
     });
   },
 });
-export const { openModal, destroyStatus, saveUserInfo, logout } = userSlice.actions;
+export const { setAuthLoading, openModal, destroyStatus, saveUserInfo, logout, clearStatus } = userSlice.actions;
 export default userSlice.reducer;

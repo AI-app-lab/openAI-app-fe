@@ -5,11 +5,12 @@ type Props = {
   children: JSX.Element | JSX.Element[];
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   className?: string;
+  allow?: boolean;
 };
 
-const IconButton = ({ onClick, children, className = "" }: Props) => {
+const IconButton = ({ allow = true, onClick, children, className = "" }: Props) => {
   return (
-    <div onClick={onClick} className={styles.iconButton + " " + className}>
+    <div onClick={allow ? onClick : () => {}} className={`${styles.iconButton} ${className} ${allow ? "" : styles.disabled}`}>
       {children}
     </div>
   );

@@ -3,7 +3,7 @@ $form-elem-margin-top: 16px;
 $rowGap: 10px;
 
 .suTitle {
-    padding-bottom: 16px;
+
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 10px;
@@ -16,45 +16,6 @@ header {
     margin: 0 auto;
     text-align: center;
     width: var(--modal-lg-w);
-
-    .toggle {
-
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
-        cursor: pointer;
-        font-size: 20px;
-        font-weight: 700;
-
-        .loginMethod {
-            width: 50%;
-            border-bottom: 3px solid inherit;
-
-
-            &:hover {
-                opacity: 0.8;
-            }
-
-            &:active {
-                opacity: 0.6;
-            }
-        }
-
-        .smsLg {
-            @extend .loginMethod;
-            color: var(--primary);
-            box-sizing: border-box;
-            border-bottom: 3px solid var(--primary);
-        }
-
-        .pwdLg {
-            @extend .loginMethod;
-            color: var(--primary);
-            box-sizing: border-box;
-            border-bottom: 3px solid var(--primary);
-        }
-
-    }
 }
 
 form {

@@ -24,6 +24,7 @@ type Props = {
   handleClick: any;
   handlePause: () => void;
   beforeRecordingFn: () => void;
+  isPlaying: boolean;
 };
 let ws: WebSocket;
 let recorder: any = null;
@@ -31,17 +32,20 @@ let audioContext: any = null;
 let _isRecording = false;
 let mediaRecorder: any = null;
 let count = 0;
-const MicrophoneBtn = ({ isRecording, startFn, stopFn, volume }: { isRecording: boolean; startFn: () => void; stopFn: () => void; volume: number }) =>
-  isRecording ? (
+const MicrophoneBtn = ({ isPlaying, isRecording, startFn, stopFn, volume }: { isPlaying: boolean; isRecording: boolean; startFn: () => void; stopFn: () => void; volume: number }) => {
+  const { loading } = useSelector((state: ChatApiState) => state.chatApi);
+
+  return isRecording ? (
     <IconButton className={`${stylesChat.sendBtn}`} onClick={stopFn}>
       <FaMicrophoneSlash className={`${styles.icon} ${styles["step" + volume]} ${styles.off}`} />
     </IconButton>
   ) : (
-    <IconButton className={`${stylesChat.sendBtn}`} onClick={startFn}>
+    <IconButton allow={!isPlaying && loading !== "loading"} className={`${stylesChat.sendBtn}`} onClick={startFn}>
       <BiMicrophone className={`${styles.icon}`} />
     </IconButton>
   );
-const OralInputRange = ({ beforeRecordingFn, handlePause, textAreaRef, handleClick, msg, setMsg }: Props) => {
+};
+const OralInputRange = ({ isPlaying, beforeRecordingFn, handlePause, textAreaRef, handleClick, msg, setMsg }: Props) => {
   const recorderWorker = new WorkerBuilder(transformpcmWorker);
   const [volume, setVolume] = useState<number>(1);
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -147,7 +151,7 @@ const OralInputRange = ({ beforeRecordingFn, handlePause, textAreaRef, handleCli
     };
     ws.onclose = (e: any) => {
       if (e.code === 4403) {
-        err("服务已过期");
+        err("服务过期/未购买");
       }
       if (e.code === 4400) {
         err("操作频繁");
@@ -187,7 +191,7 @@ const OralInputRange = ({ beforeRecordingFn, handlePause, textAreaRef, handleCli
         className={stylesChat.inputRange}
       />
       <div className={stylesChat.buttonWrapperOral}>
-        <IconButton onClick={handleSend} className={`${stylesChat.sendBtnOral} ${loading === "loading" ? stylesChat.btnLoading : ""} ${stylesChat.oralSendBtn}`}>
+        <IconButton onClick={handleSend} className={`${stylesChat.sendBtnOral} ${loading === "loading" || isPlaying ? stylesChat.btnLoading : ""} ${stylesChat.oralSendBtn}`}>
           <SendSharpIcon />
         </IconButton>
       </div>
@@ -201,7 +205,7 @@ const OralInputRange = ({ beforeRecordingFn, handlePause, textAreaRef, handleCli
             color={themes[theme].primary}
           />
         ) : (
-          <MicrophoneBtn isRecording={isRecording} startFn={startFn} stopFn={stopFn} volume={volume} />
+          <MicrophoneBtn isPlaying={isPlaying} isRecording={isRecording} startFn={startFn} stopFn={stopFn} volume={volume} />
         )}
       </div>
     </>

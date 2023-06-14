@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { EmailSendType, UserState } from "../store/userSlice";
+import { PhoneVRange, UserState } from "../store/userSlice";
 
-export const useSendEmailCountDown = (type: EmailSendType) => {
+export const usePhoneVCountDown = (type: PhoneVRange) => {
   const { status, nextTryTime } = useSelector((state: UserState) => state.user);
   const [sendBtnText, setSendBtnText] = useState<number | string>("发送");
   const countdown = () => {
@@ -17,8 +17,8 @@ export const useSendEmailCountDown = (type: EmailSendType) => {
     }, 1000);
   };
   useEffect(() => {
-    nextTryTime["resetPwd"] && countdown();
-  }, [nextTryTime["resetPwd"], sendBtnText]);
+    nextTryTime["RESET_PWD"] && countdown();
+  }, [nextTryTime["RESET_PWD"], sendBtnText]);
 
   return { sendBtnText, status };
 };

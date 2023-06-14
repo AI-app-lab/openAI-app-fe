@@ -12,9 +12,10 @@ import { useToken } from "../../../hooks/useToken";
 type Props = {
   handlePause: () => void;
   beforeRecordingFn: () => void;
+  isPlaying: boolean;
 };
 export const sleep = (t: number) => new Promise((p) => setTimeout(p, t));
-const InputRange = ({ beforeRecordingFn, handlePause }: Props) => {
+const InputRange = ({ isPlaying, beforeRecordingFn, handlePause }: Props) => {
   const [userMessage, setUserMessage] = useState<string>("");
   const dispatch: Function = useDispatch();
   const { loading, currConversationId, validConversations, currChatType, model, maxContextNum } = useSelector((state: ChatApiState) => state.chatApi);
@@ -23,8 +24,15 @@ const InputRange = ({ beforeRecordingFn, handlePause }: Props) => {
   const token = useToken();
   useEffect(() => {
     //if words are too long, make the textarea higher,but not higher than 200px,if words are too short,make the textarea lower,but not lower than 36px
+
     if (textAreaRef.current) {
-      textAreaRef.current.style.height = "auto";
+      console.log(textAreaRef.current.scrollHeight);
+      if (textAreaRef.current.scrollHeight <= 500) {
+        textAreaRef.current.style.overflow = "hidden";
+      } else {
+        textAreaRef.current.style.overflow = "auto";
+      }
+      textAreaRef.current.style.height = "37px";
       textAreaRef.current.style.height = textAreaRef.current.scrollHeight + "px";
     }
   }, [userMessage]);
@@ -87,6 +95,7 @@ const InputRange = ({ beforeRecordingFn, handlePause }: Props) => {
   const textAreaTypeOral = (
     <div className={styles["inputRangeContainerOral"]}>
       <OralInputRange
+        isPlaying={isPlaying}
         beforeRecordingFn={beforeRecordingFn}
         handlePause={handlePause}
         textAreaRef={textAreaRef}

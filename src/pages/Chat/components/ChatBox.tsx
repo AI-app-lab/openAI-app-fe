@@ -25,6 +25,7 @@ const ChatBox = ({ isChatSideBox, setIsChatSdBarOpen }: Props) => {
   const currCon = useCurrCon();
   const currConId = useCurrConId();
   const [urlPlaying, setUrlPlaying] = useState("");
+  const [isPlaying, setIsPlaying] = useState(false);
   const [beforeRecordingFn, setBeforeRecordingFn] = useState<() => void>(() => {});
   const handleAudioStop = (_audio?: HTMLAudioElement) => {
     _audio && _audio.pause();
@@ -37,8 +38,8 @@ const ChatBox = ({ isChatSideBox, setIsChatSdBarOpen }: Props) => {
     <ChatBoxContext.Provider value={{ beforeRecordingFn, setBeforeRecordingFn }}>
       <div className={styles.chatBox}>
         <ChatBoxHeader isChatSideBox={isChatSideBox} setIsChatSdBarOpen={setIsChatSdBarOpen} />
-        <ChatWindow setBeforeRecordingFn={setBeforeRecordingFn} handleAudioStop={handleAudioStop} urlPlaying={urlPlaying} setUrlPlaying={setUrlPlaying} currAudioSliceShouldPlay={currAudioSliceShouldPlay} messageList={currCon.conList} conId={currConId} />
-        <InputRange beforeRecordingFn={beforeRecordingFn} handlePause={handleAudioStop} />
+        <ChatWindow setIsPlaying={setIsPlaying} isPlaying={isPlaying} setBeforeRecordingFn={setBeforeRecordingFn} handleAudioStop={handleAudioStop} urlPlaying={urlPlaying} setUrlPlaying={setUrlPlaying} currAudioSliceShouldPlay={currAudioSliceShouldPlay} messageList={currCon.conList} conId={currConId} />
+        <InputRange isPlaying={isPlaying} beforeRecordingFn={beforeRecordingFn} handlePause={handleAudioStop} />
       </div>
     </ChatBoxContext.Provider>
   );

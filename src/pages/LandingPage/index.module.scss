@@ -84,6 +84,37 @@
             letter-spacing: 5px;
             font-size: 25px;
 
+
+        }
+
+        .footer {
+
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-top: 20px;
+            color: #d6d6d6 !important;
+            font-size: 10px;
+            font-weight: 400;
+            margin-bottom: 10px;
+
+            .bottomLink {
+                margin-left: 50px;
+            }
+
+        }
+    }
+
+    .link {
+        &:hover {
+            color: var(--primary) !important;
+            border-bottom: 1px solid var(--primary);
         }
     }
 
@@ -99,6 +130,7 @@
 
 
 
+
 }
 
 @media screen and (max-width: 768px) {
@@ -107,7 +139,7 @@
     }
 
     .body {
-        padding: 5vh 5vw !important;
+        padding: 2vh 5vw !important;
 
     }
 

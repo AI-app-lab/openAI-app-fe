@@ -1,0 +1,51 @@
+.toggleContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 15px !important;
+    border: 1px solid var(--secondary);
+    width: 500px;
+    box-sizing: border-box;
+
+    .btn {
+        border-radius: 0;
+        height: 30px;
+        width: 200px;
+        font-size: 16px;
+
+        &.selected {
+            font-weight: 700;
+            color: var(--text) !important;
+            // a selected color
+            box-sizing: border-box;
+
+            background-color: var(--primary-bg) !important;
+
+
+
+
+            &:before {
+                content: "★";
+
+                box-sizing: border-box;
+                color: rgb(255, 166, 0);
+
+
+
+
+            }
+
+            &:after {
+                @extend :before
+            }
+        }
+
+
+    }
+
+    .btn+.btn {
+        border-left: 1px solid var(--secondary);
+    }
+
+}

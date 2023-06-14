@@ -16,6 +16,7 @@ import { nanoid } from "nanoid";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "antd";
 import { CpntsState, setIsSideBarOpen } from "../../store/cpntsSlice";
+import { breakPoints } from "../../styles/global";
 
 const groupTop = [
   {
@@ -29,13 +30,7 @@ const groupTop = [
     route: "shop",
   },
 ];
-const groupBottom = [
-  {
-    name: "退出登录",
-    icon: <LogoutIcon />,
-    route: "/",
-  },
-];
+
 const SideBar = () => {
   const { pathname } = useLocation();
   const dispatch = useDispatch();
@@ -107,7 +102,12 @@ const SideBar = () => {
         <ListContainer className={styles.listContainer}>
           {groupTop.map(({ route, name, icon }) => {
             return (
-              <ListItem className={`${styles.menuItemTop} ${pathname === route ? styles.selected : ""}`} key={nanoid()}>
+              <ListItem
+                onClick={() => {
+                  window.innerWidth < breakPoints.small && dispatch(setIsSideBarOpen(false));
+                }}
+                className={`${styles.menuItemTop} ${pathname === route ? styles.selected : ""}`}
+                key={nanoid()}>
                 <Link to={route} style={{ color: "inherit", width: "100%", height: "100%" }}>
                   {icon}
                 </Link>

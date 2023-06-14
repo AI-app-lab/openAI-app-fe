@@ -11,11 +11,11 @@ type Props = {
 };
 
 const Avatar = ({ type, shape = "circle", size = "mid", style, className = "" }: Props) => {
-  const useInfo = useUserInfo();
+  const userInfo = useUserInfo();
   const AvatarDict = {
     user: (
       <div style={style} className={`${styles.container} ${className} ${styles[size]} ${styles[shape]}`}>
-        {useInfo?.email.slice(0, 1)}{" "}
+        {userInfo?.username.slice(0, 1)}
       </div>
     ),
     system: (

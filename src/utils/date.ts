@@ -14,7 +14,7 @@ export function getFormattedDate(date: string | undefined = "") {
   const _date = new Date(dateString);
 
   if (_date < new Date()) {
-    return "已过期";
+    return "未购买/已过期";
   }
 
   const formattedDate = _date.toLocaleString();

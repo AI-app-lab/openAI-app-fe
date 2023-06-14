@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 
 import styles from "./index.module.scss";
@@ -9,6 +9,10 @@ import TranslateIcon from "@mui/icons-material/Translate";
 import HeadsetMicIcon from "@mui/icons-material/HeadsetMic";
 import DrawIcon from "@mui/icons-material/Draw";
 import { nanoid } from "nanoid";
+import { useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { clear } from "console";
+import { clearStatus } from "../../store/userSlice";
 type Props = {};
 const useColor = () => {
   return ["#f1a746", "#dc5ce5", "#7b41de", "#ec445b", "#2bb68e"][Math.floor(Math.random() * 5)];
@@ -50,6 +54,14 @@ export const cards = [
   },
 ];
 const Apps = (props: Props) => {
+  const location = useLocation();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const action = location.state?.action;
+    if (action === "LOGIN") {
+      dispatch(clearStatus());
+    }
+  }, []);
   return (
     <div className={styles.wrapper}>
       <div className={styles.title}>我的应用</div>

@@ -1,36 +1,45 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "../index.module.scss";
 import { ConfigState } from "../../../store/configSlice";
 import { locations } from "../../../localization";
 import Button from "../../../components/Button/Button";
-import { destroyStatus, openModal, signUp, UserPostDto, UserState, verifyEmail } from "../../../store/userSlice";
+import { setAuthLoading, signUp, UserPhoneVerifyDto, UserPostDto, UserState, verifyPhoneNum, VerifyType } from "../../../store/userSlice";
 import Loading from "../../../components/Loading/Loading";
-import { isEmail } from "../../../utils/formValidation";
+import { isEmail, isPhoneNumber } from "../../../utils/formValidation";
 import { useNavigate } from "react-router-dom";
 import { err } from "../../../utils/alert";
-import Modal from "../../../components/Modal/Modal";
+import AuthModal from "../../../components/AuthModal/AuthModal";
 import Input from "../../../components/Input/Input";
 
+import HashLoader from "../../../components/HashLoader/HashLoader";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 type Props = {};
 
 const SignUp = (props: Props) => {
-  const dispatch: any = useDispatch();
+  const { executeRecaptcha } = useGoogleReCaptcha();
+  const handleReCaptchaVerify = useCallback(async () => {
+    if (!executeRecaptcha) {
+      return Promise.resolve("");
+    }
+    return Promise.resolve(await executeRecaptcha("SendVCode"));
+  }, [executeRecaptcha]);
+  const dispatch: Function = useDispatch();
   const { location } = useSelector((state: ConfigState) => state.config);
-  const [userPostDto, setUserPostDto] = useState<UserPostDto>({ email: "", password: "", verificationCode: "", username: "unset" });
+  const [userPostDto, setUserPostDto] = useState<UserPostDto>({ phoneNumber: "", password: "", verificationCode: "", username: "unset", invitedCode: "" });
 
   const { status, nextTryTime, userInfo } = useSelector((state: UserState) => state.user);
   const [sendBtnText, setSendBtnText] = useState<number | string>("发送");
   const navigate = useNavigate();
   useEffect(() => {
     userInfo && navigate("/apps");
-    nextTryTime["signup"] && countdown();
-  }, [nextTryTime["signup"], sendBtnText, userInfo]);
+    nextTryTime["SING_UP"] && countdown();
+  }, [nextTryTime["SING_UP"], sendBtnText, userInfo]);
 
   const countdown = () => {
     const timer = setInterval(() => {
       const time = new Date().getTime();
-      const count = Math.round((nextTryTime["signup"] - time) / 1000);
+      const count = Math.round((nextTryTime["SING_UP"] - time) / 1000);
       setSendBtnText(count);
       if (count <= 0) {
         clearInterval(timer);
@@ -39,12 +48,12 @@ const SignUp = (props: Props) => {
     }, 1000);
   };
   const isFormatCorrect = (type = "sendVcode") => {
-    if (!userPostDto.email) {
-      err("邮箱不能为空!");
+    if (!userPostDto.phoneNumber) {
+      err("手机不能为空!");
       return false;
     }
-    if (!isEmail(userPostDto.email)) {
-      err("邮箱格式不正确!");
+    if (!isPhoneNumber(userPostDto.phoneNumber)) {
+      err("手机格式不正确!");
       return false;
     }
     if (!userPostDto.verificationCode && type === "register") {
@@ -59,37 +68,47 @@ const SignUp = (props: Props) => {
     return true;
   };
 
-  const handleSendVcode = () => {
-    //todo 验证邮箱格式
+  const handleSendVcode = async () => {
+    //todo 验证手机格式
     if (!isFormatCorrect()) {
       return;
     }
+    dispatch(setAuthLoading("loading"));
+    handleReCaptchaVerify().then((token) => {
+      console.log(token);
 
-    dispatch(verifyEmail({ email: userPostDto.email }));
+      dispatch(
+        verifyPhoneNum({
+          type: "SING_UP",
+          phoneNumber: userPostDto.phoneNumber,
+          reCapToken: token,
+        })
+      );
+    });
   };
   const handleSignUp = () => {
     if (!isFormatCorrect("register")) {
       return;
     }
+
     dispatch(signUp(userPostDto));
   };
   return status.status === "loading" ? (
-    <div className={styles.modalWrapper}>
-      <Loading />
-    </div>
+    <HashLoader />
   ) : (
-    <Modal>
-      <div className={styles.suTitle}> {locations[location].loginTitle}</div>
+    <AuthModal>
       <form onSubmit={(e) => e.preventDefault()}>
-        <input id="email" value={userPostDto.email} autoComplete="text" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, email: e.target.value }))} placeholder="请输入邮箱" type="text" />
+        <div className={styles.suTitle}> {locations[location].loginTitle}</div>
+        <input id="phone" value={userPostDto.phoneNumber} autoComplete="text" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, phoneNumber: e.target.value }))} placeholder="请输入手机号" type="text" />
 
         <div className={styles.captchaGroup}>
-          <Input type="text" id="captcha" name="captcha" autoComplete="off" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, verificationCode: e.target.value }))} placeholder="验证码" />
+          <Input value={userPostDto.verificationCode} type="text" id="captcha" name="captcha" autoComplete="off" onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, verificationCode: e.target.value }))} placeholder="验证码" />
           <Button allow={typeof sendBtnText === "string"} onClick={handleSendVcode} className={styles.sendBtn}>
             {sendBtnText}
           </Button>
         </div>
         <Input className={styles.pwd} id="password" autoComplete="current-password" value={userPostDto.password} onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, password: e.target.value }))} placeholder="请输入密码" type="password" />
+        <Input className={styles.pwd} id="text" autoComplete="text" value={userPostDto.invitedCode} onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, invitedCode: e.target.value }))} placeholder="邀请码（选填）" type="text" />
         <Button onClick={handleSignUp} className={styles.btn} w={70} h={50}>
           {locations[location].singUp}
         </Button>
@@ -97,7 +116,7 @@ const SignUp = (props: Props) => {
           {locations[location].hasAcc}
         </div>
       </form>
-    </Modal>
+    </AuthModal>
   );
 };
 

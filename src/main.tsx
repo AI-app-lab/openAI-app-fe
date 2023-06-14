@@ -4,6 +4,7 @@ import "./index.css";
 import store from "./store/store";
 import { Provider } from "react-redux";
 import HashLoader from "./components/HashLoader/HashLoader";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
 let App = lazy(() => {
   return new Promise((resolve) => {
@@ -11,9 +12,11 @@ let App = lazy(() => {
   });
 });
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <Provider store={store}>
-    <Suspense fallback={<HashLoader />}>
-      <App />
-    </Suspense>
-  </Provider>
+  <GoogleReCaptchaProvider useRecaptchaNet reCaptchaKey="6LdaP4omAAAAAA0EUUUyLC8LoRVj6eF8XLskkV7L">
+    <Provider store={store}>
+      <Suspense fallback={<HashLoader />}>
+        <App />
+      </Suspense>
+    </Provider>
+  </GoogleReCaptchaProvider>
 );

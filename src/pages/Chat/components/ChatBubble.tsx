@@ -21,13 +21,14 @@ const ChatBubble = ({ showAll, time, type, message, id }: Props) => {
   const BubbleRight = () => (
     <div
       style={{
+        width: "100%",
         display: "flex",
         flexDirection: "column",
-        alignItems: "end",
       }}>
       <Avatar
         shape="square"
         style={{
+          alignSelf: "flex-end",
           marginBottom: "5px",
           marginRight: "5px",
         }}
@@ -53,10 +54,9 @@ const ChatBubble = ({ showAll, time, type, message, id }: Props) => {
       return (
         <div
           style={{
+            width: "100%",
             display: "flex",
             flexDirection: "column",
-            alignItems: "start",
-            justifyContent: "start",
           }}>
           <Avatar
             size="small"

@@ -1,6 +1,7 @@
 input {
     padding: 10px;
-    font-size: var(--modal-font-size);
+
+    font-size: var(--modal-font-size) !important;
     color: var(--text);
     background-color: var(--primary-bg);
     height: var(--input-lg-h);

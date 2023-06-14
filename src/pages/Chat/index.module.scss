@@ -677,29 +677,36 @@ $padding: 10px;
             justify-content: center;
             align-items: center;
 
-            height: var(--chatbox-input-range-height);
+            height: 36px;
+
 
             .inputRange {
-                font-family: inherit;
+                //textarea normal
 
-                min-height: var(--chatbox-input-range-height);
-                max-height: 300px;
+                height: 36px;
+                font-family: inherit;
+                padding: 0;
+                box-sizing: border-box !important;
+                // min-height: var(--chatbox-input-range-height);
+                max-height: 500px;
+                height: 100%;
                 position: absolute;
+                font-size: 15px;
+
+                padding: 0 10px;
+                padding-top: 7px;
 
                 width: calc(var(--chatbox-input-range-width) - 2 * $padding);
-                box-sizing: border-box;
-                padding: $padding;
+
+
                 color: var(--text);
                 resize: none;
                 border: 1px solid var(--secondary);
                 border-radius: var(--border-radius);
                 background-color: var(--primary-bg);
-                bottom: 0px;
+                bottom: 0;
 
-                textarea {
-                    display: block;
-                    height: 100%;
-                }
+
             }
 
             .inputRange:focus {
@@ -710,7 +717,7 @@ $padding: 10px;
             }
 
             .buttonWrapper {
-                bottom: calc($padding/2);
+                bottom: calc($padding/2 + 2px);
                 right: 2*$padding;
                 position: absolute;
 
@@ -740,6 +747,7 @@ $padding: 10px;
             .buttonWrapperOral {
                 @extend .buttonWrapper;
                 right: 7*$padding !important;
+                bottom: 7px !important;
             }
         }
 
@@ -759,7 +767,7 @@ $padding: 10px;
                 left: 20px;
                 width: calc(var(--chatbox-input-range-width) - 8* $padding);
 
-                min-height: var(--chatbox-input-range-height) !important;
+
 
 
             }
@@ -770,7 +778,7 @@ $padding: 10px;
 
                 position: absolute;
                 right: 10px;
-                bottom: 5px;
+                bottom: 0px;
 
 
 

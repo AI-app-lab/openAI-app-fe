@@ -5,7 +5,7 @@ import { lsSet } from "../utils/localstorage";
 import { getTokensCount } from "../utils/getTokensCount";
 import { err } from "../utils/alert";
 import { Prompts } from "../utils/prompt";
-import { clear } from "console";
+
 import { apiBaseUrl } from "../config/axiosConfig";
 
 export type ChatRequestType = "voice" | "chat";

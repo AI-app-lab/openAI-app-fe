@@ -13,8 +13,10 @@ import Shop from "./pages/Shop/Shop";
 import Chat from "./pages/Chat/Chat";
 import Apps from "./pages/Apps/Apps";
 import Account from "./pages/Account/Account";
-import { HashLoader } from "react-spinners";
+
 import PwdReset from "./pages/authPages/PwdReset/PwdReset";
+import Contact from "./pages/Contact/Contact";
+import Privacy from "./pages/Privacy/Privacy";
 
 export const _GuardRounded = ({ component }: { component: JSX.Element }) => {
   return lsGet("userInfo") ? component : <Navigate to="/" replace />;
@@ -41,7 +43,15 @@ export const router = createBrowserRouter([
         path: "/product",
         element: <Product />,
       },
+      {
+        path: "/contact",
+        element: <Contact />,
+      },
     ],
+  },
+  {
+    path: "/privacy",
+    element: <Privacy />,
   },
   {
     path: "/login",

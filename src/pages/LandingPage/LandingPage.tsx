@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import NavBarLanding from "./components/NavBarLanding";
-import { useSelector } from "react-redux";
-import { ConfigState } from "../../store/configSlice";
+
 import styles from "./index.module.scss";
 import Button from "../../components/Button/Button";
 import Link from "../../components/Link/Link";
@@ -39,6 +38,28 @@ export const Main = () => {
       <Link to="/sign-up">
         <Button className={styles.goBtn}>免费注册 </Button>
       </Link>
+      <div className={styles.footer}>
+        <div>
+          <div className={styles.bottomLink}>
+            <Link to="https://kdocs.cn/l/cbloXAkYusKb" className={styles.link}>
+              {"免责声明 | "}
+            </Link>
+            <Link to="https://kdocs.cn/l/cjDiQaaUorqI" className={styles.link}>
+              {"服务协议 | "}
+            </Link>
+
+            <Link className={styles.link} to="https://kdocs.cn/l/cc5L90OeAILm">
+              {"隐私政策"}
+            </Link>
+          </div>
+          <div>
+            {"本网站由界通科技运营 | "}
+            <Link className={styles.link} to="https://beian.miit.gov.cn/">
+              {"粤ICP备2023057548号"}
+            </Link>
+          </div>
+        </div>
+      </div>
     </>
   );
 };

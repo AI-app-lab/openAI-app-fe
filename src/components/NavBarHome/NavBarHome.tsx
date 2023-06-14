@@ -5,7 +5,6 @@ import ListItem from "../ListItem/ListItem";
 import KeyboardArrowDownSharpIcon from "@mui/icons-material/KeyboardArrowDownSharp";
 
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../store/userSlice";
 
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import IconButton from "../IconButon/IconButton";
@@ -26,7 +25,6 @@ const NavBarHome = () => {
 
   const userInfo = useUserInfo();
   useEffect(() => {
-    !localStorage.getItem("userInfo") && navigate("/");
     const handleClickOutside = (e: Event) => {
       if (menuRef.current?.contains(e.target as any)) return;
       setOpen(false);
@@ -72,7 +70,7 @@ const NavBarHome = () => {
                   {userInfo?.username}
                 </ListItem>
                 <ListItem btn={false} className={styles.email}>
-                  {userInfo?.email}
+                  {userInfo?.phoneNumber}
                 </ListItem>
               </ListContainer>
             </MenuItem>
@@ -82,7 +80,12 @@ const NavBarHome = () => {
             <MenuItem onClick={() => setOpen(!open)}>
               <Link to="account">账户管理</Link>
             </MenuItem>
-            <MenuItem onClick={() => dispatch(logout())}>登出</MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate("/", { replace: true, state: { action: "LOGOUT" } });
+              }}>
+              登出
+            </MenuItem>
           </Menu>
           <ListItem onClick={() => setOpen(!open)}>
             <Avatar style={{ marginRight: "20px" }} type="user" />

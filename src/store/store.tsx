@@ -5,6 +5,7 @@ import userSlice from "./userSlice";
 import cpntsSlice from "./cpntsSlice";
 import aiDrawApiSlice from "./aiDrawApiSlice";
 import aiTranslateApiSlice from "./aiTranslateApiSlice";
+import wechatPaySlice from "./wechatPaySlice";
 // import chatOralSlice from "./chatOralSlice";
 export default configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export default configureStore({
     cpnts: cpntsSlice,
     aiDraw: aiDrawApiSlice,
     aiTranslate: aiTranslateApiSlice,
+    wechatPay: wechatPaySlice,
   },
 });
 // oral: chatOralSlice,

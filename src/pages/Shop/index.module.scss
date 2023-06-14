@@ -1,0 +1,401 @@
+@media screen and (max-width: 768px) {
+    .container {
+
+        padding: 0 !important;
+        font-size: 14px !important;
+        margin-top: 20px;
+    }
+
+    .header {
+
+        display: none !important;
+
+        .diamondIcon {
+            font-size: 10px !important;
+            color: #ff9d00;
+            margin-right: 0px;
+
+        }
+
+
+        .headerText {
+
+            font-size: 10px !important;
+            margin-left: 10px !important;
+
+        }
+
+
+    }
+
+    .body {
+        margin-top: 10px !important;
+        gap: 10px !important;
+    }
+
+    .cardContainer {
+
+
+
+        margin-top: 30px;
+        width: 140px !important;
+        height: 140px !important;
+
+        .itemName {
+            font-size: 14px !important;
+        }
+
+        .price {
+            font-size: 20px !important;
+            color: #ffa310;
+        }
+
+        .priceDay {
+            font-size: 10px !important;
+        }
+
+        .cardItem+.cardItem {
+            margin-top: 20px;
+        }
+
+        .buyBtn {
+            border-radius: 5px;
+            width: 110px;
+            height: 30px;
+            ;
+            font-size: 16px !important;
+
+        }
+    }
+
+    .buyBtn {
+        width: 80px !important;
+        height: 25px !important;
+        font-size: 10px !important;
+    }
+
+    .toggle {
+        width: 300px !important;
+        height: 35px !important;
+
+        .toggleBtn {
+            font-size: 10px !important;
+            height: 100% !important;
+            width: 100px !important;
+        }
+
+    }
+
+}
+
+.container {
+    font-size: 16px;
+    color: var(--text);
+    width: 90%;
+    height: 90%;
+    display: flex;
+    box-sizing: border-box;
+    align-items: center;
+    flex-direction: column;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 0 20px;
+
+
+
+
+
+    .header {
+
+        margin-top: 30px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .diamondIcon {
+            font-size: 14px;
+            color: #ff9d00;
+            margin-right: 5px;
+
+        }
+
+
+        .headerText {
+            font-weight: 700;
+            font-size: 14px;
+            margin-left: 50px;
+
+        }
+
+
+    }
+
+    .title {
+        font-size: 24px;
+    }
+
+    .toggle {
+        margin-top: 20px;
+        color: var(--text) !important;
+    }
+
+    .body {
+        margin-top: 50px;
+        flex-direction: row;
+
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 40px;
+
+        $cardHeight: 180px;
+
+        .cardContainer {
+
+
+            width: 180px;
+            height: $cardHeight;
+            border: 1px solid var(--secondary);
+            border-radius: 10px;
+            background-color: var(--primary-bg);
+
+            padding: 20px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-direction: column;
+            //shadow
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+            position: relative;
+
+            &.recommended {
+                border: 1px solid #ffa310;
+
+                &:before {
+
+                    right: 0;
+                    top: 0;
+                    position: absolute;
+                    content: "👑";
+
+                }
+
+                &:after {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                    left: 0;
+                    right: 0;
+                    margin: auto;
+                    top: 0;
+                    position: absolute;
+                    font-size: 12px;
+                    color: var(--text-contrast);
+                    background: red;
+                    border-radius: 12px;
+                    width: 150px;
+                    font-weight: 500;
+                    height: 25px;
+
+                    transform: translateY(-80%);
+                    content: "最多人购买，限时特惠!";
+                }
+
+
+
+            }
+
+            &:hover {
+
+                background: #fbe9d1;
+                color: #9d6c47;
+
+                .price {
+                    color: #ff0000;
+                }
+
+                .buyBtn {
+                    background: #ff0000;
+                    color: #fff;
+                }
+            }
+
+            .itemName {
+                font-size: 18px;
+            }
+
+            .price {
+                font-size: 26px;
+                color: #ffa310;
+            }
+
+            .priceDay {
+                font-size: 12px;
+            }
+
+            .cardItem+.cardItem {
+                margin-top: 20px;
+            }
+
+            .buyBtn {
+                border-radius: 5px;
+                width: 110px;
+                height: 30px;
+                ;
+                font-size: 16px !important;
+
+            }
+
+        }
+
+    }
+
+
+
+}
+
+.modal {
+
+    box-sizing: border-box;
+    padding: 20px;
+
+    background-color: var(--primary-bg);
+    display: flex;
+    justify-content: start;
+    align-items: start;
+    flex-direction: column;
+    color: var(--text);
+
+    strong {
+        color: var(--text);
+        font-size: 16px;
+    }
+
+    .modalHeader {
+        color: orange;
+        font-size: 20px;
+
+    }
+
+    .modalPrice {
+        margin-top: 20px;
+        font-size: 20px;
+        font-weight: 700;
+
+        color: #1bc56c;
+
+    }
+
+    .payMethod {
+        display: flex;
+        flex-direction: column;
+
+        margin-top: 20px;
+
+        .payMethodGroup {
+
+            margin-top: 10px;
+
+
+            .wx {
+                .wxPayIcon {
+                    font-size: 20px;
+                    color: #1bc56c
+                }
+
+                font-size: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--text);
+                border-radius: 5px;
+                padding: 10px;
+                border: 3px solid var(--primary);
+                font-weight: 500;
+            }
+        }
+    }
+
+    .QRCodeContainer {
+        margin-top: 20px;
+        display: flex;
+        $borderRadius: 0px;
+
+
+
+        .QRCodeGroup {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            .QRCodeImg {
+                border-radius: $borderRadius;
+                height: 250px;
+                width: 250px;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+
+
+            .tip {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: #00c800;
+                width: 240px;
+                height: 25px;
+                margin-top: 5px;
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--text-contrast);
+                cursor: default;
+            }
+
+        }
+
+        .toturial {
+            border-radius: $borderRadius;
+            height: 250px;
+            width: 250px;
+            border: 1px solid white;
+        }
+    }
+
+
+    .btnGroup {
+        box-sizing: border-box;
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        $btnWidth: 100px;
+        $btnHeight: 35px;
+        width: 100%;
+        padding: 0 50px;
+
+        .finishBtn {
+            width: $btnWidth;
+            height: $btnHeight;
+        }
+
+        .cancelBtn {
+
+            width: $btnWidth;
+            height: $btnHeight;
+            background-color: red;
+            color: var(--text-contrast) !important;
+        }
+    }
+
+}
