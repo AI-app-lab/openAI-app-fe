@@ -31,7 +31,6 @@ const Account = (props: Props) => {
             style={{
               marginLeft: "10px",
             }}>
-            {" "}
             {`${userInfo?.username}`}
           </span>
         </div>
@@ -51,7 +50,7 @@ const Account = (props: Props) => {
           </ListItem>
         </ListContainer>
         <ListContainer className={styles.infoContainer}>
-          {expiredTime.map(({ type, time }, index) => {
+          {expiredTime.map(({ type, time }) => {
             return (
               <ListItem className={service} key={type}>
                 <span className={label}>{type}</span>
@@ -59,6 +58,10 @@ const Account = (props: Props) => {
               </ListItem>
             );
           })}
+          <ListItem className={service}>
+            <span className={label}>邀请码</span>
+            <span className={labelValue}> {userInfo?.inviteCode}</span>
+          </ListItem>
         </ListContainer>
       </main>
     </div>

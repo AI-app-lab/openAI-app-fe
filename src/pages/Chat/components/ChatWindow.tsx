@@ -245,7 +245,6 @@ const ChatWindow = ({ setIsPlaying, isPlaying, setBeforeRecordingFn, handleAudio
   useEffect(() => {
     handleAudioStop(_audio);
     setShowAll(true);
-    console.log("切换");
 
     audioSliceTTSRequest("[#OVER#]", false);
   }, [conId]);

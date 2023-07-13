@@ -11,7 +11,6 @@ import DrawIcon from "@mui/icons-material/Draw";
 import { nanoid } from "nanoid";
 import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { clear } from "console";
 import { clearStatus } from "../../store/userSlice";
 type Props = {};
 const useColor = () => {

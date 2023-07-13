@@ -25,12 +25,12 @@ const BubbleErrorBar = (props: Props) => {
                 fontWeight: 600,
               }}>
               <MdError size={16} />
-              <text
+              <div
                 style={{
                   marginLeft: 3,
                 }}>
                 {value}
-              </text>
+              </div>
             </div>
           )
       )}

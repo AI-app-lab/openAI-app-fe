@@ -6,8 +6,8 @@ import { saveUserInfo } from "./store/userSlice";
 import { ConfigState, getThemeFromLocal } from "./store/configSlice";
 import { SnackbarProvider } from "notistack";
 import { lsGet } from "./utils/localstorage";
-
 import { RouterProvider } from "react-router-dom";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
 function App() {
   const dispatch = useDispatch();
@@ -28,8 +28,9 @@ function App() {
           horizontal: "center",
         }}
       />
-
-      <RouterProvider router={router} />
+      <GoogleReCaptchaProvider useRecaptchaNet reCaptchaKey="6LdaP4omAAAAAA0EUUUyLC8LoRVj6eF8XLskkV7L">
+        <RouterProvider router={router} />
+      </GoogleReCaptchaProvider>
     </div>
   );
 }

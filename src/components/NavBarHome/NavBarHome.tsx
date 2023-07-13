@@ -17,6 +17,7 @@ import { CpntsState, setIsSideBarOpen } from "../../store/cpntsSlice";
 import { useUserInfo } from "../../hooks/useUserInfo";
 import Link from "../Link/Link";
 import Avatar from "../Avatar/Avatar";
+import { info } from "../../utils/alert";
 
 type Props = {};
 
@@ -30,7 +31,6 @@ const NavBarHome = () => {
       setOpen(false);
     };
 
-    document.addEventListener("click", handleClickOutside);
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
@@ -83,6 +83,7 @@ const NavBarHome = () => {
             <MenuItem
               onClick={() => {
                 navigate("/", { replace: true, state: { action: "LOGOUT" } });
+                info("已退出登录");
               }}>
               登出
             </MenuItem>

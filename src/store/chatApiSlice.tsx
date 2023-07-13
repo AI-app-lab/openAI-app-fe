@@ -68,7 +68,7 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
       clearTimeout(timer);
 
       reject(new Error("TIMEOUT"));
-    }, 5000);
+    }, 10000);
     let msgChunk = "";
     let count = 0;
     ctrl.signal.onabort = () => {
@@ -88,6 +88,8 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
         if (response.ok && response.headers.get("content-type") === "text/event-stream") {
           return; // everything's good
         } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+          console.log("Error:", response.status);
+
           // client-side errors are usually non-retriable:
           throw new Error(`${response.status}`);
         } else {
@@ -110,13 +112,13 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
         timer = setTimeout(() => {
           clearTimeout(timer);
           reject(new Error("TIMEOUT"));
-        }, 5000);
+        }, 10000);
 
         const word = JSON.parse(msg.data).choices[0].delta.content;
         word && dispatch(receivedUpdate(word));
         word && (msgChunk += word);
         //if msgChunk is a complete sentence, push it to the queue
-        if (msgChunk.endsWith(".") || msgChunk.endsWith("!") || msgChunk.endsWith("?")) {
+        if ((chatRequestDto.type === "voice" && msgChunk.endsWith(".")) || msgChunk.endsWith("!") || msgChunk.endsWith("?")) {
           if (count === 0 && msgChunk.length > 100) {
             dispatch(pushToMsgQueue(msgChunk));
             count += 1;

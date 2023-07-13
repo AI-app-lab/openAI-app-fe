@@ -584,7 +584,7 @@ $padding: 10px;
                     .chatBubble {
                         filter: blur(0px);
                         background-color: var(--primary-bg);
-                        cursor: pointer;
+                        cursor: default;
 
                     }
 
@@ -676,49 +676,55 @@ $padding: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
+            margin: 0 auto !important;
+            height: 36px !important;
+            border: 1px solid var(--secondary);
+            width: calc(var(--chatbox-input-range-width) - 4 * $padding);
 
-            height: 36px;
+            border-radius: 5px;
 
-
-            .inputRange {
+            textarea {
                 //textarea normal
-
-                height: 36px;
+                box-sizing: border-box;
+                max-height: 500px;
+                min-height: 36px !important;
                 font-family: inherit;
                 padding: 0;
-                box-sizing: border-box !important;
+                overflow: 'hidden';
+                border-radius: 5px;
                 // min-height: var(--chatbox-input-range-height);
                 max-height: 500px;
                 height: 100%;
                 position: absolute;
-                font-size: 15px;
+                font-size: 14px;
 
-                padding: 0 10px;
-                padding-top: 7px;
+                padding: 6px 8px !important;
+                line-height: 20px;
 
-                width: calc(var(--chatbox-input-range-width) - 2 * $padding);
+                width: 100%;
 
 
                 color: var(--text);
                 resize: none;
-                border: 1px solid var(--secondary);
-                border-radius: var(--border-radius);
+
+
                 background-color: var(--primary-bg);
                 bottom: 0;
-
+                border: 2px solid var(--primary-bg);
 
             }
 
             .inputRange:focus {
-
-                border: 1px solid var(--primary);
-                outline: 1px solid var(--primary);
+                border: 2px solid var(--primary);
+                outline: none;
 
             }
 
+
+
             .buttonWrapper {
                 bottom: calc($padding/2 + 2px);
-                right: 2*$padding;
+                right: $padding;
                 position: absolute;
 
                 .sendBtnOral {
@@ -727,7 +733,7 @@ $padding: 10px;
                     align-items: center;
                     justify-content: center;
                     background-color: inherit;
-
+                    height: fit-content !important;
                 }
 
                 .sendBtn {
@@ -759,7 +765,7 @@ $padding: 10px;
             width: 100%;
             align-items: center;
             box-sizing: border-box;
-
+            border: none;
 
             .inputRange {
                 border: 1px solid black;
@@ -767,7 +773,7 @@ $padding: 10px;
                 left: 20px;
                 width: calc(var(--chatbox-input-range-width) - 8* $padding);
 
-
+                border: 2px solid var(--primary-bg);
 
 
             }

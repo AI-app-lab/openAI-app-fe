@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./index.module.scss";
 import stylesChat from "../../Chat/index.module.scss";
 import { BiMicrophone, BiMicrophoneOff } from "react-icons/bi";
@@ -12,7 +12,7 @@ import { FaMicrophoneSlash } from "react-icons/fa";
 import { useToken } from "../../../hooks/useToken";
 import { err } from "../../../utils/alert";
 import { useActiveBotId } from "../../../hooks/useCon";
-import Loading from "../../../components/Loading/Loading";
+
 import { ClipLoader, ScaleLoader } from "react-spinners";
 import { useTheme } from "../../../hooks/useConfig";
 import { themes } from "../../../styles/global";
@@ -45,7 +45,7 @@ const MicrophoneBtn = ({ isPlaying, isRecording, startFn, stopFn, volume }: { is
     </IconButton>
   );
 };
-const OralInputRange = ({ isPlaying, beforeRecordingFn, handlePause, textAreaRef, handleClick, msg, setMsg }: Props) => {
+const OralInputRange = ({ isPlaying, beforeRecordingFn, handlePause, handleClick, msg, setMsg }: Props) => {
   const recorderWorker = new WorkerBuilder(transformpcmWorker);
   const [volume, setVolume] = useState<number>(1);
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -53,13 +53,14 @@ const OralInputRange = ({ isPlaying, beforeRecordingFn, handlePause, textAreaRef
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const theme = useTheme();
   const token = useToken();
-  const activeAudioBotId = useActiveBotId();
+  const textareaRef = useRef<any>(null);
   let buffer: any = [];
   let analyserNode: any;
-  const handleSend = () => {
+  const handleSend = (e: any) => {
     handleClick();
     setMsg("");
     stopFn();
+    textareaRef.current.style.height = "36px";
   };
   recorderWorker.onmessage = function (e) {
     buffer.push(...e.data.buffer);
@@ -177,11 +178,15 @@ const OralInputRange = ({ isPlaying, beforeRecordingFn, handlePause, textAreaRef
   return (
     <>
       <textarea
-        ref={textAreaRef}
+        ref={textareaRef}
+        onInput={(e) => {
+          e.currentTarget.style.height = "36px";
+          e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
+        }}
         onKeyDown={(e) => {
-          if (e.key == "Enter") {
+          if (!e.shiftKey && e.key == "Enter") {
             e.preventDefault();
-            handleClick();
+            handleSend(e);
           }
         }}
         value={msg}

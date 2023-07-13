@@ -1,5 +1,5 @@
 # 使用node镜像作为基础镜像，来构建一个能运行React应用的环境
-FROM node:16-alpine as build-stage
+FROM node:16.20 as build-stage
 
 # 设置工作目录
 WORKDIR /app

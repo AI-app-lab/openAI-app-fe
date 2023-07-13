@@ -1,8 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axiosInstance, { apiBaseUrl } from "../config/axiosConfig";
 import { AxiosResponse, isAxiosError } from "axios";
-import { err } from "../utils/alert";
-import { Services } from "./userSlice";
 
 export interface OrderPostDto {
   product: string;

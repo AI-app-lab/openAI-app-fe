@@ -22,20 +22,6 @@ const InputRange = ({ isPlaying, beforeRecordingFn, handlePause }: Props) => {
 
   const textAreaRef = useRef<any>(null);
   const token = useToken();
-  useEffect(() => {
-    //if words are too long, make the textarea higher,but not higher than 200px,if words are too short,make the textarea lower,but not lower than 36px
-
-    if (textAreaRef.current) {
-      console.log(textAreaRef.current.scrollHeight);
-      if (textAreaRef.current.scrollHeight <= 500) {
-        textAreaRef.current.style.overflow = "hidden";
-      } else {
-        textAreaRef.current.style.overflow = "auto";
-      }
-      textAreaRef.current.style.height = "37px";
-      textAreaRef.current.style.height = textAreaRef.current.scrollHeight + "px";
-    }
-  }, [userMessage]);
 
   async function handleClick(type: ChatRequestType = "chat") {
     type === "voice" && handlePause();
@@ -45,7 +31,7 @@ const InputRange = ({ isPlaying, beforeRecordingFn, handlePause }: Props) => {
     if (!userMessage) {
       return;
     }
-
+    type === "chat" && (textAreaRef.current.style.height = "36px");
     dispatch(sendUserMessage(userMessage));
 
     const messages: Array<RequestMessage> = [
@@ -73,8 +59,12 @@ const InputRange = ({ isPlaying, beforeRecordingFn, handlePause }: Props) => {
     <div className={styles["inputRangeContainer"]}>
       <textarea
         ref={textAreaRef}
+        onInput={(e) => {
+          e.currentTarget.style.height = "36px";
+          e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
+        }}
         onKeyDown={(e) => {
-          if (e.key == "Enter") {
+          if (!e.shiftKey && e.key == "Enter") {
             e.preventDefault();
             handleClick();
           }

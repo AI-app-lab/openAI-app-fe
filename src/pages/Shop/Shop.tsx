@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import styles from "./index.module.scss";
 import Toggle from "../../components/ToggleButton/Toggle";
 import Button from "../../components/Button/Button";
-import { err, info, success } from "../../utils/alert";
+import { success } from "../../utils/alert";
 import { IoDiamondSharp } from "react-icons/io5";
 import Modal from "../../components/Modal/Modal";
 import wxpaytut from "../../assets/wxpaytut.png";
@@ -10,6 +10,8 @@ import { RiWechatPayFill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import { OrderPostDto, WechatPayState, clearQRCode, createOrder } from "../../store/wechatPaySlice";
 import { useToken } from "../../hooks/useToken";
+import { UserState, checkOrder, clearStatus, saveUserInfo } from "../../store/userSlice";
+import { lsSet } from "../../utils/localstorage";
 
 type PlanType = {
   productCode: string;
@@ -29,6 +31,10 @@ type VipDict = Record<PlanName, VipType>;
 let ws: WebSocket;
 
 const Shop = () => {
+  const { status, userInfo } = useSelector((state: UserState) => state.user);
+  useEffect(() => {
+    status.sCode === 200 && setIsPaid(true);
+  }, [status]);
   const vip: VipDict = {
     ChatAI助理: {
       week: { productCode: "CHAT_TEXT_W", price: 29.9 },
@@ -84,14 +90,19 @@ const Shop = () => {
       setWsTimeOut(false);
     };
     ws.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      console.log(data);
+      const _userInfo = JSON.parse(e.data);
+      const __userInfo = { ..._userInfo, ...userInfo };
+      lsSet("userInfo", __userInfo);
+      dispatch(saveUserInfo(__userInfo));
+
       setIsPaid(true);
       success("支付成功");
+
       ws && ws.close();
       setIsModalOpen(false);
     };
-    ws.onclose = async (e) => {
+    ws.onclose = (e) => {
+      console.log("ws close");
       if (e.code === 1000) {
         setWsTimeOut(true);
         return;
@@ -113,6 +124,11 @@ const Shop = () => {
       wsTimeOut && dispatch(createOrder({ product: planInfo.productCode }));
     }
   }, [wsTimeOut]);
+
+  useEffect(() => {
+    isModalOpen === false && dispatch(clearQRCode());
+    isModalOpen === false && setIsPaid(false);
+  }, [isModalOpen]);
   const QRCodeDict = {
     fulfilled: (
       <div className={QRCodeImg}>
@@ -131,6 +147,7 @@ const Shop = () => {
               ws && ws.close(3200, "client close");
               setIsPaid(false);
               dispatch(clearQRCode());
+              dispatch(clearStatus());
             }}
             open={true}
             setIsOpen={setIsModalOpen}>
@@ -161,15 +178,17 @@ const Shop = () => {
                 </div>
               </div>
               <div className={QRCodeContainer}>
-                <div className={QRCodeGroup}>
-                  {isPaid ? <div className={QRCodeImg}>支付成功</div> : QRCodeDict[urlQRcode.status]} <div className={tip}>请打开手机微信，扫一扫完成支付</div>
+                <div className={QRCodeGroup}>{isPaid ? <div className={QRCodeImg}>支付成功</div> : QRCodeDict[urlQRcode.status]}</div>
+                <div className={toturial}>
+                  <img src={wxpaytut} alt="" />
                 </div>
-
-                <img className={toturial} src={wxpaytut} alt="" />
               </div>
+              <div className={tip}>请打开手机微信，扫一扫完成支付</div>
               <div className={btnGroup}>
                 <Button
                   onClick={() => {
+                    dispatch(checkOrder());
+
                     //todo: check order status
                   }}
                   className={finishBtn}>
@@ -227,7 +246,6 @@ const Shop = () => {
 
   return (
     <div className={container}>
-      <div className={title}>VIP套餐</div>
       <Toggle btnClassName={toggleBtn} className={toggle} value={plan} setValue={setPlan}>
         {Object.keys(vip).map((name) => name)}
       </Toggle>

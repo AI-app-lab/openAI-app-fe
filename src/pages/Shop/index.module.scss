@@ -335,44 +335,60 @@
 
             .QRCodeImg {
                 border-radius: $borderRadius;
-                height: 250px;
-                width: 250px;
+
 
                 display: flex;
                 justify-content: center;
                 align-items: center;
+                height: 250px;
+                width: 250px;
+                overflow: hidden;
 
                 img {
-                    width: 100%;
-                    height: 100%;
+                    object-fit: cover;
+
+                    height: 250px;
                 }
             }
 
 
-            .tip {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                background: #00c800;
-                width: 240px;
-                height: 25px;
-                margin-top: 5px;
-                font-size: 14px;
-                font-weight: 500;
-                color: var(--text-contrast);
-                cursor: default;
-            }
+
 
         }
 
         .toturial {
+
+            margin-left: 10px;
+            overflow: hidden;
+            height: 250px;
+            width: 250px;
+
+            img {
+                object-fit: cover;
+                height: 250px;
+            }
+
             border-radius: $borderRadius;
             height: 250px;
             width: 250px;
-            border: 1px solid white;
+
         }
+
     }
 
+    .tip {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #00c800;
+        width: 240px;
+        height: 25px;
+        margin-top: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-contrast);
+        cursor: default;
+    }
 
     .btnGroup {
         box-sizing: border-box;

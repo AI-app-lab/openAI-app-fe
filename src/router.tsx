@@ -1,30 +1,34 @@
 import React, { Suspense } from "react";
-import { createBrowserRouter, Outlet, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import { Main } from "./pages/LandingPage/LandingPage";
 
 import { lsGet } from "./utils/localstorage";
 import { lazy } from "react";
 import Layout from "./components/Layout/Layout";
-import Draw from "./pages/Draw/Draw";
-import Translator from "./pages/Translator/Translator";
-import OralChat from "./pages/OralChat/OralChat";
-import Shop from "./pages/Shop/Shop";
-import Chat from "./pages/Chat/Chat";
-import Apps from "./pages/Apps/Apps";
-import Account from "./pages/Account/Account";
 
 import PwdReset from "./pages/authPages/PwdReset/PwdReset";
 import Contact from "./pages/Contact/Contact";
 import Privacy from "./pages/Privacy/Privacy";
+import HashLoader from "./components/HashLoader/HashLoader";
 
-export const _GuardRounded = ({ component }: { component: JSX.Element }) => {
-  return lsGet("userInfo") ? component : <Navigate to="/" replace />;
+type GuardProps = {
+  componentModule: Promise<{ default: React.ComponentType<any> }>;
+};
+
+export const GuardRounded = ({ componentModule }: GuardProps) => {
+  const Component = lazy(() => {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(componentModule as any), 200);
+    });
+  });
+
+  return <Suspense fallback={<HashLoader transparent />}>{lsGet("userInfo") ? <Component /> : <Navigate to="/" replace />}</Suspense>;
 };
 export const getUserInfoFromLocal = () => {
   return lsGet("userInfo");
 };
-const GuardRounded = lazy(() => import("./router").then((m) => ({ default: m._GuardRounded })));
+
 const LandingPage = lazy(() => import("./pages/LandingPage/LandingPage"));
 const Login = lazy(() => import("./pages/authPages/Login/Login"));
 const Product = lazy(() => import("./pages/Product/Product"));
@@ -72,31 +76,31 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "apps",
-        element: <GuardRounded component={<Apps />} />,
+        element: <GuardRounded componentModule={import("./pages/Apps/Apps")} />,
       },
       {
         path: "apps/chat",
-        element: <GuardRounded component={<Chat type="text" />} />,
+        element: <GuardRounded componentModule={import("./pages/Chat/Chat")} />,
       },
       {
         path: "shop",
-        element: <GuardRounded component={<Shop />} />,
+        element: <GuardRounded componentModule={import("./pages/Shop/Shop")} />,
       },
       {
         path: "apps/oral-chat",
-        element: <GuardRounded component={<OralChat />} />,
+        element: <GuardRounded componentModule={import("./pages/OralChat/OralChat")} />,
       },
       {
         path: "apps/translator",
-        element: <GuardRounded component={<Translator />} />,
+        element: <GuardRounded componentModule={import("./pages/Translator/Translator")} />,
       },
       {
         path: "apps/draw",
-        element: <GuardRounded component={<Draw />} />,
+        element: <GuardRounded componentModule={import("./pages/Draw/Draw")} />,
       },
       {
         path: "account",
-        element: <GuardRounded component={<Account />} />,
+        element: <GuardRounded componentModule={import("./pages/Account/Account")} />,
       },
     ],
   },

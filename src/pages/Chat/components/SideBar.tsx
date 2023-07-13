@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import styles from "../index.module.scss";
 import SessionCard from "./SessionCard";
 import { useSelector, useDispatch } from "react-redux";
-import { ChatApiState, getRecentConversations, startNewConversation } from "../../../store/chatApiSlice";
+import { ChatApiState, startNewConversation } from "../../../store/chatApiSlice";
 import AddIcon from "@mui/icons-material/Add";
 
 type Props = {
@@ -13,12 +13,12 @@ type Props = {
 
 const SideBar = ({ type = "text", isChatSideBox, setIsChatSdBarOpen }: Props) => {
   const title = {
-    text: "全能AI助理",
-    oral: "强大口语陪练",
+    text: "AI助理",
+    oral: "口语陪练",
   };
   const dispatch = useDispatch();
   const { conversations, currChatType } = useSelector((state: ChatApiState) => state.chatApi);
-  const { userInfo } = useSelector((state: any) => state.user);
+
   return (
     <div className={`${styles.sideBar} ${isChatSideBox ? styles.open : ""}`}>
       <div className={styles.sideBarHeader}>

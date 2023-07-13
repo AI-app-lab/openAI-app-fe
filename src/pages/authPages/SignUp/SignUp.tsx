@@ -17,20 +17,26 @@ import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 type Props = {};
 
 const SignUp = (props: Props) => {
+  const reCapToken = useRef<string>("");
   const { executeRecaptcha } = useGoogleReCaptcha();
   const handleReCaptchaVerify = useCallback(async () => {
     if (!executeRecaptcha) {
-      return Promise.resolve("");
+      return;
     }
-    return Promise.resolve(await executeRecaptcha("SendVCode"));
+    reCapToken.current = await executeRecaptcha("SendVCode");
   }, [executeRecaptcha]);
   const dispatch: Function = useDispatch();
   const { location } = useSelector((state: ConfigState) => state.config);
-  const [userPostDto, setUserPostDto] = useState<UserPostDto>({ phoneNumber: "", password: "", verificationCode: "", username: "unset", invitedCode: "" });
+  const [userPostDto, setUserPostDto] = useState<UserPostDto>({ phoneNumber: "", password: "", verificationCode: "", username: "unset", inviteCode: "" });
 
   const { status, nextTryTime, userInfo } = useSelector((state: UserState) => state.user);
+
   const [sendBtnText, setSendBtnText] = useState<number | string>("发送");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    handleReCaptchaVerify();
+  }, [handleReCaptchaVerify]);
   useEffect(() => {
     userInfo && navigate("/apps");
     nextTryTime["SING_UP"] && countdown();
@@ -74,17 +80,14 @@ const SignUp = (props: Props) => {
       return;
     }
     dispatch(setAuthLoading("loading"));
-    handleReCaptchaVerify().then((token) => {
-      console.log(token);
 
-      dispatch(
-        verifyPhoneNum({
-          type: "SING_UP",
-          phoneNumber: userPostDto.phoneNumber,
-          reCapToken: token,
-        })
-      );
-    });
+    dispatch(
+      verifyPhoneNum({
+        type: "SING_UP",
+        phoneNumber: userPostDto.phoneNumber,
+        reCapToken: reCapToken.current,
+      })
+    );
   };
   const handleSignUp = () => {
     if (!isFormatCorrect("register")) {
@@ -108,7 +111,7 @@ const SignUp = (props: Props) => {
           </Button>
         </div>
         <Input className={styles.pwd} id="password" autoComplete="current-password" value={userPostDto.password} onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, password: e.target.value }))} placeholder="请输入密码" type="password" />
-        <Input className={styles.pwd} id="text" autoComplete="text" value={userPostDto.invitedCode} onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, invitedCode: e.target.value }))} placeholder="邀请码（选填）" type="text" />
+        <Input className={styles.pwd} id="text" autoComplete="text" value={userPostDto.inviteCode} onChange={(e) => setUserPostDto((prev: UserPostDto) => ({ ...prev, invitedCode: e.target.value }))} placeholder="邀请码（选填）" type="text" />
         <Button onClick={handleSignUp} className={styles.btn} w={70} h={50}>
           {locations[location].singUp}
         </Button>

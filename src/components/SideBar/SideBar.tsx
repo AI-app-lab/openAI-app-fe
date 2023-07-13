@@ -4,17 +4,14 @@ import Drawer from "@mui/material/Drawer";
 import { Switch as _Switch, Toolbar } from "@mui/material";
 import ListItem from "../ListItem/ListItem";
 import ListContainer from "../ListContainer/ListContainer";
-import LogoutIcon from "@mui/icons-material/Logout";
 import GridViewRoundedIcon from "@mui/icons-material/GridViewRounded";
 import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
 import { useDispatch, useSelector } from "react-redux";
 import { ConfigState, changeTheme } from "../../store/configSlice";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
-
 import LightModeSharpIcon from "@mui/icons-material/LightModeSharp";
 import { nanoid } from "nanoid";
 import { Link, useLocation } from "react-router-dom";
-import { Button } from "antd";
 import { CpntsState, setIsSideBarOpen } from "../../store/cpntsSlice";
 import { breakPoints } from "../../styles/global";
 

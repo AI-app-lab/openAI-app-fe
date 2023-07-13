@@ -18,7 +18,7 @@ export const Main = () => {
 
   return (
     <>
-      <div className={styles.title}>为什么选我们？</div>
+      <div className={styles.title}>为什么选择我们？</div>
       <div className={styles.subTitle}>一站式人工智能解决方案</div>
       <div className={styles.content}>
         <p>
@@ -38,6 +38,7 @@ export const Main = () => {
       <Link to="/sign-up">
         <Button className={styles.goBtn}>免费注册 </Button>
       </Link>
+
       <div className={styles.footer}>
         <div>
           <div className={styles.bottomLink}>

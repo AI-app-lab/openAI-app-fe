@@ -23,16 +23,22 @@ const Login = (props: Props) => {
   const _location = useLocation();
   const { location } = useSelector((state: ConfigState) => state.config);
   const { status, userInfo } = useSelector((state: UserState) => state.user);
+  const [userLoginPostDto, setUserLoginPostDto] = useState<UserLoginPostDto>({ reCapToken: "", phoneNumber: "", password: "" });
   const { executeRecaptcha } = useGoogleReCaptcha();
   const handleReCaptchaVerify = useCallback(async () => {
     if (!executeRecaptcha) {
-      return Promise.resolve("");
+      return;
     }
-    return Promise.resolve(await executeRecaptcha("SendVCode"));
+    const token = await executeRecaptcha("Login");
+
+    setUserLoginPostDto((prev: UserLoginPostDto) => ({ ...prev, reCapToken: token }));
   }, [executeRecaptcha]);
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    handleReCaptchaVerify();
+  }, [handleReCaptchaVerify]);
   useEffect(() => {
     const action = _location.state?.action;
     if (action === "RESET_PWD") {
@@ -53,9 +59,7 @@ const Login = (props: Props) => {
     _userInfo && dispatch(saveUserInfo(JSON.parse(_userInfo)));
   }, [userInfo]);
 
-  const [userLoginPostDto, setUserLoginPostDto] = useState<UserLoginPostDto>({ reCapToken: "", phoneNumber: "", password: "" });
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const { phoneNumber, password } = userLoginPostDto;
     if (isEmpty([phoneNumber, password])) {
       err("手机号或密码不能为空!");
@@ -63,9 +67,9 @@ const Login = (props: Props) => {
       err("手机号格式不正确!");
     } else {
       dispatch(setAuthLoading("loading"));
-      handleReCaptchaVerify().then((reCapToken) => {
-        dispatch(login({ ...userLoginPostDto, reCapToken }));
-      });
+      console.log(userLoginPostDto);
+
+      dispatch(login(userLoginPostDto));
     }
   };
 

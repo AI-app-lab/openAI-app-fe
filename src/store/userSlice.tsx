@@ -18,7 +18,7 @@ export interface UserPostDto {
   username: string;
   password: string;
   verificationCode: string;
-  invitedCode?: string;
+  inviteCode?: string;
 }
 
 export interface PwdResetDto {
@@ -44,6 +44,7 @@ export interface UserInfo extends Services {
   phoneNumber: string;
   authority: string;
   username: string;
+  inviteCode: string;
 }
 export interface OrderCheckResponseDto extends Services {
   token: string;
@@ -202,7 +203,7 @@ export const userSlice = createSlice({
       state.status = { status: "idle", sCode: null, message: null };
     },
     saveUserInfo: (state, action) => {
-      state.userInfo = action.payload;
+      state.userInfo = { ...state.userInfo, ...action.payload };
     },
     setAuthLoading: (
       state,
@@ -216,7 +217,6 @@ export const userSlice = createSlice({
       state.userInfo = null;
 
       localStorage.clear();
-      info("已退出登录");
     },
     clearStatus: (state) => {
       state.status = { status: "idle", sCode: "", message: "" };
@@ -234,6 +234,7 @@ export const userSlice = createSlice({
           state.userInfo = { ...state.userInfo, expiredTime1, expiredTime2, expiredTime3, expiredTime4, token } as UserInfo;
           lsSet("userInfo", state.userInfo);
           success("状态已更新");
+          state.status = { status: "idle", message: "状态已更新", sCode: action.payload.status };
           break;
       }
     });
@@ -333,7 +334,7 @@ export const userSlice = createSlice({
       if (!action.payload) {
         return;
       }
-      const userInfo = { ...action.payload.data, phoneNumber: encodedPhoneNum(action.payload.data.phoneNumber) };
+      const userInfo = { ...state.userInfo, ...action.payload.data, phoneNumber: encodedPhoneNum(action.payload.data.phoneNumber) };
       state.userInfo = userInfo;
       localStorage.setItem("userInfo", JSON.stringify(userInfo));
       state.status = { status: "idle", message: "注册成功", sCode: null };
