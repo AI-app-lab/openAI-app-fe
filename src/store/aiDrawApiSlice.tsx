@@ -20,8 +20,9 @@ export interface AiDrawState {
   aiDraw: AiDrawSliceState;
 }
 export const getPictures = createAsyncThunk("aiDrawApi/getPictures", async (drawRequestDto: AiDrawApiRequestDto, { rejectWithValue }) => {
+  const drawUrl = import.meta.env.VITE_DRAW_URL;
   try {
-    const response = await axiosInstance.post(apiBaseUrl + ":9999/image/generate", drawRequestDto);
+    const response = await axiosInstance.post(apiBaseUrl + drawUrl, drawRequestDto);
     const { data, status } = response as AxiosResponse<any>;
     return { data, status };
   } catch (err) {
@@ -56,14 +57,22 @@ export const aiDrawApiSlice = createSlice({
       action.payload?.data.data.map((item: any) => {
         state.images.push(item.url);
       });
-      console.log(action.payload?.data.data.url);
-
-      console.log("getPictures.fulfilled", action);
     });
     builder.addCase(getPictures.rejected, (state, action) => {
       state.isLoading = false;
-      err("生成失败 CODE: " + action.payload);
-      console.log("getPictures.rejected", action);
+      switch (action.payload) {
+        case 400:
+          err("指令格式有误");
+          break;
+        case 401:
+          err("未授权");
+          break;
+        case 403:
+          err("服务未开通或已过期");
+          break;
+        default:
+          err("未知错误");
+      }
     });
     builder.addCase(getPictures.pending, (state, action) => {
       state.isLoading = true;

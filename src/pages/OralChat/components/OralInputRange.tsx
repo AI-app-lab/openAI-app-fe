@@ -11,11 +11,10 @@ import SendSharpIcon from "@mui/icons-material/SendSharp";
 import { FaMicrophoneSlash } from "react-icons/fa";
 import { useToken } from "../../../hooks/useToken";
 import { err } from "../../../utils/alert";
-import { useActiveBotId } from "../../../hooks/useCon";
-
 import { ClipLoader, ScaleLoader } from "react-spinners";
 import { useTheme } from "../../../hooks/useConfig";
 import { themes } from "../../../styles/global";
+import { wss } from "../../../config/wssConfig";
 
 type Props = {
   msg: string;
@@ -82,7 +81,8 @@ const OralInputRange = ({ isPlaying, beforeRecordingFn, handlePause, handleClick
   };
 
   const startRecord = (stream: any) => {
-    ws = new WebSocket(`wss://kitzone.cn:7878/asr/v2?token=${token}`);
+    const asrWsUrl = import.meta.env.VITE_ASR_WS_URL;
+    ws = wss(`${asrWsUrl}?token=${token}`);
 
     ws.onopen = async (e: any) => {
       audioContext = new AudioContext();

@@ -8,7 +8,8 @@ const axiosInstance = axios.create({
   headers: {},
 });
 
-export const apiBaseUrl = "https://kitzone.cn";
+export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = lsGet("userInfo").token;

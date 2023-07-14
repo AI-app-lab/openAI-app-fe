@@ -14,6 +14,7 @@ import Button from "../../../components/Button/Button";
 import { BsFillSquareFill } from "react-icons/bs";
 import IconButton from "../../../components/IconButon/IconButton";
 import TopicList from "./TopicList";
+import { wss } from "../../../config/wssConfig";
 
 type Props = {
   messageList: Array<ShownMessage>;
@@ -111,7 +112,8 @@ const ChatWindow = ({ setIsPlaying, isPlaying, setBeforeRecordingFn, handleAudio
     console.log("[requesting for expired resource]", count);
 
     setIsRequesting(true);
-    ws = new WebSocket(`wss://kitzone.cn:7979/ttsapi/v2/tts?token=${token}`);
+    const ttsWsUrl = import.meta.env.VITE_TTS_WS_URL;
+    ws = wss(`${ttsWsUrl}?token=${token}`);
     ws.onopen = async () => {
       //wait for the connection to be established
       setIsRequesting(true);

@@ -54,8 +54,16 @@ export interface OrderCheckResponseDto extends Services {
 export interface UserState {
   user: UserInitialState;
 }
+
+const orderCheckUrl = import.meta.env.VITE_ORDER_CHECK_URL;
+const pwdResetUrl = import.meta.env.VITE_PWD_RESET_URL;
+const pwdResetVerificationUrl = import.meta.env.VITE_PWD_RESET_VERIFICATION_URL;
+const signUpVerificationUrl = import.meta.env.VITE_SIGN_UP_VERIFICATION_URL;
+const signUpUrl = import.meta.env.VITE_SIGN_UP_URL;
+const phoneNumberLoginUrl = import.meta.env.VITE_PHONE_NUMBER_LOGIN_URL;
+const nameChangeUrl = import.meta.env.VITE_NAME_CHANGE_URL;
 export const checkOrder = createAsyncThunk("wechatPay/check", async (_, { rejectWithValue }) => {
-  const url = apiBaseUrl + ":9443/user/expiredtime/refresh";
+  const url = apiBaseUrl + orderCheckUrl;
   try {
     const response: AxiosResponse<OrderCheckResponseDto | unknown> = await axiosInstance.get(url);
 
@@ -68,7 +76,7 @@ export const checkOrder = createAsyncThunk("wechatPay/check", async (_, { reject
   }
 });
 export const resetPwd = createAsyncThunk("users/resetPwd", async (pwdResetDto: PwdResetDto, { dispatch, rejectWithValue }) => {
-  const url = apiBaseUrl + ":9999/user/password";
+  const url = apiBaseUrl + pwdResetUrl;
   try {
     const _pwdResetDto = { ...pwdResetDto, password: await sha256(pwdResetDto.password) };
 
@@ -97,8 +105,8 @@ export const verifyPhoneNum = createAsyncThunk(
     { dispatch, rejectWithValue }
   ) => {
     const url: Record<VerifyType, string> = {
-      SING_UP: apiBaseUrl + ":9999/signup/verification",
-      RESET_PWD: apiBaseUrl + ":9999/user/reset/password",
+      SING_UP: apiBaseUrl + signUpVerificationUrl,
+      RESET_PWD: apiBaseUrl + pwdResetVerificationUrl,
     };
     try {
       const response = await axios.get(url[type], { params: userPhoneVerifyDto });
@@ -118,7 +126,7 @@ export const verifyPhoneNum = createAsyncThunk(
 export const signUp = createAsyncThunk("users/signUp", async (userPostDto: UserPostDto, { rejectWithValue }) => {
   try {
     const _userPostDto = { ...userPostDto, password: await sha256(userPostDto.password) };
-    const response: AxiosResponse<UserInfo, UserPostDto> = await axios.post(apiBaseUrl + ":9999/signup/registration", _userPostDto);
+    const response: AxiosResponse<UserInfo, UserPostDto> = await axios.post(apiBaseUrl + signUpUrl, _userPostDto);
 
     const { data, status } = response;
     return { data, status };
@@ -131,7 +139,7 @@ export const signUp = createAsyncThunk("users/signUp", async (userPostDto: UserP
 });
 export const changeName = createAsyncThunk("users/changeName", async (username: string, { rejectWithValue }) => {
   try {
-    const response: AxiosResponse<UserInfo, UserPostDto> = await axiosInstance.put(apiBaseUrl + ":9999/user/username", { username });
+    const response: AxiosResponse<UserInfo, UserPostDto> = await axiosInstance.put(apiBaseUrl + nameChangeUrl, { username });
 
     const { data, status } = response;
     return { data, status };
@@ -145,7 +153,7 @@ export const changeName = createAsyncThunk("users/changeName", async (username: 
 export const login = createAsyncThunk("users/login", async (userLoginPostDto: UserLoginPostDto, { rejectWithValue }) => {
   try {
     const _userLoginPostDto = { ...userLoginPostDto, password: await sha256(userLoginPostDto.password) };
-    const response = await axios.post(apiBaseUrl + ":9999/user/login/phoneNumber", _userLoginPostDto);
+    const response = await axios.post(apiBaseUrl + phoneNumberLoginUrl, _userLoginPostDto);
     const { data, status } = response as AxiosResponse<UserInfo>;
 
     return { data, status };

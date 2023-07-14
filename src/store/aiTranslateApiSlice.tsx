@@ -24,10 +24,9 @@ export interface AiTranslateState {
   aiTranslate: AiTranslateSliceState;
 }
 export const getTranslatedResult = createAsyncThunk("aiTranslateApi/getTranslatedResult", async (drawRequestDto: AiTranslateApiRequestDto, { rejectWithValue }) => {
-  console.log(123);
-
+  const translateUrl = import.meta.env.VITE_TRANSLATE_URL;
   try {
-    const response = await axiosInstance.post(apiBaseUrl + ":9999/translate/text", drawRequestDto);
+    const response = await axiosInstance.post(apiBaseUrl + translateUrl, drawRequestDto);
     const { data, status } = response;
     return { data, status };
   } catch (err) {
@@ -76,7 +75,8 @@ export const aiTranslateApiSlice = createSlice({
           err("未登录或未授权");
           break;
         case 403:
-          err("服务已过期");
+          err("服务未开通或已过期");
+          break;
         default:
           err("未知错误");
       }

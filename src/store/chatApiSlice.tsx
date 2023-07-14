@@ -75,8 +75,8 @@ const handleFetchEventSource = (chatRequestDto: ChatRequestDto, dispatch: Dispat
       clearTimeout(timer);
       reject(new Error("ABORT"));
     };
-
-    fetchEventSource(apiBaseUrl + ":9898/v1/chat/completions", {
+    const chatUrl = import.meta.env.VITE_CHAT_URL;
+    fetchEventSource(apiBaseUrl + chatUrl, {
       method: "POST",
       body: JSON.stringify({ ...chatRequestDto, stream: true }),
       headers: {

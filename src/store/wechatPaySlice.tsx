@@ -23,9 +23,9 @@ export interface WechatPaySliceState {
     status: "pending" | "fulfilled" | "rejected";
   };
 }
-
+const orderCreateUrl = import.meta.env.VITE_ORDER_CREATE_URL;
 export const createOrder = createAsyncThunk("wechatPay/create", async (orderPostDto: OrderPostDto, { dispatch, rejectWithValue }) => {
-  const url = apiBaseUrl + ":9443/user/wxpay/native/create";
+  const url = apiBaseUrl + orderCreateUrl;
   try {
     const response: AxiosResponse<OrderResponseDto, OrderPostDto> = await axiosInstance.post(url, orderPostDto);
 
