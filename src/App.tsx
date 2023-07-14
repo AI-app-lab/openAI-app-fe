@@ -28,7 +28,7 @@ function App() {
           horizontal: "center",
         }}
       />
-      <GoogleReCaptchaProvider useRecaptchaNet reCaptchaKey="6LdaP4omAAAAAA0EUUUyLC8LoRVj6eF8XLskkV7L">
+      <GoogleReCaptchaProvider useRecaptchaNet reCaptchaKey={import.meta.env.VITE_RECAPTCHA_KEY}>
         <RouterProvider router={router} />
       </GoogleReCaptchaProvider>
     </div>
