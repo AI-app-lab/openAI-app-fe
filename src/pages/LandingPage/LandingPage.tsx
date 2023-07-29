@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import NavBarLanding from "./components/NavBarLanding";
 
 import styles from "./index.module.scss";
 import Button from "../../components/Button/Button";
 import Link from "../../components/Link/Link";
 import { Outlet } from "react-router-dom";
-
+import { Helmet } from "react-helmet";
 export const Main = () => {
   const Span = ({ children }: { children: string }) => (
     <span
@@ -18,6 +18,15 @@ export const Main = () => {
 
   return (
     <>
+      <Helmet>
+        <meta name="title" content="为什么选择我们？" />
+        <meta name="description" content="一站式人工智能解决方案" />
+        <meta
+          name="keywords"
+          content="人工智能, AI, 人工智能解决方案, AI解决方案, AI口语陪练, AI助手, AI翻译工具, AI绘图工具, ChatGPT4.0,ChatGPT3.5, gpt3.5, gpt4.0, 英语口语 /> 
+        "
+        />
+      </Helmet>
       <div className={styles.title}>为什么选择我们？</div>
       <div className={styles.subTitle}>一站式人工智能解决方案</div>
       <div className={styles.content}>

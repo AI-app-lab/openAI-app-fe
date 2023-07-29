@@ -9,7 +9,7 @@ import { lsGet } from "./utils/localstorage";
 import { RouterProvider } from "react-router-dom";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
-function App() {
+const App = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getThemeFromLocal());
@@ -33,6 +33,6 @@ function App() {
       </GoogleReCaptchaProvider>
     </div>
   );
-}
+};
 
 export default App;

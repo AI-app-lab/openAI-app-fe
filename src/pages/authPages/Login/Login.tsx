@@ -30,6 +30,7 @@ const Login = (props: Props) => {
       return;
     }
     const token = await executeRecaptcha("Login");
+    console.log(token);
 
     setUserLoginPostDto((prev: UserLoginPostDto) => ({ ...prev, reCapToken: token }));
   }, [executeRecaptcha]);
